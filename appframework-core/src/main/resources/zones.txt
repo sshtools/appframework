@@ -1,0 +1,181 @@
+223,Alabama
+223,Alaska
+223,American Samoa
+223,Arizona
+223,Arkansas
+223,Armed Forces Africa
+223,Armed Forces Americas
+223,Armed Forces Canada
+223,Armed Forces Europe
+223,Armed Forces Middle East
+223,Armed Forces Pacific
+223,California
+223,Colorado
+223,Connecticut
+223,Delaware
+223,District of Columbia
+223,Federated States Of Micronesia
+223,Florida
+223,Georgia
+223,Guam
+223,Hawaii
+223,Idaho
+223,Illinois
+223,Indiana
+223,Iowa
+223,Kansas
+223,Kentucky
+223,Louisiana
+223,Maine
+223,Marshall Islands
+223,Maryland
+223,Massachusetts
+223,Michigan
+223,Minnesota
+223,Mississippi
+223,Missouri
+223,Montana
+223,Nebraska
+223,Nevada
+223,New Hampshire
+223,New Jersey
+223,New Mexico
+223,New York
+223,North Carolina
+223,North Dakota
+223,Northern Mariana Islands
+223,Ohio
+223,Oklahoma
+223,Oregon
+223,Palau
+223,Pennsylvania
+223,Puerto Rico
+223,Rhode Island
+223,South Carolina
+223,South Dakota
+223,Tennessee
+223,Texas
+223,Utah
+223,Vermont
+223,Virgin Islands
+223,Virginia
+223,Washington
+223,West Virginia
+223,Wisconsin
+223,Wyoming
+38,Alberta
+38,British Columbia
+38,Manitoba
+38,Newfoundland
+38,New Brunswick
+38,Nova Scotia
+38,Northwest Territories
+38,Nunavut
+38,Ontario
+38,Prince Edward Island
+38,Quebec
+38,Saskatchewan
+38,Yukon Territory
+81,Niedersachsen
+81,Baden-Württemberg
+81,Bayern
+81,Berlin
+81,Brandenburg
+81,Bremen
+81,Hamburg
+81,Hessen
+81,Mecklenburg-Vorpommern
+81,Nordrhein-Westfalen
+81,Rheinland-Pfalz
+81,Saarland
+81,Sachsen
+81,Sachsen-Anhalt
+81,Schleswig-Holstein
+81,Thüringen
+14,Wien
+14,Niederösterreich
+14,Oberösterreich
+14,Salzburg
+14,Kärnten
+14,Steiermark
+14,Tirol
+14,Burgenland
+14,Voralberg
+204,Aargau
+204,Appenzell Innerrhoden
+204,Appenzell Ausserrhoden
+204,Bern
+204,Basel-Landschaft
+204,Basel-Stadt
+204,Freiburg
+204,Genf
+204,Glarus
+204,Graubünden
+204,Jura
+204,Luzern
+204,Neuenburg
+204,Nidwalden
+204,Obwalden
+204,St. Gallen
+204,Schaffhausen
+204,Solothurn
+204,Schwyz
+204,Thurgau
+204,Tessin
+204,Uri
+204,Waadt
+204,Wallis
+204,Zug
+204,Zürich
+195,A Coruña
+195,Alava
+195,Albacete
+195,Alicante
+195,Almeria
+195,Asturias
+195,Avila
+195,Badajoz
+195,Baleares
+195,Barcelona
+195,Burgos
+195,Caceres
+195,Cadiz
+195,Cantabria
+195,Castellon
+195,Ceuta
+195,Ciudad Real
+195,Cordoba
+195,Cuenca
+195,Girona
+195,Granada
+195,Guadalajara
+195,Guipuzcoa
+195,Huelva
+195,Huesca
+195,Jaen
+195,La Rioja
+195,Las Palmas
+195,Leon
+195,Lleida
+195,Lugo
+195,Madrid
+195,Malaga
+195,Melilla
+195,Murcia
+195,Navarra
+195,Ourense
+195,Palencia
+195,Pontevedra
+195,Salamanca
+195,Santa Cruz de Tenerife
+195,Segovia
+195,Sevilla
+195,Soria
+195,Tarragona
+195,Teruel
+195,Toledo
+195,Valencia
+195,Valladolid
+195,Vizcaya
+195,Zamora
+195,Zaragoza
