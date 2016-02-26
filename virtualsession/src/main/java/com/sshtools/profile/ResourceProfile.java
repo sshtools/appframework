@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -619,6 +620,26 @@ public class ResourceProfile {
 			ResourceProfileListener l = (ResourceProfileListener) listeners
 					.elementAt(i);
 			l.profileChanged();
+		}
+	}
+	
+	public void setUsername(String username) {
+		String password = getPassword();
+		try {
+			uri.setUserinfo(username == null && password == null ? null : (
+					(username == null ? "" : URLEncoder.encode(username, "UTF-8")) + ( password == null ? "" : ( ":" + URLEncoder.encode(password, "UTF-8")))));
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public void setPassword(String password) {
+		String username = getUsername();
+		try {
+			uri.setUserinfo(username == null && password == null ? null : (
+					(username == null ? "" : URLEncoder.encode(username, "UTF-8")) + ( password == null ? "" : ( ":" + URLEncoder.encode(password, "UTF-8")))));
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 
