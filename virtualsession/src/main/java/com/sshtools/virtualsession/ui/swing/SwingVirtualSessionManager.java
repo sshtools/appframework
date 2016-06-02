@@ -317,42 +317,41 @@ public class SwingVirtualSessionManager extends JPanel implements
 	public void removeVirtualSession(VirtualSession vt) {
 		int idx = getTabIndexForVirtualSession(vt);
 		boolean removingSelected = vt == getSelectedVirtualSession();
-		if (idx != -1) {
-			vt.removeVirtualSessionListener(terminalListener);
-			if (virtualSessions.size() == 2 && hideSingleTabHeading) {
-				if (tabs != null) {
-					tabs.removeTabAt(idx);
-				}
-				virtualSessions.removeElement(vt);
-				VirtualSession first = (VirtualSession) virtualSessions
-						.elementAt(0);
-				setSwitcherComponent(createSingleTabComponent(first));
-				if (tabs != null) {
-					tabs.removeChangeListener(changeListener);
-					tabs = null;
-				}
-			} else {
-				if (virtualSessions.size() == 1) {
-					lastSel = null;
-					setSwitcherComponent(null);
-				} else {
-					if (tabs != null) {
-						tabs.removeTabAt(idx);
-					}
-				}
-				virtualSessions.removeElement(vt);
+		
+		vt.removeVirtualSessionListener(terminalListener);
+		if (virtualSessions.size() == 2 && hideSingleTabHeading) {
+			if (tabs != null && idx > -1) {
+				tabs.removeTabAt(idx);
 			}
-			fireRemoved(vt);
-			if (removingSelected && virtualSessions.size() > 0) {
-				fireDeselected(vt);
-				setSelectedVirtualSession((VirtualSession) virtualSessions
-						.elementAt(virtualSessions.size() - 1));
-			}
-			if (tabs != null && virtualSessions.size() == 0) {
+			virtualSessions.removeElement(vt);
+			VirtualSession first = (VirtualSession) virtualSessions
+					.elementAt(0);
+			setSwitcherComponent(createSingleTabComponent(first));
+			if (tabs != null) {
 				tabs.removeChangeListener(changeListener);
 				tabs = null;
-				lastSel = null;
 			}
+		} else {
+			if (virtualSessions.size() == 1) {
+				lastSel = null;
+				setSwitcherComponent(null);
+			} else {
+				if (tabs != null && idx > -1) {
+					tabs.removeTabAt(idx);
+				}
+			}
+			virtualSessions.removeElement(vt);
+		}
+		fireRemoved(vt);
+		if (removingSelected && virtualSessions.size() > 0) {
+			fireDeselected(vt);
+			setSelectedVirtualSession((VirtualSession) virtualSessions
+					.elementAt(virtualSessions.size() - 1));
+		}
+		if (tabs != null && virtualSessions.size() == 0) {
+			tabs.removeChangeListener(changeListener);
+			tabs = null;
+			lastSel = null;
 		}
 	}
 
