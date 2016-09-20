@@ -5,11 +5,12 @@ package com.sshtools.appframework.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -21,19 +22,22 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 
-import net.miginfocom.swing.MigLayout;
-
 import com.sshtools.ui.swing.AppAction;
 import com.sshtools.ui.swing.GradientPanel;
 import com.sshtools.ui.swing.ResourceIcon;
 
+import net.miginfocom.swing.MigLayout;
+
 public class MessagePanel extends GradientPanel {
+
+	public interface Listener {
+		void cancelled();
+	}
+
 	public enum Type {
-		progress(new Color(251, 255, 139), Color.black, null), error(new Color(
-				255, 68, 59), Color.white, new ResourceIcon(
-				"/images/error-24x24.png")), hidden(null, null, null), information(
-				new Color(59, 133, 255), Color.white, new ResourceIcon(
-						"/images/information-24x24.png"));
+		progress(new Color(251, 255, 139), Color.black, null), error(new Color(255, 68, 59), Color.white,
+				new ResourceIcon("/images/error-24x24.png")), hidden(null, null, null), information(
+						new Color(59, 133, 255), Color.white, new ResourceIcon("/images/information-24x24.png"));
 
 		Color background;
 		Color foreground;
@@ -57,6 +61,7 @@ public class MessagePanel extends GradientPanel {
 	private Thread updateThread;
 	private boolean stopUpdateThread;
 	private int progress;
+	private List<Listener> listeners = new ArrayList<Listener>();
 
 	private Object lock = new Object();
 
@@ -65,8 +70,7 @@ public class MessagePanel extends GradientPanel {
 	}
 
 	public MessagePanel(Type type) {
-		super(new MigLayout("wrap 3, hidemode 3", "[][fill,grow][]",
-				"push[][]push"));
+		super(new MigLayout("wrap 3, hidemode 3", "[][fill,grow][]", "push[][]push"));
 		setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 		setOpaque(true);
 
@@ -84,6 +88,14 @@ public class MessagePanel extends GradientPanel {
 		updates = new ArrayBlockingQueue(100, true);
 		waitQueue = new ArrayBlockingQueue(3, true);
 
+	}
+
+	public void addListener(Listener listener) {
+		listeners.add(listener);
+	}
+
+	public void removeListener(Listener listener) {
+		listeners.remove(listener);
 	}
 
 	public void setProgressMaximum(int max) {
@@ -153,6 +165,10 @@ public class MessagePanel extends GradientPanel {
 		} catch (InterruptedException e1) {
 		}
 	}
+	
+	public void uncancel() {
+		cancelled = false;
+	}
 
 	public boolean isCancelled() {
 		return cancelled;
@@ -168,6 +184,9 @@ public class MessagePanel extends GradientPanel {
 		public void actionPerformed(ActionEvent evt) {
 			super.actionPerformed(evt);
 			cancelled = true;
+			for (int i = MessagePanel.this.listeners.size() - 1; i >= 0; i--) {
+				MessagePanel.this.listeners.get(i).cancelled();
+			}
 		}
 
 	}
@@ -176,7 +195,7 @@ public class MessagePanel extends GradientPanel {
 		setType(Type.error);
 		StringBuffer buf = new StringBuffer("<html>");
 		if (mesg != null) {
-			buf.append(mesg + "<br>"); //$NON-NLS-1$
+			buf.append(mesg.replace("\n", " ") + ""); //$NON-NLS-1$
 		}
 
 		// Search up the exception chain until we get a message
@@ -186,25 +205,23 @@ public class MessagePanel extends GradientPanel {
 				message = exception.getMessage();
 			}
 			if (message != null) {
-				message = message.trim();
+				message = message.trim().replace("\n", " ");
 				buf.append(message);
-				if(!message.trim().endsWith(".")) {
+				if (!message.trim().endsWith(".")) {
 					buf.append(". ");
 				}
 			}
 			exception = exception.getCause();
 		}
-		
+
 		// appendException(exception, 0, buf, false);/
 		buf.append("</html>");
 		setMessage(buf.toString());
 	}
 
-	protected static void appendException(Throwable exception, int level,
-			StringBuffer buf, boolean details) {
+	protected static void appendException(Throwable exception, int level, StringBuffer buf, boolean details) {
 		try {
-			if (((exception != null) && (exception.getMessage() != null))
-					&& (exception.getMessage().length() > 0)) {
+			if (((exception != null) && (exception.getMessage() != null)) && (exception.getMessage().length() > 0)) {
 				if (details && (level > 0)) {
 					buf.append("\n \nCaused by ...\n"); //$NON-NLS-1$
 				}
@@ -212,8 +229,7 @@ public class MessagePanel extends GradientPanel {
 			}
 			if (details) {
 				if (exception != null) {
-					if ((exception.getMessage() != null)
-							&& (exception.getMessage().length() == 0)) {
+					if ((exception.getMessage() != null) && (exception.getMessage().length() == 0)) {
 						buf.append("\n \nCaused by ..."); //$NON-NLS-1$
 					} else {
 						buf.append("\n \n"); //$NON-NLS-1$
@@ -226,10 +242,8 @@ public class MessagePanel extends GradientPanel {
 				buf.append(sw.toString());
 			}
 			try {
-				java.lang.reflect.Method method = exception.getClass()
-						.getMethod("getCause", new Class[] {}); //$NON-NLS-1$
-				Throwable cause = (Throwable) method.invoke(exception,
-						(Object[]) null);
+				java.lang.reflect.Method method = exception.getClass().getMethod("getCause", new Class[] {}); //$NON-NLS-1$
+				Throwable cause = (Throwable) method.invoke(exception, (Object[]) null);
 				if (cause != null) {
 					appendException(cause, level + 1, buf, details);
 				}
@@ -285,8 +299,7 @@ public class MessagePanel extends GradientPanel {
 			updateThread = null;
 		}
 
-		void consume(Object o) throws InterruptedException,
-				InvocationTargetException {
+		void consume(Object o) throws InterruptedException, InvocationTargetException {
 			final Update update = (Update) o;
 			while (!stopUpdateThread && progress < update.progress) {
 				progress += 2;

@@ -21,6 +21,8 @@ package com.sshtools.appframework.ui;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
 
+import com.sshtools.ui.swing.FontUtil;
+
 /**
  * Description of the Class
  * 
@@ -43,7 +45,7 @@ public class TextBox extends JTextArea {
 		setBackground(UIManager.getColor("Label.background"));
 		setForeground(UIManager.getColor("Label.foreground"));
 		setBorder(UIManager.getBorder("Label.border"));
-		setFont(UIManager.getFont("TextField.font"));
+		setFont(FontUtil.getUIManagerTextFieldFontOrDefault("TextField.font"));
 		setOpaque(false);
 		setWrapStyleWord(true);
 		setLineWrap(true);

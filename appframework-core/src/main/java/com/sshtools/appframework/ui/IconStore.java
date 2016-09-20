@@ -13,7 +13,6 @@ import java.util.Properties;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.logging.Log;
@@ -39,26 +38,22 @@ import org.freedesktop.mime.MIMEEntry;
 import org.freedesktop.mime.MIMEService;
 import org.freedesktop.swing.SVGIcon;
 
-import com.kitfox.svg.SVGUniverse;
-
 public class IconStore {
 	final static Log LOG = LogFactory.getLog(IconStore.class);
-	
+
 	private static Properties fixes = new Properties();
-	
+
 	static {
 		try {
 			InputStream in = IconStore.class.getResourceAsStream("/icon-name-map.properties");
-			if(in != null) {
+			if (in != null) {
 				try {
 					fixes.load(in);
-				}
-				finally {
+				} finally {
 					in.close();
 				}
 			}
-		}
-		catch(Exception e) {
+		} catch (Exception e) {
 		}
 	}
 
@@ -76,12 +71,10 @@ public class IconStore {
 		aliasService = new DefaultAliasService();
 		globService = new DefaultGlobService();
 		magicService = new DefaultMagicService();
-		mimeService = new DefaultMIMEService(globService, aliasService,
-				magicService);
+		mimeService = new DefaultMIMEService(globService, aliasService, magicService);
 
 		if (SystemUtils.IS_OS_LINUX) {
-			if (System.getProperty("appframework.disableDefaultIconThemes",
-					"false").equals("false")) {
+			if (System.getProperty("appframework.disableDefaultIconThemes", "false").equals("false")) {
 				try {
 					iconService = new LinuxIconService();
 				} catch (Exception e) {
@@ -104,8 +97,7 @@ public class IconStore {
 				LOG.error("Failed to aliases.", e);
 			}
 			try {
-				mimeService = new LinuxMIMEService(globService, aliasService,
-						magicService);
+				mimeService = new LinuxMIMEService(globService, aliasService, magicService);
 			} catch (Exception e) {
 				LOG.error("Failed to MIME.", e);
 			}
@@ -119,7 +111,7 @@ public class IconStore {
 		addThemeJar("default-tango-theme");
 		setDefaultThemeName("default-tango-theme");
 	}
-	
+
 	public void setDefaultThemeName(String defaultThemeName) {
 		iconService.setDefaultThemeName(defaultThemeName);
 	}
@@ -130,6 +122,28 @@ public class IconStore {
 
 	public Icon getIconForFile(FileObject file, int size) {
 		return getIconForFile(file, size, true);
+	}
+
+	public MIMEEntry getMIMEEntryForFile(FileObject file, boolean useMagic) {
+		try {
+			if (file.getType().equals(FileType.FILE) || file.getType().equals(FileType.FOLDER)) {
+				MIMEEntry mime = mimeCache.get(file);
+				if (mime == null) {
+					mime = mimeService.getMimeTypeForFile(file, useMagic);
+				}
+
+				if (mime != null) {
+					mimeCache.cache(file, mime);
+				}
+
+				return mime;
+			} else {
+				return null;
+			}
+		} catch (Exception fse) {
+			LOG.debug("Failed to load MIME.", fse);
+			return null;
+		}
 	}
 
 	public Icon getIconForFile(FileObject file, int size, boolean useMagic) {
@@ -181,8 +195,7 @@ public class IconStore {
 		}
 	}
 
-	public void configure(SshToolsApplication application) throws IOException,
-			ParseException {
+	public void configure(SshToolsApplication application) throws IOException, ParseException {
 		// Initialise icon service
 		iconService.postInit();
 	}
@@ -190,19 +203,14 @@ public class IconStore {
 	public void addThemeJar(String themeName) throws IOException {
 		FileObject obj = null;
 		try {
-			obj = VFS.getManager().resolveFile(
-					"res:" + themeName + "/index.theme");
+			obj = VFS.getManager().resolveFile("res:" + themeName + "/index.theme");
 		} catch (Exception e) {
-			URL loc = getClass().getClassLoader().getResource(
-					themeName + "/index.theme");
+			URL loc = getClass().getClassLoader().getResource(themeName + "/index.theme");
 			try {
 				String sloc = loc.toURI().toString();
-				if (sloc.startsWith("jar:file:/")
-						|| !sloc.startsWith("jar:file://")) {
-					sloc = "jar:jar:/" + System.getProperty("user.dir")
-							+ sloc.substring(9);
-					FileObject resolveFile = VFS.getManager().resolveFile(
-							System.getProperty("user.dir"));
+				if (sloc.startsWith("jar:file:/") || !sloc.startsWith("jar:file://")) {
+					sloc = "jar:jar:/" + System.getProperty("user.dir") + sloc.substring(9);
+					FileObject resolveFile = VFS.getManager().resolveFile(System.getProperty("user.dir"));
 					obj = VFS.getManager().resolveFile(resolveFile, sloc);
 				} else {
 					obj = VFS.getManager().resolveFile(sloc);
@@ -225,8 +233,7 @@ public class IconStore {
 		if (iconService == null) {
 			throw new IllegalStateException("configure() not yet called.");
 		}
-		
-		
+
 		String cacheKey = name + "/" + size;
 		if (cache.containsKey(name)) {
 			return cache.get(cacheKey);
@@ -238,26 +245,24 @@ public class IconStore {
 
 				icon = get(name, size, cacheKey, file);
 			} else {
-				if(fixes.containsKey(name)) {
+				if (fixes.containsKey(name)) {
 					file = iconService.findIcon(fixes.getProperty(name), 48);
 					if (file != null) {
 
 						icon = get(name, size, cacheKey, file);
-					} 
+					}
 				}
-//				if(file == null) {
-//					System.err.println("Cannot find icon " + name);
-//				}
+				// if(file == null) {
+				// System.err.println("Cannot find icon " + name);
+				// }
 			}
 		} catch (Exception e) {
-			LOG.error("Failed to load icon " + name + " at size " + size + ".",
-					e);
+			LOG.error("Failed to load icon " + name + " at size " + size + ".", e);
 		}
 		return icon;
 	}
 
-	private Icon get(String name, int size, String cacheKey, FileObject file)
-			throws FileSystemException, IOException {
+	private Icon get(String name, int size, String cacheKey, FileObject file) throws FileSystemException, IOException {
 		Icon icon;
 		if (file.getName().getBaseName().toLowerCase().endsWith(".svg")) {
 			InputStream in = file.getContent().getInputStream();
@@ -267,11 +272,9 @@ public class IconStore {
 				in.close();
 			}
 		} else {
-			DataInputStream din = new DataInputStream(file.getContent()
-					.getInputStream());
+			DataInputStream din = new DataInputStream(file.getContent().getInputStream());
 			try {
-				byte[] imgData = new byte[(int) file.getContent()
-						.getSize()];
+				byte[] imgData = new byte[(int) file.getContent().getSize()];
 				din.readFully(imgData);
 				icon = new ImageIcon(imgData);
 			} finally {

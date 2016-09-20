@@ -141,7 +141,8 @@ public class ActionTabbedPane extends DnDTabbedPane {
 		try {
 			Object th = getClass().getMethod("getTabComponentAt", int.class)
 					.invoke(this, idx);
-			th.getClass().getMethod("setCanClose", boolean.class)
+			if(th != null)
+				th.getClass().getMethod("setCanClose", boolean.class)
 					.invoke(th, canClose);
 		} catch (Exception e) {
 			e.printStackTrace();

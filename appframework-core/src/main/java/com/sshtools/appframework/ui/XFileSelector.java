@@ -10,16 +10,30 @@ import java.io.FilenameFilter;
 
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 import org.apache.commons.lang.SystemUtils;
 
+import com.google.code.gtkjfilechooser.ui.GtkFileChooserUI;
+
 public abstract class XFileSelector {
+
+	static {
+		if ("GTK look and feel".equals(UIManager.getLookAndFeel().getName())) {
+			UIManager.put("FileChooserUI", com.google.code.gtkjfilechooser.ui.GtkFileChooserUI.class.getName());
+		}
+	}
 
 	static class JFileChooserSelector extends XFileSelector {
 		private JFileChooser chooser;
 
 		JFileChooserSelector(String dir) {
-			chooser = new JFileChooser(dir);
+			chooser = new JFileChooser(dir) {
+				{
+					if (SystemUtils.IS_OS_LINUX)
+						setUI(new GtkFileChooserUI(this));
+				}
+			};
 		}
 
 		@Override
@@ -96,9 +110,7 @@ public abstract class XFileSelector {
 		private void doSetMultipleMode(boolean multiSelection) {
 			if (dialog != null) {
 				try {
-					dialog.getClass()
-							.getMethod("setMultipleMode", boolean.class)
-							.invoke(dialog, multiSelection);
+					dialog.getClass().getMethod("setMultipleMode", boolean.class).invoke(dialog, multiSelection);
 				} catch (Exception e) {
 				}
 			}
@@ -106,23 +118,20 @@ public abstract class XFileSelector {
 
 		@Override
 		public void setFileSelectionMode(int fileSelectionMode) {
-			if ((fileSelectionMode == DIRECTORIES_ONLY || fileSelectionMode == FILES_AND_DIRECTORIES ) && fallback == null) {
-				fallback = new JFileChooserSelector(
-						selectedDirectory.getAbsolutePath());
+			if ((fileSelectionMode == DIRECTORIES_ONLY || fileSelectionMode == FILES_AND_DIRECTORIES)
+					&& fallback == null) {
+				fallback = new JFileChooserSelector(selectedDirectory.getAbsolutePath());
 				if (selectedFile != null) {
 					fallback.setSelectedFile(selectedFile);
 				}
 				fallback.setDialogType(dialogType);
 				fallback.setMultiSelectionEnabled(multiSelection);
-			} else if (fileSelectionMode != DIRECTORIES_ONLY
-					&& fallback != null) {
+			} else if (fileSelectionMode != DIRECTORIES_ONLY && fallback != null) {
 				if (fallback.getSelectedFile() != null) {
 					setSelectedFile(fallback.getSelectedFile());
 				}
-				setDialogType(((JFileChooserSelector) fallback).chooser
-						.getDialogType());
-				setMultiSelectionEnabled(((JFileChooserSelector) fallback).chooser
-						.isMultiSelectionEnabled());
+				setDialogType(((JFileChooserSelector) fallback).chooser.getDialogType());
+				setMultiSelectionEnabled(((JFileChooserSelector) fallback).chooser.isMultiSelectionEnabled());
 				fallback = null;
 			}
 			if (fallback != null) {
@@ -174,8 +183,7 @@ public abstract class XFileSelector {
 
 		private void doSetSelectedFile() {
 			if (dialog != null) {
-				String path = selectedFile == null ? null : selectedFile
-						.getPath();
+				String path = selectedFile == null ? null : selectedFile.getPath();
 				dialog.setFile(path);
 			}
 		}
@@ -192,8 +200,7 @@ public abstract class XFileSelector {
 
 		private void doSetCurrentDirectory() {
 			if (dialog != null) {
-				dialog.setDirectory(selectedDirectory == null ? null
-						: selectedDirectory.getAbsolutePath());
+				dialog.setDirectory(selectedDirectory == null ? null : selectedDirectory.getAbsolutePath());
 			}
 		}
 
@@ -259,8 +266,7 @@ public abstract class XFileSelector {
 			} else {
 				if (dialog != null) {
 					try {
-						return (File[]) dialog.getClass().getMethod("getFiles")
-								.invoke(dialog);
+						return (File[]) dialog.getClass().getMethod("getFiles").invoke(dialog);
 					} catch (Exception e) {
 
 					}
@@ -286,8 +292,7 @@ public abstract class XFileSelector {
 
 		private void doSetDialogType() {
 			if (dialog != null) {
-				dialog.setMode(dialogType == OPEN_DIALOG ? FileDialog.LOAD
-						: FileDialog.SAVE);
+				dialog.setMode(dialogType == OPEN_DIALOG ? FileDialog.LOAD : FileDialog.SAVE);
 			}
 		}
 
@@ -307,12 +312,7 @@ public abstract class XFileSelector {
 	}
 
 	public static XFileSelector create(String dir) {
-		if (SystemUtils.IS_OS_LINUX && !SystemUtils.IS_JAVA_1_6
-				&& !SystemUtils.IS_JAVA_1_5 && !SystemUtils.IS_JAVA_1_4) {
-			return new AWTFileSelector(dir);
-		} else {
-			return new JFileChooserSelector(dir);
-		}
+		return new JFileChooserSelector(dir);
 	}
 
 	public abstract void setMultiSelectionEnabled(boolean multiSelection);

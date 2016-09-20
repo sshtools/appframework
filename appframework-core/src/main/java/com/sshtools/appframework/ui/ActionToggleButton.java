@@ -8,6 +8,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JToggleButton;
@@ -80,6 +81,7 @@ public class ActionToggleButton extends JToggleButton {
 
     private void init(AppAction a, boolean useToolIcon, boolean showText) {
         this.useToolIcon = useToolIcon;
+        setBorder(BorderFactory.createEmptyBorder());
         enablePlasticWorkaround = UIManager.getLookAndFeel().getClass().getName().startsWith("com.jgoodies.looks.plastic.");
         setAction(a);
         addMouseListener(new MouseAdapter() {
