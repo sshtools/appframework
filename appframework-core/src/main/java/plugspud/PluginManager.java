@@ -1,3 +1,12 @@
+/**
+ * Appframework
+ * Copyright (C) 2003-2016 SSHTOOLS Limited
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ */
 /*--
 
  $Id: PluginManager.java,v 1.1.2.3 2011-10-14 17:26:45 brett Exp $

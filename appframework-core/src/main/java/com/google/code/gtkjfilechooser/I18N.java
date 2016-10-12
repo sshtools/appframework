@@ -1,13 +1,12 @@
-/*******************************************************************************
- * Copyright (c) 2010 Costantino Cerbo.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v2.1
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * 
- * Contributors:
- *     Costantino Cerbo - initial API and implementation
- ******************************************************************************/
+/**
+ * Appframework
+ * Copyright (C) 2003-2016 SSHTOOLS Limited
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ */
 package com.google.code.gtkjfilechooser;
 
 import java.util.Locale;
