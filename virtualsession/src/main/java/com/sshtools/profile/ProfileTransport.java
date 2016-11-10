@@ -3,126 +3,146 @@ package com.sshtools.profile;
 
 import java.io.IOException;
 
-import com.sshtools.virtualsession.VirtualSession;
-
 /**
- * ProfileTransport implementations are responsible for creating and
- * maintaing a connection to a resource. The resource {@link URI} is
- * determined from the {@link ResourceProfile} provided when
- * <code>connect()</code> is called.
- *
- * @author $Author: brett $
+ * ProfileTransport implementations are responsible for creating and maintaing a
+ * connection to a resource. The resource {@link URI} is determined from the
+ * {@link ResourceProfile} provided when <code>connect()</code> is called.
  */
 
-public interface ProfileTransport {
+public interface ProfileTransport<S> {
 
-  /**
-   * Connect to a host (or resource) using the URI provided
-   * in the ResourceProfile}. The URI will supply such details as host,
-   * user etc. Any protocol specific authentication will also be
-   * performed.
-   *
-   * @param profile profile
- * @param parentUIComponent TODO
-   * @return <code>true</code> if connected OK
-   * @throws ProfileException on any connection error
-   * @throws AuthenticationException if authentication fails
-   */
-  public boolean connect(ResourceProfile profile, Object parentUIComponent) throws ProfileException,
-      AuthenticationException;
+	/**
+	 * The session this transport will be used with.
+	 *
+	 * @param session
+	 *            the session this transport is attached to
+	 */
+	void init(S session);
 
-  /**
-   * Disconnect from the currently connected resource. If a connection
-   * is not currently being maintained, an <code>IOException</code> will
-   * be thrown.
-   *
-   * @throws IOException on any disconnection error
-   */
-  public void disconnect() throws IOException;
+	/**
+	 * The session this transport is used with.
+	 *
+	 * @return the session this transport is attached to
+	 */
+	S getHandler();
 
-  /**
-   * Get if a connection is currently being maintained.
-   *
-   * @return connected
-   */
-  public boolean isConnected();
+	/**
+	 * Connect to a host (or resource) using the URI provided in the
+	 * {@link ResourceProfile}. The URI will supply such details as host, user
+	 * etc. Any protocol specific authentication will also be performed.
+	 *
+	 * @param profile
+	 *            profile
+	 * @param parentUIComponent
+	 *            TODO
+	 * @return <code>true</code> if connected OK
+	 * @throws ProfileException
+	 *             on any connection error
+	 * @throws AuthenticationException
+	 *             if authentication fails
+	 */
+	boolean connect(ResourceProfile profile, Object parentUIComponent) throws ProfileException, AuthenticationException;
 
-  /**
-   * Get if a connection is currently pending, e.g. unauthenticated.
-   *
-   * @return connection pending
-   */
-  public boolean isConnectionPending();
+	/**
+	 * Disconnect from the currently connected resource. If a connection is not
+	 * currently being maintained, an <code>IOException</code> will be thrown.
+	 *
+	 * @throws IOException
+	 *             on any disconnection error
+	 */
+	void disconnect() throws IOException;
 
-  /**
-   * Return the underlying provider of the terminal. This should be used
-   * to return the underlying object that creates and maintains the terminal
-   * transport, its purpose is to allow additional features such as SFTP to
-   * be implemented in the terminal.
-   * @return
-   */
-  public Object getProvider();
+	/**
+	 * Get if a connection is currently being maintained.
+	 *
+	 * @return connected
+	 */
+	boolean isConnected();
 
-  /**
-   * Some transports may be capable of cloning the current virtual session (SSH
-   * for example). Such transports should return <code>true</code> for this
-   * method.
-   *
-   * @return transport supports cloning
-   */
-  public boolean isCloneVirtualSessionSupported();
+	/**
+	 * Get if a connection is currently pending, e.g. unauthenticated.
+	 *
+	 * @return connection pending
+	 */
+	boolean isConnectionPending();
 
-  /**
-   * Get the profile that was used to connect this transport. This will be
-   * <code>null</code> if disconnected.
-   *
-   * @return profile
-   */
-  public ResourceProfile getProfile();
+	/**
+	 * Return the underlying provider of the terminal. This should be used to
+	 * return the underlying object that creates and maintains the terminal
+	 * transport, its purpose is to allow additional features such as SFTP to be
+	 * implemented in the terminal.
+	 * 
+	 * @return
+	 */
+	Object getProvider();
 
-  /**
-   * If the host has provided some information about itself, this method
-   * will return it. Otherwise <code>null</code> will be returned.
-   *
-   * @return host description
-   */
-  public String getHostDescription();
+	/**
+	 * Some transports may be capable of cloning the current virtual session
+	 * (SSH for example). Such transports should return <code>true</code> for
+	 * this method.
+	 *
+	 * @return transport supports cloning
+	 */
+	boolean isCloneTransportSupported();
 
+	/**
+	 * Get the profile that was used to connect this transport. This will be
+	 * <code>null</code> if disconnected.
+	 *
+	 * @return profile
+	 */
+	ResourceProfile getProfile();
 
-  /**
-   * Return a short description of the protocol, for example "Telnet" or "SSH2"
-   * @return
-   */
-  public String getProtocolDescription();
+	/**
+	 * If the host has provided some information about itself, this method will
+	 * return it. Otherwise <code>null</code> will be returned.
+	 *
+	 * @return host description
+	 */
+	String getHostDescription();
 
-  /**
-   * Is the protocol secure?
-   * @return
-   */
-  public boolean isProtocolSecure();
+	/**
+	 * Return a short description of the protocol, for example "Telnet" or
+	 * "SSH2"
+	 * 
+	 * @return protocol description
+	 */
+	String getProtocolDescription();
 
+	/**
+	 * Is the protocol secure?
+	 * 
+	 * @return secure transport
+	 */
+	boolean isProtocolSecure();
 
-  /**
-   * Return a short description of the transport, for example "Socket" or "SOCKS5"
-   * @return
-   */
-  public String getTransportDescription();
+	/**
+	 * Return a short description of the transport, for example "Socket" or
+	 * "SOCKS5"
+	 * 
+	 * @return description
+	 */
+	String getTransportDescription();
 
-  /**
-   * Is this transport secure?
-   * @return
-   */
-  public boolean isTransportSecure();
+	/**
+	 * Is the transport layer secure?
+	 * 
+	 * @return secure transport
+	 */
+	boolean isTransportSecure();
 
-  /**
-   * Clone the current virtual session. The current connection should be
-   * cloned and a new instance of the appropriate transport will be returned.
-   *
-   * @param session the virtual session that is going to manage this newly cloned connection
-   * @return the cloned connection
-   * @throws CloneNotSupportedException if cloning cannot take place
-   * @throws ProfileException on any errors that may occur during cloning.
-   */
-  public ProfileTransport cloneVirtualSession(VirtualSession session) throws
-      CloneNotSupportedException, ProfileException;
+	/**
+	 * Clone the current session. The current connection should be cloned and a
+	 * new instance of the appropriate transport will be returned.
+	 *
+	 * @param session
+	 *            the session that is going to manage this newly cloned
+	 *            connection
+	 * @return the cloned connection
+	 * @throws CloneNotSupportedException
+	 *             if cloning cannot take place
+	 * @throws ProfileException
+	 *             on any errors that may occur during cloning.
+	 */
+	ProfileTransport<S> cloneTransport(S session) throws CloneNotSupportedException, ProfileException;
 }
