@@ -40,6 +40,7 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 
 	private JComboBox lafChooser;
 	private JCheckBox toolBarSmallIcons = new JCheckBox(Messages.getString("GlobalOptionsTab.SmallIcons"));
+	private JCheckBox useSystemIconTheme = new JCheckBox(Messages.getString("GlobalOptionsTab.UseSystemIconTheme"));
 	private JCheckBox toolBarShowSelectiveText = new JCheckBox(Messages.getString("GlobalOptionsTab.SelectiveText"));
 	private JCheckBox wrapToolBar = new JCheckBox("Wrap tool bar icons");
 	private JCheckBox stayRunning = new JCheckBox("Stay running on closing last window");
@@ -61,7 +62,8 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 		gbc1.anchor = GridBagConstraints.WEST;
 		gbc1.fill = GridBagConstraints.HORIZONTAL;
 		gbc1.weightx = 0.0;
-		UIUtil.jGridBagAdd(s, new JLabel(Messages.getString("GlobalOptionsTab.LAF")), gbc1, GridBagConstraints.RELATIVE);
+		UIUtil.jGridBagAdd(s, new JLabel(Messages.getString("GlobalOptionsTab.LAF")), gbc1,
+				GridBagConstraints.RELATIVE);
 		gbc1.weightx = 1.0;
 
 		lafChooser = new JComboBox(new LookAndFeelModel());
@@ -84,6 +86,8 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 		gbc1.insets = ins2;
 		toolBarSmallIcons.setMnemonic('i');
 		UIUtil.jGridBagAdd(s, toolBarSmallIcons, gbc1, GridBagConstraints.REMAINDER);
+		useSystemIconTheme.setMnemonic('y');
+		UIUtil.jGridBagAdd(s, useSystemIconTheme, gbc1, GridBagConstraints.REMAINDER);
 		toolBarShowSelectiveText.setMnemonic('s');
 		UIUtil.jGridBagAdd(s, toolBarShowSelectiveText, gbc1, GridBagConstraints.REMAINDER);
 
@@ -102,11 +106,12 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 
 	public void reset() {
 		LookAndFeelModel model = (LookAndFeelModel) lafChooser.getModel();
-		lafChooser.setSelectedItem(model.getElementForName(PreferencesStore.get(SshToolsApplication.PREF_LAF, UIManager
-			.getLookAndFeel().getClass().getName())));
-		toolBarShowSelectiveText.setSelected(PreferencesStore
-			.getBoolean(SshToolsApplication.PREF_TOOLBAR_SHOW_SELECTIVE_TEXT, true));
+		lafChooser.setSelectedItem(model.getElementForName(
+				PreferencesStore.get(SshToolsApplication.PREF_LAF, UIManager.getLookAndFeel().getClass().getName())));
+		toolBarShowSelectiveText
+				.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_TOOLBAR_SHOW_SELECTIVE_TEXT, true));
 		toolBarSmallIcons.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_TOOLBAR_SMALL_ICONS, false));
+		useSystemIconTheme.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_USE_SYSTEM_ICON_THEME, true));
 		wrapToolBar.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_TOOLBAR_WRAP, false));
 		stayRunning.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_STAY_RUNNING, false));
 	}
@@ -151,8 +156,10 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 			PreferencesStore.put(SshToolsApplication.PREF_LAF, newLaf);
 			changed = true;
 		}
-		PreferencesStore.putBoolean(SshToolsApplication.PREF_TOOLBAR_SHOW_SELECTIVE_TEXT, toolBarShowSelectiveText.isSelected());
+		PreferencesStore.putBoolean(SshToolsApplication.PREF_TOOLBAR_SHOW_SELECTIVE_TEXT,
+				toolBarShowSelectiveText.isSelected());
 		PreferencesStore.putBoolean(SshToolsApplication.PREF_TOOLBAR_SMALL_ICONS, toolBarSmallIcons.isSelected());
+		PreferencesStore.putBoolean(SshToolsApplication.PREF_USE_SYSTEM_ICON_THEME, useSystemIconTheme.isSelected());
 		PreferencesStore.putBoolean(SshToolsApplication.PREF_TOOLBAR_WRAP, wrapToolBar.isSelected());
 		PreferencesStore.putBoolean(SshToolsApplication.PREF_STAY_RUNNING, stayRunning.isSelected());
 		if (changed) {

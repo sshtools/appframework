@@ -83,6 +83,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	public final static String PREF_SKIN = "apps.skin";
 	public final static String PREF_STAY_RUNNING = "apps.stayRunning";
 	public final static String PREF_TOOLBAR_SMALL_ICONS = "apps.toolBar.smallIcons";
+	public final static String PREF_USE_SYSTEM_ICON_THEME = "apps.toolBar.useSystemIconTheme";
 	public final static String PREF_TOOLBAR_SHOW_SELECTIVE_TEXT = "apps.toolBar.showSelectiveText";
 	public static final String PREF_TOOLBAR_WRAP = "apps.toolBar.wrap";
 
@@ -119,6 +120,8 @@ public abstract class SshToolsApplication implements PluginHostContext {
 				UIManager.getSystemLookAndFeelClassName()));
 		addLAF(new UIManager.LookAndFeelInfo("Cross Platform",
 				UIManager.getCrossPlatformLookAndFeelClassName()));
+		
+		System.setProperty("jfreedesktop.alwaysUseDefaultTheme", String.valueOf(!PreferencesStore.getBoolean(SshToolsApplication.PREF_USE_SYSTEM_ICON_THEME, true)));
 
 	}
 
