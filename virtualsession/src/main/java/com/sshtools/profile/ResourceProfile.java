@@ -14,15 +14,15 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
-import java.util.Vector;
-
-import nanoxml.XMLElement;
+import java.util.Map;
 
 import com.sshtools.profile.URI.MalformedURIException;
+
+import nanoxml.XMLElement;
 
 /**
  * A ResourceProfile stores everything that is needed to be known for a
@@ -49,24 +49,23 @@ import com.sshtools.profile.URI.MalformedURIException;
  * XMLelement when the profile is read from storage.<br>
  * 
  */
-public class ResourceProfile {
+public class ResourceProfile<T extends ProfileTransport<?>> {
 
 	// Private instance variables
 
 	private URI uri;
 	private String name;
-	private Properties properties;
-	private Hashtable schemeOptions;
-	private Hashtable extensions;
+	private Map<String, String> properties = new HashMap<String, String>();
+	private Map<Class<? extends SchemeOptions>, SchemeOptions> schemeOptions = new HashMap<Class<? extends SchemeOptions>, SchemeOptions>();
+	private Map<String, XMLElement> extensions = new HashMap<String, XMLElement>();
 	private boolean needSave;
-	private Vector listeners;
+	private List<ResourceProfileListener> listeners = new ArrayList<ResourceProfileListener>();
 
 	/**
 	 * Construct a new empty profile.
 	 */
-	public ResourceProfile(ResourceProfile profile) {
+	public ResourceProfile(ResourceProfile<?> profile) {
 		setFromProfile(profile);
-		listeners = new Vector();
 	}
 
 	/**
@@ -75,29 +74,25 @@ public class ResourceProfile {
 	 * @param profile
 	 * @throws Error
 	 */
-	public void setFromProfile(ResourceProfile profile) throws Error {
+	public void setFromProfile(ResourceProfile<?> profile) throws Error {
 		if (profile == this) {
-			throw new IllegalArgumentException(
-					"Cannot set profile from itself.");
+			throw new IllegalArgumentException("Cannot set profile from itself.");
 		}
 		try {
 			uri = new URI(profile.getURI().toString());
 		} catch (MalformedURIException e) {
 			throw new Error(e);
 		}
-		properties = new Properties();
+		properties.clear();
 		properties.putAll(profile.properties);
-		extensions = new Hashtable(profile.extensions);
-		schemeOptions = new Hashtable();
+		extensions.clear();
+		schemeOptions.clear();
 		needSave = profile.needSave;
 		try {
 			if (profile.schemeOptions != null) {
-				for (Enumeration en = profile.schemeOptions.keys(); en
-						.hasMoreElements();) {
-					Class k = (Class) en.nextElement();
-					SchemeOptions sopts = (SchemeOptions) profile.schemeOptions
-							.get(k);
-					schemeOptions.put(k, sopts.clone());
+				for (Class<? extends SchemeOptions> k : profile.schemeOptions.keySet()) {
+					SchemeOptions sopts = (SchemeOptions) profile.schemeOptions.get(k);
+					schemeOptions.put(k, (SchemeOptions) sopts.clone());
 				}
 			}
 		} catch (CloneNotSupportedException e) {
@@ -109,18 +104,12 @@ public class ResourceProfile {
 	 * Construct a new empty profile.
 	 */
 	public ResourceProfile() {
-		properties = new Properties();
-		extensions = new Hashtable();
-		needSave = false;
-		listeners = new Vector();
-		schemeOptions = new Hashtable();
 	}
 
 	/**
 	 * Construct a new profile given a URI
 	 * 
-	 * @param uri
-	 *            uri
+	 * @param uri uri
 	 */
 	public ResourceProfile(URI uri) {
 		this(null, uri);
@@ -129,10 +118,8 @@ public class ResourceProfile {
 	/**
 	 * Construct a new profile given a URI and a name
 	 * 
-	 * @param name
-	 *            name
-	 * @param uri
-	 *            uri
+	 * @param name name
+	 * @param uri uri
 	 */
 	public ResourceProfile(String name, URI uri) {
 		this();
@@ -144,8 +131,7 @@ public class ResourceProfile {
 	 * Get the internet address for this profile (if applicable).
 	 * 
 	 * @return address
-	 * @throws UnknownHostException
-	 *             if host not supplied or known
+	 * @throws UnknownHostException if host not supplied or known
 	 */
 	public InetAddress getAddress() throws UnknownHostException {
 		if (uri.getHost() == null || uri.getHost().length() == 0) {
@@ -158,22 +144,20 @@ public class ResourceProfile {
 	 * Add a listener to the list that should be notified when something in the
 	 * profile changes, or if the profile is loaded / saved.
 	 * 
-	 * @param l
-	 *            listener to add
+	 * @param l listener to add
 	 */
 	public void addResourceProfileListener(ResourceProfileListener l) {
-		listeners.addElement(l);
+		listeners.add(l);
 	}
 
 	/**
 	 * Remove a listener from the list that should be notified when something in
 	 * the profile changes, or if the profile is loaded / saved.
 	 * 
-	 * @param l
-	 *            listener to remove
+	 * @param l listener to remove
 	 */
 	public void removeResourceProfileListener(ResourceProfileListener l) {
-		listeners.removeElement(l);
+		listeners.remove(l);
 	}
 
 	/**
@@ -181,29 +165,24 @@ public class ResourceProfile {
 	 * for this profile
 	 * 
 	 * @return ProfileTransport
-	 * @throws ProfileException
-	 *             if there is any problem with the profile
-	 * @throws IOException
-	 *             if the transport cannot connect
-	 * @throws AuthenticationException
-	 *             if the transport cannot authenticate
+	 * @throws ProfileException if there is any problem with the profile
+	 * @throws IOException if the transport cannot connect
+	 * @throws AuthenticationException if the transport cannot authenticate
 	 */
-	public ProfileTransport createProfileTransport() throws ProfileException,
-			IOException, AuthenticationException {
+	public T createProfileTransport() throws ProfileException, IOException, AuthenticationException {
 		ConnectionManager mgr = ConnectionManager.getInstance();
 		if (uri != null) {
-			SchemeHandler handler = mgr.getSchemeHandler(uri.getScheme());
+			@SuppressWarnings("unchecked")
+			SchemeHandler<T> handler = mgr.getSchemeHandler(uri.getScheme());
 			if (handler == null) {
-				throw new ProfileException(
-						"Could not locate SchemeHandler for scheme name "
-								+ uri.getScheme());
+				throw new ProfileException("Could not locate SchemeHandler for scheme name " + uri.getScheme());
 			}
 			return handler.createProfileTransport(this);
 		}
 		return null;
 	}
 
-	public boolean hasSchemeOptions(Class clazz) {
+	public boolean hasSchemeOptions(Class<? extends SchemeOptions> clazz) {
 		return schemeOptions.containsKey(clazz);
 	}
 
@@ -212,11 +191,12 @@ public class ResourceProfile {
 	 * 
 	 * @return scheme options
 	 */
-	public SchemeOptions getSchemeOptions(Class clazz) {
-		SchemeOptions sopts = (SchemeOptions) schemeOptions.get(clazz);
+	public <C extends SchemeOptions> C getSchemeOptions(Class<C> clazz) {
+		@SuppressWarnings("unchecked")
+		C sopts = (C) schemeOptions.get(clazz);
 		if (sopts == null) {
 			try {
-				sopts = (SchemeOptions) clazz.newInstance();
+				sopts = (C) clazz.newInstance();
 			} catch (InstantiationException e) {
 				throw new IllegalArgumentException(e);
 			} catch (IllegalAccessException e) {
@@ -230,8 +210,7 @@ public class ResourceProfile {
 	/**
 	 * Set scheme specific options for this profile.
 	 * 
-	 * @param options
-	 *            scheme specific options to add
+	 * @param options scheme specific options to add
 	 */
 	public void setSchemeOptions(SchemeOptions options) {
 		schemeOptions.put(options.getClass(), options);
@@ -240,8 +219,7 @@ public class ResourceProfile {
 	/**
 	 * Set the name for this profile
 	 * 
-	 * @param name
-	 *            name
+	 * @param name name
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -259,8 +237,7 @@ public class ResourceProfile {
 	/**
 	 * Set the URI for this resource
 	 * 
-	 * @param uri
-	 *            resource URI
+	 * @param uri resource URI
 	 */
 	public void setURI(URI uri) {
 		this.uri = uri;
@@ -278,10 +255,8 @@ public class ResourceProfile {
 	/**
 	 * Load the profile given an input stream providing the XML data.
 	 * 
-	 * @param in
-	 *            instream providing XML data for profile
-	 * @throws IOException
-	 *             if profile cannot be loaded
+	 * @param in instream providing XML data for profile
+	 * @throws IOException if profile cannot be loaded
 	 */
 	public void load(InputStream in) throws IOException {
 		loadImpl(in);
@@ -290,10 +265,8 @@ public class ResourceProfile {
 	/**
 	 * Save the profile given an output stream to write the XML data to.
 	 * 
-	 * @param out
-	 *            output stream to write XML data to
-	 * @throws IOException
-	 *             if profile cannot be written
+	 * @param out output stream to write XML data to
+	 * @throws IOException if profile cannot be written
 	 */
 	public void save(OutputStream in) throws IOException {
 		saveImpl(in);
@@ -304,16 +277,11 @@ public class ResourceProfile {
 		rootEl.setName("resourceProfile");
 		rootEl.setAttribute("name", name == null ? "" : name);
 		rootEl.setAttribute("uri", uri.toString());
-		// XMLElement uriEl = new XMLElement();
-		// uriEl.setName("uri");
-		// uriEl.setContent(uri.toString());
-		// rootEl.addChild(uriEl);
 		if (properties.size() > 0) {
 			XMLElement propertiesEl = new XMLElement();
 			propertiesEl.setName("properties");
-			for (Enumeration e = properties.keys(); e.hasMoreElements();) {
-				String k = (String) e.nextElement();
-				String v = properties.getProperty(k);
+			for (String k : properties.keySet()) {
+				String v = properties.get(k);
 				XMLElement propertyEl = new XMLElement();
 				propertyEl.setName("property");
 				propertyEl.setAttribute("name", k);
@@ -323,35 +291,27 @@ public class ResourceProfile {
 			rootEl.addChild(propertiesEl);
 		}
 		if (schemeOptions != null) {
-			for (Enumeration en = schemeOptions.keys(); en.hasMoreElements();) {
-				Class k = (Class) en.nextElement();
-				SchemeOptions sopts = (SchemeOptions) schemeOptions.get(k);
+			for (Class<? extends SchemeOptions> k : schemeOptions.keySet()) {
+				SchemeOptions sopts = schemeOptions.get(k);
 				XMLElement schemeOptionsEl = sopts.getElement();
 				if (schemeOptionsEl != null) {
 					schemeOptionsEl.setName("schemeOptions");
 					schemeOptionsEl.setAttribute("scheme", sopts.getScheme());
-					schemeOptionsEl.setAttribute("className", sopts.getClass()
-							.getName());
+					schemeOptionsEl.setAttribute("className", sopts.getClass().getName());
 					rootEl.addChild(schemeOptionsEl);
 				}
 			}
 		}
 		if (extensions.size() > 0) {
-			Enumeration e = extensions.elements();
-			XMLElement el;
-			while (e.hasMoreElements()) {
-				el = (XMLElement) e.nextElement();
-				rootEl.addChild(el);
-			}
+			for (XMLElement x : extensions.values())
+				rootEl.addChild(x);
 		}
 		PrintWriter writer = new PrintWriter(out);
 		writer.println(rootEl.toString());
 		writer.flush();
 		needSave = false;
 		for (int i = listeners.size() - 1; i >= 0; i--) {
-			ResourceProfileListener l = (ResourceProfileListener) listeners
-					.elementAt(i);
-			l.profileSaved();
+			listeners.get(i).profileSaved();
 		}
 	}
 
@@ -374,31 +334,24 @@ public class ResourceProfile {
 
 		XMLElement el;
 		String n;
-		for (Enumeration e = xml.enumerateChildren(); e.hasMoreElements();) {
+		for (Enumeration<?> e = xml.enumerateChildren(); e.hasMoreElements();) {
 			el = (XMLElement) e.nextElement();
 			/**
 			 * Made the URI an attribute of the root element to gaurentee that
 			 * we have the information before processing elements which may
 			 * require it.
 			 */
-			if /*
-				 * (el.getName().equals("uri")) { uri = new
-				 * URI(el.getContent()); } else if
-				 */(el.getName().equals("properties")) {
-				for (Enumeration c = el.enumerateChildren(); c
-						.hasMoreElements();) {
+			if (el.getName().equals("properties")) {
+				for (Enumeration<?> c = el.enumerateChildren(); c.hasMoreElements();) {
 					el = (XMLElement) c.nextElement();
 					if (el.getName().equals("property")) {
 						n = (String) el.getAttribute("name");
 						if (n == null || n.equals("")) {
-							throw new IOException(
-									"Invalid propert element, name attribute must be specified.");
+							throw new IOException("Invalid propert element, name attribute must be specified.");
 						}
 						properties.put(n, el.getContent());
 					} else {
-						throw new IOException(
-								"Invalid profile properties element "
-										+ el.getName() + ".");
+						throw new IOException("Invalid profile properties element " + el.getName() + ".");
 					}
 				}
 			} else if (el.getName().equals("schemeOptions")) {
@@ -411,38 +364,20 @@ public class ResourceProfile {
 
 				try {
 					SchemeOptions sopts = ConnectionManager.getInstance()
-							.getSchemeHandler((String)el.getAttribute("scheme", uri.getScheme()))
-							.createSchemeOptions();
+							.getSchemeHandler((String) el.getAttribute("scheme", uri.getScheme())).createSchemeOptions();
 					sopts.init(el);
 					schemeOptions.put(sopts.getClass(), sopts);
 				} catch (Throwable t) {
-					System.err
-							.println("Could not create scheme specific options for "
-									+ uri.getScheme());
+					System.err.println("Could not create scheme specific options for " + uri.getScheme());
 				}
 
-				/*
-				 * String clazzName = (String) el.getAttribute("className"); if
-				 * (clazzName != null) { try { schemeOptions = (SchemeOptions)
-				 * Class.forName(clazzName). newInstance();
-				 * schemeOptions.init(el); } catch (Throwable t) {
-				 * System.err.println
-				 * ("Could not create scheme specific options " + clazzName +
-				 * ". " + t.getMessage()); } } else { throw new IOException(
-				 * "Invalid schemeOptions element, must provide className attribute."
-				 * ); }
-				 */
 			} else {
 				extensions.put(el.getName(), el);
-				// throw new IOException("Invalid profile element " +
-				// el.getName() + ".");
 			}
 		}
 		needSave = false;
 		for (int i = listeners.size() - 1; i >= 0; i--) {
-			ResourceProfileListener l = (ResourceProfileListener) listeners
-					.elementAt(i);
-			l.profileLoaded();
+			listeners.get(i).profileLoaded();
 		}
 
 	}
@@ -451,16 +386,13 @@ public class ResourceProfile {
 	 * Return one of the properties as an <code>int</code> given its property
 	 * name and a default value if the property does not exist is or invalid.
 	 * 
-	 * @param name
-	 *            property name
-	 * @param defaultValue
-	 *            default value
+	 * @param name property name
+	 * @param defaultValue default value
 	 * @return value
 	 */
 	public int getApplicationPropertyInt(String name, int defaultValue) {
 		try {
-			return Integer.parseInt(getApplicationProperty(name,
-					String.valueOf(defaultValue)));
+			return Integer.parseInt(getApplicationProperty(name, String.valueOf(defaultValue)));
 		} catch (NumberFormatException nfe) {
 			return defaultValue;
 		}
@@ -471,17 +403,13 @@ public class ResourceProfile {
 	 * property name and a default value if the property does not exist is or
 	 * invalid.
 	 * 
-	 * @param name
-	 *            property name
-	 * @param defaultValue
-	 *            default value
+	 * @param name property name
+	 * @param defaultValue default value
 	 * @return value
 	 */
-	public boolean getApplicationPropertyBoolean(String name,
-			boolean defaultValue) {
+	public boolean getApplicationPropertyBoolean(String name, boolean defaultValue) {
 		try {
-			return new Boolean(getApplicationProperty(name,
-					String.valueOf(defaultValue))).booleanValue();
+			return new Boolean(getApplicationProperty(name, String.valueOf(defaultValue))).booleanValue();
 		} catch (NumberFormatException nfe) {
 			return defaultValue;
 		}
@@ -491,10 +419,8 @@ public class ResourceProfile {
 	 * Return one of the properties as a <code>String</code> given its property
 	 * name and a default value if the property does not exist is or invalid.
 	 * 
-	 * @param name
-	 *            property name
-	 * @param defaultValue
-	 *            default value
+	 * @param name property name
+	 * @param defaultValue default value
 	 * @return value
 	 */
 	public String getApplicationProperty(String name, String defaultValue) {
@@ -508,10 +434,8 @@ public class ResourceProfile {
 	/**
 	 * Set a property given its name and a value
 	 * 
-	 * @param name
-	 *            property name
-	 * @param value
-	 *            value
+	 * @param name property name
+	 * @param value value
 	 */
 	public void setApplicationProperty(String name, String value) {
 		properties.put(name, value);
@@ -520,10 +444,8 @@ public class ResourceProfile {
 	/**
 	 * Set a property given its name and a value
 	 * 
-	 * @param name
-	 *            property name
-	 * @param value
-	 *            value
+	 * @param name property name
+	 * @param value value
 	 */
 	public void setApplicationProperty(String name, int value) {
 		properties.put(name, String.valueOf(value));
@@ -532,10 +454,8 @@ public class ResourceProfile {
 	/**
 	 * Set a property given its name and a value
 	 * 
-	 * @param name
-	 *            property name
-	 * @param value
-	 *            value
+	 * @param name property name
+	 * @param value value
 	 */
 	public void setApplicationProperty(String name, boolean value) {
 		properties.put(name, String.valueOf(value));
@@ -546,15 +466,14 @@ public class ResourceProfile {
 	 * 
 	 * @return Enumeration of property keys
 	 */
-	public Enumeration getApplicationPropertyKeys() {
-		return properties.keys();
+	public Collection<String> getApplicationPropertyKeys() {
+		return properties.keySet();
 	}
 
 	/**
 	 * Remove a property givens its name.
 	 * 
-	 * @param key
-	 *            name
+	 * @param key name
 	 */
 	public void removeApplicationProperty(String key) {
 		properties.remove(key);
@@ -578,7 +497,7 @@ public class ResourceProfile {
 	 * @return
 	 */
 	public XMLElement getApplicationExtension(String name) {
-		return (XMLElement) extensions.get(name);
+		return extensions.get(name);
 	}
 
 	/**
@@ -606,8 +525,7 @@ public class ResourceProfile {
 	 * Set whether anything has changed since the profile was last loaded or
 	 * saved.
 	 * 
-	 * @param needSave
-	 *            true if the profile needs saving.
+	 * @param needSave true if the profile needs saving.
 	 */
 	public void setNeedSave(boolean needSave) {
 		if (this.needSave != needSave) {
@@ -617,27 +535,27 @@ public class ResourceProfile {
 
 	public void fireProfileChanged() {
 		for (int i = listeners.size() - 1; i >= 0; i--) {
-			ResourceProfileListener l = (ResourceProfileListener) listeners
-					.elementAt(i);
-			l.profileChanged();
+			listeners.get(i).profileChanged();
 		}
 	}
-	
+
 	public void setUsername(String username) {
 		String password = getPassword();
 		try {
-			uri.setUserinfo(username == null && password == null ? null : (
-					(username == null ? "" : URLEncoder.encode(username, "UTF-8")) + ( password == null ? "" : ( ":" + URLEncoder.encode(password, "UTF-8")))));
+			uri.setUserinfo(username == null && password == null ? null
+					: ((username == null ? "" : URLEncoder.encode(username, "UTF-8"))
+							+ (password == null ? "" : (":" + URLEncoder.encode(password, "UTF-8")))));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	public void setPassword(String password) {
 		String username = getUsername();
 		try {
-			uri.setUserinfo(username == null && password == null ? null : (
-					(username == null ? "" : URLEncoder.encode(username, "UTF-8")) + ( password == null ? "" : ( ":" + URLEncoder.encode(password, "UTF-8")))));
+			uri.setUserinfo(username == null && password == null ? null
+					: ((username == null ? "" : URLEncoder.encode(username, "UTF-8"))
+							+ (password == null ? "" : (":" + URLEncoder.encode(password, "UTF-8")))));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -676,14 +594,14 @@ public class ResourceProfile {
 		return null;
 	}
 
-	public List getSchemeOptionsList() {
-		return new ArrayList(schemeOptions.values());
+	public List<SchemeOptions> getSchemeOptionsList() {
+		return new ArrayList<SchemeOptions>(schemeOptions.values());
 	}
 
-	public static ResourceProfile load(File file) throws IOException {
+	public static ResourceProfile<ProfileTransport<?>> load(File file) throws IOException {
 		FileInputStream fin = new FileInputStream(file);
 		try {
-			ResourceProfile p = new ResourceProfile();
+			ResourceProfile<ProfileTransport<?>> p = new ResourceProfile<ProfileTransport<?>>();
 			p.load(fin);
 			return p;
 		} finally {

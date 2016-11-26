@@ -1,8 +1,7 @@
 /* HEADER */
 package com.sshtools.virtualsession;
 
-import java.util.Enumeration;
-
+import com.sshtools.profile.ProfileTransport;
 import com.sshtools.profile.URI;
 
 /**
@@ -13,88 +12,82 @@ import com.sshtools.profile.URI;
  * available sessions in a tree and a right handed view of the selected session.
  *
  */
-public interface VirtualSessionManager {
+public interface VirtualSessionManager<S extends VirtualSession<? extends ProfileTransport<?>,? extends VirtualSessionManager<?>>> {
 
 	/**
 	 * Add a new VirtualSession to this manager.
 	 *
-	 * @param vs
-	 *            virtual session to add
+	 * @param vs virtual session to add
 	 */
-	public void addVirtualSession(VirtualSession vs);
+	void addVirtualSession(S vs);
 
 	/**
 	 * Remove a VirtualSession from this terminal
 	 *
-	 * @param vs
-	 *            virtual session to remove
+	 * @param vs virtual session to remove
 	 */
-	public void removeVirtualSession(VirtualSession vs);
+	void removeVirtualSession(S vs);
 
 	/**
 	 * Return the number of virtual sessions.
 	 *
 	 * @return virtual sessions
 	 */
-	public int getVirtualSessionCount();
+	int getVirtualSessionCount();
 
 	/**
 	 * Return the currently selected virtual session
 	 *
 	 * @return selected session
 	 */
-	public VirtualSession getSelectedVirtualSession();
+	S getSelectedVirtualSession();
 
 	/**
 	 * Return the currently selected virtual index
 	 *
 	 * @return selected terminal index
 	 */
-	public int getSelectedVirtualSessionIndex();
+	int getSelectedVirtualSessionIndex();
 
 	/**
 	 * Return the virtual session at the specified index
 	 *
-	 * @param i
-	 *            index
+	 * @param i index
 	 * @return virtual terminal
 	 */
-	public VirtualSession getVirtualSession(int i);
+	S getVirtualSession(int i);
 
 	/**
 	 * Make the provided virtual session the selected one
 	 *
-	 * @param vs
-	 *            virtual session to select
+	 * @param vs virtual session to select
 	 */
-	public void setSelectedVirtualSession(VirtualSession vs);
+	void setSelectedVirtualSession(S vs);
 
 	/**
 	 * Add a <code>VirtualSessionManagerListener</code> to the list that should
 	 * receive events about changes in the state of the virtual sessions managed
 	 * by this virtual session manager.
 	 *
-	 * @param listener
-	 *            listener to add
+	 * @param listener listener to add
 	 */
-	public void addVirtualSessionManagerListener(VirtualSessionManagerListener listener);
+	void addVirtualSessionManagerListener(VirtualSessionManagerListener listener);
 
 	/**
 	 * Removes a <code>VirtualSessionManagerListener</code> from the list that
 	 * should receive events about changes in the state of the virtual sessions
 	 * managed by this virtual session manager.
 	 *
-	 * @param listener
-	 *            listener to remove
+	 * @param listener listener to remove
 	 */
-	public void removeVirtualSessionManagerListener(VirtualSessionManagerListener listener);
+	void removeVirtualSessionManagerListener(VirtualSessionManagerListener listener);
 
 	/**
 	 * Return an enumeration of virtual sessions
 	 *
 	 * @return enumeration of virtual session
 	 */
-	public Enumeration virtualSessions();
+	public Iterable<S> virtualSessions();
 
 	/**
 	 * The applet container may have supplied an SSL Explorer embedded client
@@ -104,5 +97,5 @@ public interface VirtualSessionManager {
 	 *
 	 * @return ticket URI
 	 */
-	public URI getEmbeddedClientTicketURI();
+	URI getEmbeddedClientTicketURI();
 }

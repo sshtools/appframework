@@ -8,20 +8,16 @@ import java.util.List;
 
 /**
  * 
- * 
- * @author $Author: brett $
  */
-public abstract class SchemeHandler {
+public abstract class SchemeHandler<T extends ProfileTransport<?>> {
 	private String name;
 	private String description;
 
 	/**
 	 * Construct a new SchemeHandler
 	 * 
-	 * @param name
-	 *            scheme name
-	 * @param description
-	 *            description
+	 * @param name scheme name
+	 * @param description description
 	 */
 	public SchemeHandler(String name, String description) {
 		this.name = name;
@@ -42,8 +38,8 @@ public abstract class SchemeHandler {
 	 * 
 	 * @return list of scheme options
 	 */
-	public List createMultipleSchemeOptions() {
-		List l = new ArrayList();
+	public List<SchemeOptions> createMultipleSchemeOptions() {
+		List<SchemeOptions> l = new ArrayList<SchemeOptions>();
 		SchemeOptions createSchemeOptions = createSchemeOptions();
 		if (createSchemeOptions != null) {
 			l.add(createSchemeOptions);
@@ -56,9 +52,8 @@ public abstract class SchemeHandler {
 	 * 
 	 * @return profile transport
 	 */
-	public abstract ProfileTransport createProfileTransport(
-			ResourceProfile profile) throws ProfileException, IOException,
-			AuthenticationException;
+	public abstract T createProfileTransport(ResourceProfile<T> profile)
+			throws ProfileException, IOException, AuthenticationException;
 
 	/**
 	 * Get the scheme name

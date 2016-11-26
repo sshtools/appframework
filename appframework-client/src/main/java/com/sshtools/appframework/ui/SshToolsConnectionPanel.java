@@ -1,5 +1,4 @@
 /* HEADER */
-
 package com.sshtools.appframework.ui;
 
 import java.awt.BorderLayout;
@@ -26,7 +25,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -44,16 +42,12 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.UIManager;
-import javax.swing.plaf.basic.BasicArrowButton;
-
-import net.miginfocom.swing.MigLayout;
-import plugspud.ArrowIcon;
-import plugspud.ToolButton;
 
 import com.sshtools.appframework.api.ui.AbstractSshToolsApplicationClientPanel;
 import com.sshtools.appframework.api.ui.SshToolsConnectionTab;
 import com.sshtools.appframework.util.IOUtil;
 import com.sshtools.profile.ConnectionManager;
+import com.sshtools.profile.ProfileTransport;
 import com.sshtools.profile.ResourceProfile;
 import com.sshtools.profile.SchemeHandler;
 import com.sshtools.profile.SchemeOptions;
@@ -64,9 +58,13 @@ import com.sshtools.ui.swing.FontUtil;
 import com.sshtools.ui.swing.SideBarTabber;
 import com.sshtools.ui.swing.UIUtil;
 
+import net.miginfocom.swing.MigLayout;
+import plugspud.ArrowIcon;
+import plugspud.ToolButton;
+
 /**
  * <p>
- * Swing component allows GUIcreation and editing of {@link ResrouceProfile}
+ * Swing component allows GUIcreation and editing of {@link ResourceProfile}
  * which can then be used to connect to a host.
  * </p>
  * 
@@ -76,384 +74,20 @@ import com.sshtools.ui.swing.UIUtil;
  * protocol specific options, then an appropriate GUI component will be shown so
  * the user can change those options.
  * </p>
- * 
- * @author $Author: brett $
  */
-
 @SuppressWarnings("serial")
 public class SshToolsConnectionPanel extends JPanel implements ActionListener {
-
 	public static final Dimension DEFAULT_SIZE = new Dimension(620, 600);
-	// Private instance variables
 
-	private SideBarTabber tabber;
-	private ResourceProfile profile;
-
-	private SshToolsConnectionTab[] optionalTabs;
-
-	private boolean newProfile;
-	private HoverSchemeSelectionPanel schemeSelector;
-	private ConnectionManager mgr;
-	private SchemeSettings sel;
-	private SchemeSettings[] schemes;
-
-	abstract class HoverSchemeSelectionPanel extends JPanel {
-		private JPanel schemeSelection;
-		private JPanel categorySelection;
-		private final static String debug = "";
-		private Map<String, JComponent> categories = new HashMap<String, JComponent>();
-		private Map<String, JComponent> categoryButtons = new HashMap<String, JComponent>();
-		private ArrowIcon arrowIcon;
-		private List<SchemeSettings> showSchemes = new ArrayList<SchemeSettings>();
-		private boolean inComponent = false;
-		private Timer timer;
-
-		HoverSchemeSelectionPanel() {
-			super(new MigLayout(debug + "ins 0, gap 0, hidemode 1", "[fill,grow]", ""));
-			timer = new Timer(2000, new ActionListener() {
-				public void actionPerformed(ActionEvent arg0) {
-					if (!inComponent) {
-						setCategory(sel.handler.getCategory());
-					} else {
-						timer.restart();
-					}
-				}
-			});
-			addMouseListener(new MouseAdapter() {
-
-				@Override
-				public void mouseEntered(MouseEvent e) {
-					setInComponent(true);
-				}
-
-				@Override
-				public void mouseExited(MouseEvent e) {
-					setInComponent(false);
-				}
-
-			});
-			arrowIcon = new ArrowIcon(SwingConstants.SOUTH, UIManager.getColor("Label.foreground"),
-					UIManager.getColor("Label.foreground"), UIManager.getColor("Label.foreground")) {
-				public int getIconHeight() {
-					return 12;
-				}
-
-				public int getIconWidth() {
-					return 12;
-				};
-			};
-
-			categorySelection = new JPanel();
-			categorySelection.setLayout(new MigLayout(debug + "ins 0, gap 0", "[grow,fill]", ""));
-
-			schemeSelection = new JPanel();
-			schemeSelection.setLayout(new MigLayout(debug + "ins 0, gap 0", "[grow,fill]", "[][8!]"));
-
-			add(categorySelection, "wrap, growx");
-			add(schemeSelection, "wrap, growx");
-
-			changed();
-		}
-
-		void setCategory(final String category) {
-			schemeSelection.invalidate();
-			schemeSelection.removeAll();
-
-			for (Map.Entry<String, JComponent> ent : categories.entrySet()) {
-				ent.getValue().setVisible(ent.getKey().equals(category));
-			}
-			for (Map.Entry<String, JComponent> ent : categoryButtons.entrySet()) {
-				if (ent.getKey().equals(category)) {
-					ent.getValue()
-							.setFont(FontUtil.getUIManagerButtonFontOrDefault("Button.Font").deriveFont(Font.BOLD));
-				} else {
-					ent.getValue().setFont(FontUtil.getUIManagerButtonFontOrDefault("Button.Font"));
-				}
-			}
-
-			setSchemesForCategory(category);
-
-			for (Iterator<SchemeSettings> it = showSchemes.iterator(); it.hasNext();) {
-				final SchemeSettings settings = it.next();
-				ToolButton toolButton = new ToolButton(new AbstractAction(settings.handler.getDescription()) {
-					public void actionPerformed(ActionEvent arg0) {
-						schemeSelected(settings);
-						setCategory(category);
-					}
-				}, false);
-				if (settings == sel) {
-					toolButton.setFont(FontUtil.getUIManagerButtonFontOrDefault("Button.Font").deriveFont(Font.BOLD));
-				} else {
-					toolButton.setFont(FontUtil.getUIManagerButtonFontOrDefault("Button.Font"));
-				}
-				if (it.hasNext()) {
-					schemeSelection.add(toolButton, "growx");
-				} else {
-					schemeSelection.add(toolButton, "growx, wrap");
-				}
-			}
-
-			for (Iterator<SchemeSettings> it = showSchemes.iterator(); it.hasNext();) {
-				final SchemeSettings settings = it.next();
-				JLabel c = settings == sel ? new JLabel(arrowIcon) : new JLabel();
-				c.setHorizontalAlignment(SwingConstants.CENTER);
-				if (it.hasNext()) {
-					schemeSelection.add(c, "growx");
-				} else {
-					schemeSelection.add(c, "growx, wrap");
-				}
-			}
-			schemeSelection.setVisible(categories.size() != 1 || showSchemes.size() > 1);
-
-			schemeSelection.validate();
-			schemeSelection.repaint();
-		}
-
-		private void setSchemesForCategory(final String category) {
-			showSchemes.clear();
-			for (final SchemeSettings s : schemes) {
-				final SshToolsSchemeHandler ssht = s.handler;
-				if (!ssht.isInternal() && ssht.getCategory().equals(category)) {
-					showSchemes.add(s);
-				}
-			}
-		}
-
-		abstract void schemeSelected(SchemeSettings ssht);
-
-		void changed() {
-			categorySelection.invalidate();
-			categorySelection.removeAll();
-			categories.clear();
-			categoryButtons.clear();
-			if (schemes != null) {
-				Map<String, SchemeSettings> map = new HashMap<String, SchemeSettings>();
-				for (SchemeSettings s : schemes) {
-					SshToolsSchemeHandler ssht = s.handler;
-					if (!ssht.isInternal()) {
-						map.put(ssht.getCategory(), s);
-					}
-				}
-				List<String> l = new ArrayList<String>(map.keySet());
-				Collections.sort(l);
-				for (Iterator<String> it = l.iterator(); it.hasNext();) {
-					String s = it.next();
-					final SchemeSettings ssht = map.get(s);
-					ToolButton toolButton = new ToolButton(
-							new AbstractAction(ssht.handler.getCategory(), ssht.handler.getIcon()) {
-								public void actionPerformed(ActionEvent arg0) {
-									String category = ssht.handler.getCategory();
-									setSchemesForCategory(category);
-									int idx = sel == null ? -1 : showSchemes.indexOf(sel);
-									if (idx == -1) {
-										idx = 0;
-									} else if (idx >= showSchemes.size() - 1) {
-										idx = 0;
-									} else {
-										idx++;
-									}
-									sel = showSchemes.get(idx);
-									setCategory(category);
-									schemeSelected(sel);
-								}
-							});
-					toolButton.addMouseListener(new MouseAdapter() {
-
-						public void mouseEntered(MouseEvent e) {
-							setInComponent(true);
-							setCategory(ssht.handler.getCategory());
-						}
-
-						public void mouseExited(MouseEvent e) {
-							setInComponent(false);
-						}
-					});
-					toolButton.setHideText(false);
-					if (it.hasNext()) {
-						categorySelection.add(toolButton, "growx");
-					} else {
-						categorySelection.add(toolButton, "growx, wrap");
-					}
-					categoryButtons.put(s, toolButton);
-				}
-				for (Iterator<String> it = l.iterator(); it.hasNext();) {
-					String s = it.next();
-					JLabel jLabel = new JLabel(arrowIcon);
-					if (it.hasNext()) {
-						categorySelection.add(jLabel, "growx");
-					} else {
-						categorySelection.add(jLabel, "growx, wrap");
-					}
-					categories.put(s, jLabel);
-				}
-				setCategory(
-						((SshToolsSchemeHandler) ConnectionManager.getInstance().getSchemeHandler(0)).getCategory());
-			}
-			categorySelection.setVisible(categories.size() > 1);
-			categorySelection.validate();
-			categorySelection.repaint();
-		}
-
-		void setInComponent(boolean inComponent) {
-			this.inComponent = inComponent;
-			timer.restart();
-		}
+	public static ResourceProfile<? extends ProfileTransport<?>> showConnectionDialog(Component parent,
+			ResourceProfile<? extends ProfileTransport<?>> profile, List<SshToolsConnectionTab<ProfileTransport<?>>> optionalTabs2) {
+		return showConnectionDialog(parent, profile, optionalTabs2, DEFAULT_SIZE);
 	}
 
-	/**
-	 * Creates a new SshToolsConnectionPanel object.
-	 * 
-	 * @param showConnectionTabs
-	 *            show tabs for editing the connection
-	 */
-
-	public SshToolsConnectionPanel(boolean showConnectionTabs, SshToolsConnectionTab[] optionalTabs) {
-		super(new BorderLayout());
-		this.optionalTabs = optionalTabs;
-		mgr = ConnectionManager.getInstance();
-		// Create the scheme selection panel
-		if (showConnectionTabs) {
-			add(schemeSelector = new HoverSchemeSelectionPanel() {
-
-				@Override
-				void schemeSelected(SchemeSettings ssht) {
-					sel = ssht;
-					showTabsForScheme();
-				}
-			}, BorderLayout.NORTH);
-		}
-		// Create the tabber for scheme options
-		/* tabber = new TabbedTabber(); */
-		tabber = new SideBarTabber();
-		tabber.setFixedToolBarWidth(72);
-		JPanel p = new JPanel(new GridLayout());
-		p.add(tabber.getComponent());
-		p.setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
-		add(p, BorderLayout.CENTER);
-		if (optionalTabs != null) {
-			for (int i = 0; i < optionalTabs.length; i++) {
-				tabber.addTab(optionalTabs[i]);
-			}
-		}
-		setConnectionProfile(null);
-
-	}
-
-	/**
-	 * @return
-	 */
-
-	public boolean validateTabs() {
-		return tabber.validateTabs();
-
-	}
-
-	/**
-	 * 
-	 */
-
-	public void applyTabs() {
-		SchemeSettings settings = getSelectedSchemeSettings();
-		if (settings != null) {
-			applyTabs(profile, getSelectedSchemeSettings());
-			PreferencesStore.put(AbstractSshToolsApplicationClientPanel.PREF_DEFAULT_SCHEME_NAME,
-					settings.handler.getName());
-		}
-	}
-
-	/**
-	 * 
-	 */
-
-	protected void applyTabs(ResourceProfile profile, SchemeSettings settings) {
-		if (schemeSelector != null) {
-			try {
-				profile.getURI().setScheme(settings.handler.getName());
-			} catch (MalformedURIException e) {
-			}
-			for (SchemeOptions sopt : settings.getSchemeOptions().values()) {
-				profile.setSchemeOptions(sopt);
-			}
-		}
-		tabber.applyTabs();
-	}
-
-	/**
-	 * @param tab
-	 */
-
-	public void addTab(SshToolsConnectionTab tab) {
-		tabber.addTab(tab);
-
-	}
-
-	/**
-	 * @param profile
-	 */
-
-	public void setConnectionProfile(ResourceProfile profile) {
-		// If null is supplied, the we need to create a profile
-		if (profile == null) {
-			profile = new ResourceProfile();
-			String defaultSchemeName = PreferencesStore
-					.get(AbstractSshToolsApplicationClientPanel.PREF_DEFAULT_SCHEME_NAME, "ssh2");
-			SchemeHandler defaultHandler = mgr.getSchemeHandler(defaultSchemeName);
-			if (defaultHandler == null) {
-				defaultHandler = mgr.getSchemeHandlerCount() > 0 ? mgr.getSchemeHandler(0) : null;
-			}
-			if (defaultHandler != null) {
-				try {
-					URI uri = new URI(defaultHandler.getName(), "", null, null, null);
-					profile.setURI(uri);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-			if (schemeSelector != null) {
-				schemeSelector.setEnabled(true);
-			}
-			newProfile = true;
-		} else if (schemeSelector != null) {
-			schemeSelector.setEnabled(false);
-			newProfile = false;
-		} else {
-			newProfile = false;
-		}
-		this.profile = profile;
-		doSetProfile(profile);
-		if (schemeSelector != null && sel != null) {
-			schemeSelector.setCategory(sel.handler.getCategory());
-		}
-		showTabsForScheme();
-	}
-
-	/**
-	 * @param parent
-	 * @param optionalTabs
-	 * 
-	 * @return
-	 */
-
-	public static ResourceProfile showConnectionDialog(Component parent, SshToolsConnectionTab[] optionalTabs) {
-		return showConnectionDialog(parent, null, optionalTabs);
-
-	}
-
-	/**
-	 * @param parent
-	 * @param profile
-	 * @param optionalTabs
-	 * 
-	 * @return
-	 */
-	public static ResourceProfile showConnectionDialog(Component parent, ResourceProfile profile,
-			SshToolsConnectionTab[] optionalTabs) {
-		return showConnectionDialog(parent, profile, optionalTabs, DEFAULT_SIZE);
-	}
-
-	public static ResourceProfile showConnectionDialog(Component parent, ResourceProfile profile,
-			SshToolsConnectionTab[] optionalTabs, Dimension size) {
-		final SshToolsConnectionPanel conx = new SshToolsConnectionPanel(true, optionalTabs);
+	public static ResourceProfile<? extends ProfileTransport<?>> showConnectionDialog(Component parent,
+			ResourceProfile<? extends ProfileTransport<?>> profile, List<SshToolsConnectionTab<ProfileTransport<?>>> optionalTabs2,
+			Dimension size) {
+		final SshToolsConnectionPanel conx = new SshToolsConnectionPanel(true, optionalTabs2);
 		conx.setConnectionProfile(profile);
 		profile = conx.getConnectionProfile();
 		EscapeDialog d = null;
@@ -466,51 +100,45 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 			d = new EscapeDialog((JFrame) null, Messages.getString("SshToolsConnectionPanel.ConnProfile"), true);
 		}
 		final EscapeDialog dialog = d;
-
 		class UserAction {
-
 			boolean connect;
-
 		}
-
 		final UserAction userAction = new UserAction();
 		// Create the bottom button panel
 		final JButton cancel = new JButton(Messages.getString("Cancel"));
 		cancel.setMnemonic('c');
 		cancel.addActionListener(new ActionListener() {
-
+			@Override
 			public void actionPerformed(ActionEvent evt) {
 				dialog.setVisible(false);
-
 			}
-
 		});
 		final JButton connect = new JButton(Messages.getString("Connect"));
 		connect.setMnemonic('t');
 		connect.addActionListener(new ActionListener() {
-
+			@Override
 			public void actionPerformed(ActionEvent evt) {
 				if (conx.validateTabs()) {
 					userAction.connect = true;
 					dialog.setVisible(false);
 				}
 			}
-
 		});
 		final JButton setDefault = new JButton(Messages.getString("SetDefault"));
 		setDefault.setMnemonic('s');
 		setDefault.setToolTipText(Messages.getString("SetDefault.ToolTip"));
 		setDefault.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent evt) {
 				Option[] opts = new Option[] { Option.CHOICE_YES, Option.CHOICE_NO };
-				SchemeSettings settings = (SchemeSettings) conx.sel;
+				SchemeSettings settings = conx.sel;
 				String scheme = settings.handler.getName();
 				if (TellMeAgainPane.showTellMeAgainDialog(conx, Messages.getString("Connect.SetDefault.CheckBoxText"),
 						"sshtools.warnAboutSettingDefault",
-						MessageFormat.format(Messages.getString("Connect.SetDefault.Text"), new Object[] { scheme }),
-						opts, Messages.getString("Connect.SetDefault.Title"),
+						MessageFormat.format(Messages.getString("Connect.SetDefault.Text"), new Object[] { scheme }), opts,
+						Messages.getString("Connect.SetDefault.Title"),
 						UIManager.getIcon("OptionPane.warningIcon")) != Option.CHOICE_NO) {
-					ResourceProfile profile = new ResourceProfile();
+					ResourceProfile<?> profile = new ResourceProfile<>();
 					File f = new File(SshToolsApplication.getInstance().getApplicationPreferencesDirectory(),
 							scheme + "-default.xml");
 					OutputStream out = null;
@@ -557,92 +185,148 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 		}
 		conx.applyTabs();
 		return profile;
-
 	}
+
+	public static ResourceProfile<?> showConnectionDialog(Component parent,
+			List<SshToolsConnectionTab<ProfileTransport<?>>> optionalTabs) {
+		return showConnectionDialog(parent, null, optionalTabs);
+	}
+
+	private ConnectionManager mgr;
+	private boolean newProfile;
+	private List<SshToolsConnectionTab<ProfileTransport<?>>> optionalTabs;
+	private ResourceProfile<? extends ProfileTransport<?>> profile;
+	private SchemeSettings[] schemes;
+	private HoverSchemeSelectionPanel schemeSelector;
+	private SchemeSettings sel;
+	private SideBarTabber tabber;
 
 	/**
-	 * @return
-	 */
-
-	private ResourceProfile getConnectionProfile() {
-		return profile;
-
-	}
-
-	/*
-	 * (non-Javadoc)
+	 * Creates a new SshToolsConnectionPanel object.
 	 * 
-	 * @see
-	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 * @param showConnectionTabs show tabs for editing the connection
 	 */
-
-	public void actionPerformed(ActionEvent evt) {
-		showTabsForScheme();
-
-	}
-
-	private SchemeSettings getSelectedSchemeSettings() {
-		return sel;
-
-	}
-
-	/*
-	 * Show the appropriate tabs for the selected scheme
-	 */
-
-	private void showTabsForScheme() {
-		SchemeSettings selected = getSelectedSchemeSettings();
-
-		invalidate();
-		tabber.removeAllTabs();
-		if (profile != null) {
-			List<SshToolsConnectionTab> tabs = new ArrayList<SshToolsConnectionTab>();
-			if (selected != null && selected.getTabs() != null) {
-				profile.setURI(selected.uri);
-				for (int i = 0; i < selected.getTabs().length; i++) {
-					SshToolsConnectionTab tab = selected.getTabs()[i];
-					tabs.add(tab);
-					tabber.addTab(tab);
+	public SshToolsConnectionPanel(boolean showConnectionTabs, List<SshToolsConnectionTab<ProfileTransport<?>>> optionalTabs) {
+		super(new BorderLayout());
+		this.optionalTabs = optionalTabs;
+		mgr = ConnectionManager.getInstance();
+		if (showConnectionTabs) {
+			add(schemeSelector = new HoverSchemeSelectionPanel() {
+				@Override
+				void schemeSelected(SchemeSettings ssht) {
+					sel = ssht;
+					showTabsForScheme();
 				}
-			}
-			if (optionalTabs != null) {
-				for (int i = 0; i < optionalTabs.length; i++) {
-					SshToolsConnectionTab tab = optionalTabs[i];
-					tabs.add(tab);
-					tabber.addTab(tab);
-				}
-			}
-			for (SshToolsConnectionTab t : tabs) {
-				t.setConnectionProfile(profile);
-			}
-			if (tabber.getTabCount() > 0) {
-				tabber.getTabAt(0).getTabComponent().requestFocusInWindow();
+			}, BorderLayout.NORTH);
+		}
+		tabber = new SideBarTabber();
+		tabber.setFixedToolBarWidth(72);
+		JPanel p = new JPanel(new GridLayout());
+		p.add(tabber.getComponent());
+		p.setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
+		add(p, BorderLayout.CENTER);
+		if (optionalTabs != null) {
+			for (SshToolsConnectionTab<ProfileTransport<?>> tab : optionalTabs) {
+				tabber.addTab(tab);
 			}
 		}
-		validate();
-		repaint();
-
+		setConnectionProfile(null);
 	}
 
-	void doSetProfile(ResourceProfile profile) {
+	@Override
+	public void actionPerformed(ActionEvent evt) {
+		showTabsForScheme();
+	}
+
+	public void addTab(SshToolsConnectionTab<?> tab) {
+		tabber.addTab(tab);
+	}
+
+	public void applyTabs() {
+		SchemeSettings settings = getSelectedSchemeSettings();
+		if (settings != null) {
+			applyTabs(profile, getSelectedSchemeSettings());
+			PreferencesStore.put(AbstractSshToolsApplicationClientPanel.PREF_DEFAULT_SCHEME_NAME, settings.handler.getName());
+		}
+	}
+
+	public ResourceProfile<? extends ProfileTransport<?>> getConnectionProfile() {
+		return profile;
+	}
+
+	public void setConnectionProfile(ResourceProfile<? extends ProfileTransport<?>> profile) {
+		// If null is supplied, the we need to create a profile
+		if (profile == null) {
+			profile = new ResourceProfile<>();
+			String defaultSchemeName = PreferencesStore.get(AbstractSshToolsApplicationClientPanel.PREF_DEFAULT_SCHEME_NAME,
+					"ssh2");
+			SchemeHandler<?> defaultHandler = mgr.getSchemeHandler(defaultSchemeName);
+			if (defaultHandler == null) {
+				defaultHandler = mgr.getSchemeHandlerCount() > 0 ? mgr.getSchemeHandler(0) : null;
+			}
+			if (defaultHandler != null) {
+				try {
+					URI uri = new URI(defaultHandler.getName(), "", null, null, null);
+					profile.setURI(uri);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			if (schemeSelector != null) {
+				schemeSelector.setEnabled(true);
+			}
+			newProfile = true;
+		} else if (schemeSelector != null) {
+			schemeSelector.setEnabled(false);
+			newProfile = false;
+		} else {
+			newProfile = false;
+		}
+		this.profile = profile;
+		doSetProfile(profile);
+		if (schemeSelector != null && sel != null) {
+			schemeSelector.setCategory(sel.handler.getCategory());
+		}
+		showTabsForScheme();
+	}
+
+	public boolean validateTabs() {
+		return tabber.validateTabs();
+	}
+
+	protected void applyTabs(ResourceProfile<?> profile, SchemeSettings settings) {
+		if (schemeSelector != null) {
+			try {
+				profile.getURI().setScheme(settings.handler.getName());
+			} catch (MalformedURIException e) {
+			}
+			for (SchemeOptions sopt : settings.getSchemeOptions().values()) {
+				profile.setSchemeOptions(sopt);
+			}
+		}
+		tabber.applyTabs();
+	}
+
+	void doSetProfile(ResourceProfile<? extends ProfileTransport<?>> profile2) {
 		List<SchemeSettings> v = new ArrayList<SchemeSettings>();
 		sel = null;
 		if (newProfile) {
 			for (int i = 0; i < mgr.getSchemeHandlerCount(); i++) {
-				SchemeHandler handler = mgr.getSchemeHandler(i);
+				@SuppressWarnings("unchecked")
+				SchemeHandler<ProfileTransport<?>> handler = mgr.getSchemeHandler(i);
 				if (!(handler instanceof SshToolsSchemeHandler)) {
-					/* DEBUG */System.err.println(
-							"WARNING! SchemeHandler is not an instance of SshToolsSchemeHandler. Will be ignored.");
+					/* DEBUG */System.err
+							.println("WARNING! SchemeHandler is not an instance of SshToolsSchemeHandler. Will be ignored.");
 				} else {
-					SchemeSettings settings = new SchemeSettings((SshToolsSchemeHandler) handler);
-					if (handler.getName().equals(profile.getURI().getScheme())) {
+					SchemeSettings settings = new SchemeSettings((SshToolsSchemeHandler<ProfileTransport<?>>) handler);
+					if (handler.getName().equals(profile2.getURI().getScheme())) {
 						sel = settings;
 					}
 					v.add(settings);
 				}
 			}
 		} else {
-			SchemeSettings settings = new SchemeSettings(profile);
+			SchemeSettings settings = new SchemeSettings(profile2);
 			sel = settings;
 			v.add(settings);
 		}
@@ -656,36 +340,293 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 			schemeSelector.changed();
 		}
 		if (optionalTabs != null) {
-			for (int i = 0; i < optionalTabs.length; i++) {
-				optionalTabs[i].setConnectionProfile(profile);
+			for (SshToolsConnectionTab<ProfileTransport<?>> t : optionalTabs) {
+				@SuppressWarnings("unchecked")
+				// TODO ugh ... no idea
+				ResourceProfile<ProfileTransport<?>> p2 = (ResourceProfile<ProfileTransport<?>>) profile;
+				t.setConnectionProfile(p2);
 			}
 		}
 	}
 
-	class SchemeSettings {
+	private SchemeSettings getSelectedSchemeSettings() {
+		return sel;
+	}
 
-		SshToolsSchemeHandler handler;
-		Map<Class<? extends SchemeOptions>, SchemeOptions> options = new HashMap<Class<? extends SchemeOptions>, SchemeOptions>();
-		SshToolsConnectionTab[] tabs;
-		URI uri;
+	private void showTabsForScheme() {
+		SchemeSettings selected = getSelectedSchemeSettings();
+		invalidate();
+		tabber.removeAllTabs();
+		if (profile != null) {
+			List<SshToolsConnectionTab<? extends ProfileTransport<?>>> tabs = new ArrayList<>();
+			if (selected != null && selected.getTabs() != null) {
+				profile.setURI(selected.uri);
+				for (SshToolsConnectionTab<?> tab : selected.getTabs()) {
+					tabs.add(tab);
+					tabber.addTab(tab);
+				}
+			}
+			if (optionalTabs != null) {
+				for (SshToolsConnectionTab<ProfileTransport<?>> tab : optionalTabs) {
+					tabs.add(tab);
+					tabber.addTab(tab);
+				}
+			}
+			for (SshToolsConnectionTab<? extends ProfileTransport<?>> t : tabs) {
+				@SuppressWarnings("unchecked")
+				// TODO ugh ... no idea
+				ResourceProfile<ProfileTransport<?>> p2 = (ResourceProfile<ProfileTransport<?>>) profile;
+				t.setConnectionProfile(p2);
+			}
+			if (tabber.getTabCount() > 0) {
+				tabber.getTabAt(0).getTabComponent().requestFocusInWindow();
+			}
+		}
+		validate();
+		repaint();
+	}
 
-		SchemeSettings(SshToolsSchemeHandler handler)
+	abstract class HoverSchemeSelectionPanel extends JPanel {
+		private final static String debug = "";
+		private ArrowIcon arrowIcon;
+		private Map<String, JComponent> categories = new HashMap<String, JComponent>();
+		private Map<String, JComponent> categoryButtons = new HashMap<String, JComponent>();
+		private JPanel categorySelection;
+		private boolean inComponent = false;
+		private JPanel schemeSelection;
+		private List<SchemeSettings> showSchemes = new ArrayList<SchemeSettings>();
+		private Timer timer;
 
-				throws IllegalArgumentException {
-			this.handler = handler;
+		HoverSchemeSelectionPanel() {
+			super(new MigLayout(debug + "ins 0, gap 0, hidemode 1", "[fill,grow]", ""));
+			timer = new Timer(2000, new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					if (!inComponent) {
+						setCategory(sel.handler.getCategory());
+					} else {
+						timer.restart();
+					}
+				}
+			});
+			addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseEntered(MouseEvent e) {
+					setInComponent(true);
+				}
 
+				@Override
+				public void mouseExited(MouseEvent e) {
+					setInComponent(false);
+				}
+			});
+			arrowIcon = new ArrowIcon(SwingConstants.SOUTH, UIManager.getColor("Label.foreground"),
+					UIManager.getColor("Label.foreground"), UIManager.getColor("Label.foreground")) {
+				@Override
+				public int getIconHeight() {
+					return 12;
+				}
+
+				@Override
+				public int getIconWidth() {
+					return 12;
+				};
+			};
+			categorySelection = new JPanel();
+			categorySelection.setLayout(new MigLayout(debug + "ins 0, gap 0", "[grow,fill]", ""));
+			schemeSelection = new JPanel();
+			schemeSelection.setLayout(new MigLayout(debug + "ins 0, gap 0", "[grow,fill]", "[][8!]"));
+			add(categorySelection, "wrap, growx");
+			add(schemeSelection, "wrap, growx");
+			changed();
 		}
 
-		SchemeSettings(ResourceProfile profile) throws IllegalArgumentException {
-			handler = (SshToolsSchemeHandler) ConnectionManager.getInstance()
-					.getSchemeHandler(profile.getURI().getScheme());
-			uri = profile.getURI();
+		void changed() {
+			categorySelection.invalidate();
+			categorySelection.removeAll();
+			categories.clear();
+			categoryButtons.clear();
+			if (schemes != null) {
+				Map<String, SchemeSettings> map = new HashMap<String, SchemeSettings>();
+				for (SchemeSettings s : schemes) {
+					SshToolsSchemeHandler<?> ssht = s.handler;
+					if (!ssht.isInternal()) {
+						map.put(ssht.getCategory(), s);
+					}
+				}
+				List<String> l = new ArrayList<String>(map.keySet());
+				Collections.sort(l);
+				for (Iterator<String> it = l.iterator(); it.hasNext();) {
+					String s = it.next();
+					final SchemeSettings ssht = map.get(s);
+					ToolButton toolButton = new ToolButton(new AbstractAction(ssht.handler.getCategory(), ssht.handler.getIcon()) {
+						@Override
+						public void actionPerformed(ActionEvent arg0) {
+							String category = ssht.handler.getCategory();
+							setSchemesForCategory(category);
+							int idx = sel == null ? -1 : showSchemes.indexOf(sel);
+							if (idx == -1) {
+								idx = 0;
+							} else if (idx >= showSchemes.size() - 1) {
+								idx = 0;
+							} else {
+								idx++;
+							}
+							sel = showSchemes.get(idx);
+							setCategory(category);
+							schemeSelected(sel);
+						}
+					});
+					toolButton.addMouseListener(new MouseAdapter() {
+						@Override
+						public void mouseEntered(MouseEvent e) {
+							setInComponent(true);
+							setCategory(ssht.handler.getCategory());
+						}
+
+						@Override
+						public void mouseExited(MouseEvent e) {
+							setInComponent(false);
+						}
+					});
+					toolButton.setHideText(false);
+					if (it.hasNext()) {
+						categorySelection.add(toolButton, "growx");
+					} else {
+						categorySelection.add(toolButton, "growx, wrap");
+					}
+					categoryButtons.put(s, toolButton);
+				}
+				for (Iterator<String> it = l.iterator(); it.hasNext();) {
+					String s = it.next();
+					JLabel jLabel = new JLabel(arrowIcon);
+					if (it.hasNext()) {
+						categorySelection.add(jLabel, "growx");
+					} else {
+						categorySelection.add(jLabel, "growx, wrap");
+					}
+					categories.put(s, jLabel);
+				}
+				setCategory(((SshToolsSchemeHandler<?>) ConnectionManager.getInstance().getSchemeHandler(0)).getCategory());
+			}
+			categorySelection.setVisible(categories.size() > 1);
+			categorySelection.validate();
+			categorySelection.repaint();
+		}
+
+		abstract void schemeSelected(SchemeSettings ssht);
+
+		void setCategory(final String category) {
+			schemeSelection.invalidate();
+			schemeSelection.removeAll();
+			for (Map.Entry<String, JComponent> ent : categories.entrySet()) {
+				ent.getValue().setVisible(ent.getKey().equals(category));
+			}
+			for (Map.Entry<String, JComponent> ent : categoryButtons.entrySet()) {
+				if (ent.getKey().equals(category)) {
+					ent.getValue().setFont(FontUtil.getUIManagerButtonFontOrDefault("Button.Font").deriveFont(Font.BOLD));
+				} else {
+					ent.getValue().setFont(FontUtil.getUIManagerButtonFontOrDefault("Button.Font"));
+				}
+			}
+			setSchemesForCategory(category);
+			for (Iterator<SchemeSettings> it = showSchemes.iterator(); it.hasNext();) {
+				final SchemeSettings settings = it.next();
+				ToolButton toolButton = new ToolButton(new AbstractAction(settings.handler.getDescription()) {
+					@Override
+					public void actionPerformed(ActionEvent arg0) {
+						schemeSelected(settings);
+						setCategory(category);
+					}
+				}, false);
+				if (settings == sel) {
+					toolButton.setFont(FontUtil.getUIManagerButtonFontOrDefault("Button.Font").deriveFont(Font.BOLD));
+				} else {
+					toolButton.setFont(FontUtil.getUIManagerButtonFontOrDefault("Button.Font"));
+				}
+				if (it.hasNext()) {
+					schemeSelection.add(toolButton, "growx");
+				} else {
+					schemeSelection.add(toolButton, "growx, wrap");
+				}
+			}
+			for (Iterator<SchemeSettings> it = showSchemes.iterator(); it.hasNext();) {
+				final SchemeSettings settings = it.next();
+				JLabel c = settings == sel ? new JLabel(arrowIcon) : new JLabel();
+				c.setHorizontalAlignment(SwingConstants.CENTER);
+				if (it.hasNext()) {
+					schemeSelection.add(c, "growx");
+				} else {
+					schemeSelection.add(c, "growx, wrap");
+				}
+			}
+			schemeSelection.setVisible(categories.size() != 1 || showSchemes.size() > 1);
+			schemeSelection.validate();
+			schemeSelection.repaint();
+		}
+
+		void setInComponent(boolean inComponent) {
+			this.inComponent = inComponent;
+			timer.restart();
+		}
+
+		private void setSchemesForCategory(final String category) {
+			showSchemes.clear();
+			for (final SchemeSettings s : schemes) {
+				final SshToolsSchemeHandler<?> ssht = s.handler;
+				if (!ssht.isInternal() && ssht.getCategory().equals(category)) {
+					showSchemes.add(s);
+				}
+			}
+		}
+	}
+
+	class SchemeComparator implements Comparator<SchemeSettings> {
+		@Override
+		public int compare(SchemeSettings handler1, SchemeSettings handler2) {
+			int i1 = handler1.handler.getCategory() == null && handler2.handler.getCategory() != null ? -1
+					: (handler2.handler.getCategory() == null && handler1.handler.getCategory() != null ? 1
+							: handler1.handler.getCategory().compareTo(handler2.handler.getCategory()));
+			return i1 == 0 ? new Integer(handler1.handler.getWeight()).compareTo(new Integer(handler2.handler.getWeight())) : i1;
+		}
+	}
+
+	class SchemeSettings {
+		SshToolsSchemeHandler<ProfileTransport<?>> handler;
+		Map<Class<? extends SchemeOptions>, SchemeOptions> options = new HashMap<Class<? extends SchemeOptions>, SchemeOptions>();
+		List<SshToolsConnectionTab<? extends ProfileTransport<?>>> tabs;
+		URI uri;
+
+		@SuppressWarnings("unchecked")
+		SchemeSettings(ResourceProfile<? extends ProfileTransport<?>> profile2) throws IllegalArgumentException {
+			handler = (SshToolsSchemeHandler<ProfileTransport<?>>) ConnectionManager.getInstance()
+					.getSchemeHandler(profile2.getURI().getScheme());
+			uri = profile2.getURI();
 			options.clear();
 			addProfileSchemes();
 			tabs = handler.createTabs();
 		}
 
-		@SuppressWarnings("unchecked")
+		SchemeSettings(SshToolsSchemeHandler<ProfileTransport<?>> handler) throws IllegalArgumentException {
+			this.handler = handler;
+		}
+
+		public Map<Class<? extends SchemeOptions>, SchemeOptions> getSchemeOptions() {
+			checkLoaded();
+			return options;
+		}
+
+		public List<SshToolsConnectionTab<? extends ProfileTransport<?>>> getTabs() {
+			checkLoaded();
+			return tabs;
+		}
+
+		private void addProfileSchemes() {
+			for (SchemeOptions s : profile.getSchemeOptionsList()) {
+				options.put(s.getClass(), s);
+			}
+		}
+
 		private void checkLoaded() {
 			if (tabs == null) {
 				tabs = handler.createTabs();
@@ -711,48 +652,19 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 					}
 				}
 				addProfileSchemes();
-				for (SchemeOptions s : (List<SchemeOptions>) handler.createMultipleSchemeOptions()) {
+				for (SchemeOptions s : handler.createMultipleSchemeOptions()) {
 					if (!options.containsKey(s.getClass())) {
 						options.put(s.getClass(), s);
 						profile.setSchemeOptions(s);
 					}
 				}
-
-				for (int j = 0; j < tabs.length; j++) {
-					tabs[j].setConnectionProfile(profile);
+				for (SshToolsConnectionTab<? extends ProfileTransport<?>> t : tabs) {
+					@SuppressWarnings("unchecked")
+					// TODO ugh ... no idea
+					ResourceProfile<ProfileTransport<?>> p2 = (ResourceProfile<ProfileTransport<?>>) profile;
+					t.setConnectionProfile(p2);
 				}
 			}
 		}
-
-		@SuppressWarnings("unchecked")
-		private void addProfileSchemes() {
-			for (SchemeOptions s : (List<SchemeOptions>) profile.getSchemeOptionsList()) {
-				options.put(s.getClass(), s);
-			}
-		}
-
-		public Map<Class<? extends SchemeOptions>, SchemeOptions> getSchemeOptions() {
-			checkLoaded();
-			return options;
-		}
-
-		public SshToolsConnectionTab[] getTabs() {
-			checkLoaded();
-			return tabs;
-		}
-
-	}
-
-	class SchemeComparator implements Comparator<SchemeSettings> {
-
-		public int compare(SchemeSettings handler1, SchemeSettings handler2) {
-			int i1 = handler1.handler.getCategory() == null && handler2.handler.getCategory() != null ? -1
-					: (handler2.handler.getCategory() == null && handler1.handler.getCategory() != null ? 1
-							: handler1.handler.getCategory().compareTo(handler2.handler.getCategory()));
-			return i1 == 0
-					? new Integer(handler1.handler.getWeight()).compareTo(new Integer(handler2.handler.getWeight()))
-					: i1;
-		}
-
 	}
 }

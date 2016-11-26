@@ -41,7 +41,7 @@ public interface ProfileTransport<S> {
 	 * @throws AuthenticationException
 	 *             if authentication fails
 	 */
-	boolean connect(ResourceProfile profile, Object parentUIComponent) throws ProfileException, AuthenticationException;
+	boolean connect(ResourceProfile<? extends ProfileTransport<S>> profile, Object parentUIComponent) throws ProfileException, AuthenticationException;
 
 	/**
 	 * Disconnect from the currently connected resource. If a connection is not
@@ -91,7 +91,7 @@ public interface ProfileTransport<S> {
 	 *
 	 * @return profile
 	 */
-	ResourceProfile getProfile();
+	ResourceProfile<? extends ProfileTransport<S>> getProfile();
 
 	/**
 	 * If the host has provided some information about itself, this method will
@@ -145,4 +145,5 @@ public interface ProfileTransport<S> {
 	 *             on any errors that may occur during cloning.
 	 */
 	ProfileTransport<S> cloneTransport(S session) throws CloneNotSupportedException, ProfileException;
+
 }

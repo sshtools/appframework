@@ -2,20 +2,23 @@
  */
 package com.sshtools.appframework.ui;
 
+import java.util.List;
+
 import javax.swing.Icon;
 
 import com.sshtools.appframework.api.ui.SshToolsConnectionTab;
+import com.sshtools.profile.ProfileTransport;
 import com.sshtools.profile.SchemeHandler;
 
 /**
  *
  */
-public abstract class SshToolsSchemeHandler extends SchemeHandler {
+public abstract class SshToolsSchemeHandler<T extends ProfileTransport<?>> extends SchemeHandler<T> {
 
 	private String category;
-	private int weight;
 	private Icon icon;
 	private boolean internal;
+	private int weight;
 
 	/**
 	 * Construct a new SchemeHandler
@@ -34,20 +37,7 @@ public abstract class SshToolsSchemeHandler extends SchemeHandler {
 		this.internal = internal;
 	}
 
-	public abstract SshToolsConnectionTab[] createTabs();
-
-	/**
-	 * The scheme may return a weight to determine its position in a list of
-	 * schemes. This may be used for example in a graphical environment where
-	 * the user must select a scheme from a list. The lower the number, the
-	 * higher up the list the scheme occurs. If two schemes have the same
-	 * weight, the result is unpredicatable.
-	 * 
-	 * @return weight
-	 */
-	public int getWeight() {
-		return weight;
-	}
+	public abstract List<SshToolsConnectionTab<? extends ProfileTransport<?>>> createTabs();
 
 	/**
 	 * Get the category of scheme.
@@ -65,6 +55,19 @@ public abstract class SshToolsSchemeHandler extends SchemeHandler {
 	 */
 	public Icon getIcon() {
 		return icon;
+	}
+
+	/**
+	 * The scheme may return a weight to determine its position in a list of
+	 * schemes. This may be used for example in a graphical environment where
+	 * the user must select a scheme from a list. The lower the number, the
+	 * higher up the list the scheme occurs. If two schemes have the same
+	 * weight, the result is unpredicatable.
+	 * 
+	 * @return weight
+	 */
+	public int getWeight() {
+		return weight;
 	}
 
 	/**

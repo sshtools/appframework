@@ -13,10 +13,10 @@ import com.sshtools.profile.ResourceProfile;
  * {@link VirtualSessionManager} implementation that manages all of the virtual
  * terminals.
  * 
- * @param S 
+ * @param S
  */
 
-public interface VirtualSession<S> {
+public interface VirtualSession<T extends ProfileTransport<?>, M extends VirtualSessionManager<? extends VirtualSession<?,?>>> {
 
 	/**
 	 * Reset the session back to its initial state (e.g. clear the scree, clear
@@ -44,10 +44,10 @@ public interface VirtualSession<S> {
 	 * Initialise the virtual session. Called after it has been added to the
 	 * virtual session manager.
 	 * 
-	 * @param virtualSessionManager
-	 *            the virtual session manager session has been added to
+	 * @param virtualSessionManager the virtual session manager session has been
+	 *            added to
 	 */
-	void init(VirtualSessionManager virtualSessionManager);
+	void init(M virtualSessionManager);
 
 	/**
 	 * Get the virtual session manager. Will return <code>null</code> until
@@ -55,17 +55,15 @@ public interface VirtualSession<S> {
 	 * 
 	 * @return the virtual session manager session has been added to
 	 */
-	VirtualSessionManager getVirtualSessionManager();
+	M getVirtualSessionManager();
 
 	/**
 	 * Disconnect this session from the host it is connected to. If
 	 * <code>true</code> is passed for the <code>doDisconnect</code> value, the
 	 * the transport will also be disconnected.
 	 * 
-	 * @param doDisconnect
-	 *            disconnect the transport
-	 * @param exception
-	 *            cause if any
+	 * @param doDisconnect disconnect the transport
+	 * @param exception cause if any
 	 */
 	void disconnect(boolean doDisconnect, Throwable exception);
 
@@ -74,8 +72,7 @@ public interface VirtualSession<S> {
 	 * events such as connection made, disconnected, resizes, data sent and
 	 * received etc.
 	 * 
-	 * @param listener
-	 *            listener to add
+	 * @param listener listener to add
 	 */
 	void addVirtualSessionListener(VirtualSessionListener listener);
 
@@ -84,24 +81,20 @@ public interface VirtualSession<S> {
 	 * such as connection made, disconnected, resizes, data sent and received
 	 * etc.
 	 * 
-	 * @param listener
-	 *            listener to remove
+	 * @param listener listener to remove
 	 */
 	void removeVirtualSessionListener(VirtualSessionListener listener);
 
 	/**
 	 * Connect the session to the streams provided by the transport.
 	 * 
-	 * @param transport
-	 *            transport
-	 * @throws IOException
-	 *             there may be some I/O involved in connecting the session. An
-	 *             exception will be thrown if an error occurs
-	 * @throws AuthenticationException
-	 *             connecting a session might involve secondary authentication.
-	 *             This will be thrown if that fails
+	 * @param transport transport
+	 * @throws IOException there may be some I/O involved in connecting the
+	 *             session. An exception will be thrown if an error occurs
+	 * @throws AuthenticationException connecting a session might involve
+	 *             secondary authentication. This will be thrown if that fails
 	 */
-	void connect(ProfileTransport<S> transport) throws IOException, AuthenticationException;
+	void connect(T transport) throws IOException, AuthenticationException;
 
 	/**
 	 * Get the transport currently in use. This will be set after
@@ -110,7 +103,7 @@ public interface VirtualSession<S> {
 	 * 
 	 * @return transport
 	 */
-	ProfileTransport<S> getTransport();
+	T getTransport();
 
 	/**
 	 * Prior to connection, and when the user applies connection profiles, this
@@ -119,8 +112,7 @@ public interface VirtualSession<S> {
 	 * a terminal like implementation would set the background, foreground,
 	 * cursor style etc.
 	 * 
-	 * @param profile
-	 *            profile to configure virtual session from
+	 * @param profile profile to configure virtual session from
 	 */
-	void setVirtualSessionProperties(ResourceProfile profile);
+	void setVirtualSessionProperties(ResourceProfile<T> profile);
 }
