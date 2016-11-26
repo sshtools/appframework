@@ -7,6 +7,8 @@ package com.sshtools.profile;
  */
 public class AuthenticationException extends Exception {
 
+	private static final long serialVersionUID = -437309166509232776L;
+
 	public AuthenticationException() {
 		super();
 	}

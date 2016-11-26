@@ -80,7 +80,8 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 	public static final Dimension DEFAULT_SIZE = new Dimension(620, 600);
 
 	public static ResourceProfile<? extends ProfileTransport<?>> showConnectionDialog(Component parent,
-			ResourceProfile<? extends ProfileTransport<?>> profile, List<SshToolsConnectionTab<ProfileTransport<?>>> optionalTabs2) {
+			ResourceProfile<? extends ProfileTransport<?>> profile,
+			List<SshToolsConnectionTab<ProfileTransport<?>>> optionalTabs2) {
 		return showConnectionDialog(parent, profile, optionalTabs2, DEFAULT_SIZE);
 	}
 
@@ -313,7 +314,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 		if (newProfile) {
 			for (int i = 0; i < mgr.getSchemeHandlerCount(); i++) {
 				@SuppressWarnings("unchecked")
-				SchemeHandler<ProfileTransport<?>> handler = mgr.getSchemeHandler(i);
+				SchemeHandler<ProfileTransport<?>> handler = (SchemeHandler<ProfileTransport<?>>) mgr.getSchemeHandler(i);
 				if (!(handler instanceof SshToolsSchemeHandler)) {
 					/* DEBUG */System.err
 							.println("WARNING! SchemeHandler is not an instance of SshToolsSchemeHandler. Will be ignored.");
@@ -353,6 +354,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 		return sel;
 	}
 
+	@SuppressWarnings("unchecked")
 	private void showTabsForScheme() {
 		SchemeSettings selected = getSelectedSchemeSettings();
 		invalidate();
@@ -372,11 +374,9 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 					tabber.addTab(tab);
 				}
 			}
-			for (SshToolsConnectionTab<? extends ProfileTransport<?>> t : tabs) {
-				@SuppressWarnings("unchecked")
-				// TODO ugh ... no idea
-				ResourceProfile<ProfileTransport<?>> p2 = (ResourceProfile<ProfileTransport<?>>) profile;
-				t.setConnectionProfile(p2);
+			for (@SuppressWarnings("rawtypes")
+			SshToolsConnectionTab t : tabs) {
+				t.setConnectionProfile(profile);
 			}
 			if (tabber.getTabCount() > 0) {
 				tabber.getTabAt(0).getTabComponent().requestFocusInWindow();
@@ -627,6 +627,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 			}
 		}
 
+		@SuppressWarnings("unchecked")
 		private void checkLoaded() {
 			if (tabs == null) {
 				tabs = handler.createTabs();
@@ -658,11 +659,9 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 						profile.setSchemeOptions(s);
 					}
 				}
-				for (SshToolsConnectionTab<? extends ProfileTransport<?>> t : tabs) {
-					@SuppressWarnings("unchecked")
-					// TODO ugh ... no idea
-					ResourceProfile<ProfileTransport<?>> p2 = (ResourceProfile<ProfileTransport<?>>) profile;
-					t.setConnectionProfile(p2);
+				for (@SuppressWarnings("rawtypes")
+				SshToolsConnectionTab t : tabs) {
+					t.setConnectionProfile(profile);
 				}
 			}
 		}

@@ -173,7 +173,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 		ConnectionManager mgr = ConnectionManager.getInstance();
 		if (uri != null) {
 			@SuppressWarnings("unchecked")
-			SchemeHandler<T> handler = mgr.getSchemeHandler(uri.getScheme());
+			SchemeHandler<T> handler = (SchemeHandler<T>) mgr.getSchemeHandler(uri.getScheme());
 			if (handler == null) {
 				throw new ProfileException("Could not locate SchemeHandler for scheme name " + uri.getScheme());
 			}
