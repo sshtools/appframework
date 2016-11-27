@@ -98,12 +98,11 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	private static SshToolsApplication instance;
 
 	static {
-//		System.setProperty("java.util.prefs.PreferencesFactory",
-//				FilePreferencesFactory.class.getName());
+		// System.setProperty("java.util.prefs.PreferencesFactory",
+		// FilePreferencesFactory.class.getName());
 
 		// Add the LAFS already known to Java
-		addLAF(new UIManager.LookAndFeelInfo("Default", UIManager
-				.getLookAndFeel().getClass().getName()));
+		addLAF(new UIManager.LookAndFeelInfo("Default", UIManager.getLookAndFeel().getClass().getName()));
 
 		UIManager.LookAndFeelInfo[] i;
 		try {
@@ -114,14 +113,9 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		for (int j = 0; j < i.length; j++) {
 			addLAF(i[j]);
 		}
-		addLAF(new UIManager.LookAndFeelInfo("Metal",
-				"javax.swing.plaf.metal.MetalLookAndFeel"));
-		addLAF(new UIManager.LookAndFeelInfo("Native",
-				UIManager.getSystemLookAndFeelClassName()));
-		addLAF(new UIManager.LookAndFeelInfo("Cross Platform",
-				UIManager.getCrossPlatformLookAndFeelClassName()));
-		
-		System.setProperty("jfreedesktop.alwaysUseDefaultTheme", String.valueOf(!PreferencesStore.getBoolean(SshToolsApplication.PREF_USE_SYSTEM_ICON_THEME, true)));
+		addLAF(new UIManager.LookAndFeelInfo("Metal", "javax.swing.plaf.metal.MetalLookAndFeel"));
+		addLAF(new UIManager.LookAndFeelInfo("Native", UIManager.getSystemLookAndFeelClassName()));
+		addLAF(new UIManager.LookAndFeelInfo("Cross Platform", UIManager.getCrossPlatformLookAndFeelClassName()));
 
 	}
 
@@ -129,8 +123,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		for (UIManager.LookAndFeelInfo info : LAFS) {
 			if (info.getName().equals(laf.getName())) {
 				try {
-					laf.getClass().getClassLoader()
-							.loadClass(info.getClassName());
+					laf.getClass().getClassLoader().loadClass(info.getClassName());
 				} catch (Throwable t) {
 				}
 				return;
@@ -140,8 +133,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	}
 
 	public static UIManager.LookAndFeelInfo[] getAllLookAndFeelInfo() {
-		UIManager.LookAndFeelInfo[] i = new UIManager.LookAndFeelInfo[LAFS
-				.size()];
+		UIManager.LookAndFeelInfo[] i = new UIManager.LookAndFeelInfo[LAFS.size()];
 		LAFS.toArray(i);
 		return i;
 	}
@@ -166,10 +158,8 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		File a = app.getApplicationPreferencesDirectory();
 		if (a != null) {
 			try {
-				File f = new File(app.getApplicationPreferencesDirectory(),
-						app.getApplicationName() + ".mru");
-				PrintWriter w = new PrintWriter(new OutputStreamWriter(
-						new FileOutputStream(f), "UTF-8"), true);
+				File f = new File(app.getApplicationPreferencesDirectory(), app.getApplicationName() + ".mru");
+				PrintWriter w = new PrintWriter(new OutputStreamWriter(new FileOutputStream(f), "UTF-8"), true);
 				try {
 					w.println(mruModel.getMRUList().toString());
 				} finally {
@@ -195,22 +185,12 @@ public abstract class SshToolsApplication implements PluginHostContext {
 
 	protected int reusePort = -1;
 
-	public SshToolsApplication(
-			Class<? extends SshToolsApplicationPanel> panelClass,
-			Class<? extends SshToolsApplicationContainer> defaultContainerClass)
-			throws IOException, ParseException {
-		IconStore store = IconStore.getInstance();
-		preConfigureIconStore(store);
-		store.configure(this);
-		postConfigureIconStore(store);
+	public SshToolsApplication(Class<? extends SshToolsApplicationPanel> panelClass,
+			Class<? extends SshToolsApplicationContainer> defaultContainerClass) throws IOException, ParseException {
 
 		this.panelClass = panelClass;
 		this.defaultContainerClass = defaultContainerClass;
 		// this.lic = new LicenseVerification(this);
-
-		additionalOptionsTabs = new ArrayList<OptionsTab>();
-		loadMRU();
-		pluginManager = new PluginManager();
 
 	}
 
@@ -235,19 +215,16 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		options.addOption(help);
 		if (isReuseCapable()) {
 			OptionBuilder.withLongOpt("nodaemon");
-			OptionBuilder
-					.withDescription("do not start the instance re-use daemon");
+			OptionBuilder.withDescription("do not start the instance re-use daemon");
 			Option noListen = OptionBuilder.create("d");
 			options.addOption(noListen);
 		}
 		OptionBuilder.withLongOpt("--reusePort");
 		OptionBuilder.withArgName("port");
 		OptionBuilder.hasArg();
-		OptionBuilder
-				.withDescription("port on which to listen for re-use requests");
+		OptionBuilder.withDescription("port on which to listen for re-use requests");
 		OptionBuilder.create("r");
-		options.addOption("e", "noOptionsAction", false,
-				"dont allow the user to change options.");
+		options.addOption("e", "noOptionsAction", false, "dont allow the user to change options.");
 	}
 
 	public abstract boolean canUpgrade();
@@ -257,16 +234,14 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		if (canClose) {
 			if (container.closeContainer()) {
 				containers.remove(container);
-				if (!PreferencesStore.getBoolean(PREF_STAY_RUNNING, false)
-						&& containers.size() == 0) {
+				if (!PreferencesStore.getBoolean(PREF_STAY_RUNNING, false) && containers.size() == 0) {
 					exit();
 				}
 			}
 		}
 	}
 
-	protected void configurePanel(SshToolsApplicationPanel panel,
-			SshToolsApplicationContainer container)
+	protected void configurePanel(SshToolsApplicationPanel panel, SshToolsApplicationContainer container)
 			throws SshToolsApplicationException {
 		log.debug("Initialising panel " + panelClass.getName());
 		panel.setOptionsActionAvailable(!getCLI().hasOption('e'));
@@ -288,20 +263,16 @@ public abstract class SshToolsApplication implements PluginHostContext {
 
 	}
 
-	public SshToolsApplicationContainer convertContainer(
-			SshToolsApplicationContainer container,
-			Class<SshToolsApplicationContainer> newContainerClass)
-			throws SshToolsApplicationException {
+	public SshToolsApplicationContainer convertContainer(SshToolsApplicationContainer container,
+			Class<SshToolsApplicationContainer> newContainerClass) throws SshToolsApplicationException {
 		int idx = containers.indexOf(container);
 		if (idx == -1) {
-			throw new SshToolsApplicationException(
-					"Container is not being manager by the application.");
+			throw new SshToolsApplicationException("Container is not being manager by the application.");
 		}
 		SshToolsApplicationContainer newContainer = null;
 		try {
 			if (container.closeContainer()) {
-				SshToolsApplicationPanel panel = container
-						.getApplicationPanel();
+				SshToolsApplicationPanel panel = container.getApplicationPanel();
 				newContainer = newContainerClass.newInstance();
 				newContainer.init(this, panel);
 				panel.setApplicationContainer(newContainer);
@@ -323,8 +294,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		}
 	}
 
-	protected LookAndFeel createLookAndFeel(Class<LookAndFeel> clazz)
-			throws Exception {
+	protected LookAndFeel createLookAndFeel(Class<LookAndFeel> clazz) throws Exception {
 		return clazz.newInstance();
 	}
 
@@ -391,8 +361,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		return containers.size();
 	}
 
-	public SshToolsApplicationContainer getContainerForPanel(
-			SshToolsApplicationPanel panel) {
+	public SshToolsApplicationContainer getContainerForPanel(SshToolsApplicationPanel panel) {
 		for (SshToolsApplicationContainer c : containers) {
 			if (c.getApplicationPanel() == panel) {
 				return c;
@@ -412,8 +381,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	}
 
 	public OptionsTab getOptionsTab(String title) {
-		for (Iterator<OptionsTab> i = additionalOptionsTabs.iterator(); i
-				.hasNext();) {
+		for (Iterator<OptionsTab> i = additionalOptionsTabs.iterator(); i.hasNext();) {
 			OptionsTab t = i.next();
 			if (t.getTabTitle().equals(title)) {
 				return t;
@@ -431,8 +399,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	}
 
 	public PluginVersion getPluginHostVersion() {
-		return new PluginVersion(GeneralUtil.getVersionString(
-				getApplicationName(), getClass()));
+		return new PluginVersion(GeneralUtil.getVersionString(getApplicationName(), getClass()));
 	}
 
 	public PluginManager getPluginManager() {
@@ -441,8 +408,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 
 	public URL getPluginUpdatesResource() {
 		try {
-			return new URL("http://3sp.com/plugins/" + getPluginHostName()
-					+ "/" + getPluginHostVersion());
+			return new URL("http://3sp.com/plugins/" + getPluginHostName() + "/" + getPluginHostVersion());
 		} catch (MalformedURLException murle) {
 			return null;
 		}
@@ -453,8 +419,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	}
 
 	public URL getStandardPluginsResource() {
-		String spr = GeneralUtil.checkAndGetProperty("sshtools.builtInPlugins",
-				"");
+		String spr = GeneralUtil.checkAndGetProperty("sshtools.builtInPlugins", "");
 		if (spr.equals("")) {
 			return null;
 		}
@@ -485,8 +450,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		try {
 			initPluginManager(options1);
 		} catch (PluginException e1) {
-			log(PluginHostContext.LOG_ERROR,
-					"Failed to initialise plugin manager.", e1);
+			log(PluginHostContext.LOG_ERROR, "Failed to initialise plugin manager.", e1);
 		}
 
 		CommandLineParser parser1 = new PosixParser();
@@ -515,19 +479,16 @@ public abstract class SshToolsApplication implements PluginHostContext {
 				if (reusePort == -1) {
 					reusePort = getDefaultReusePort();
 				}
-				log.debug("Attempting connection to reuse server on "
-						+ hostname + ":" + reusePort);
+				log.debug("Attempting connection to reuse server on " + hostname + ":" + reusePort);
 				s = new Socket(hostname, reusePort);
-				log.debug("Found reuse server on " + hostname + ":" + reusePort
-						+ ", sending arguments");
+				log.debug("Found reuse server on " + hostname + ":" + reusePort + ", sending arguments");
 				s.setSoTimeout(5000);
 				PrintWriter pw = new PrintWriter(s.getOutputStream(), true);
 				for (int i = 0; args != null && i < args.length; i++) {
 					pw.println(args[i]);
 				}
 				pw.println();
-				BufferedReader r = new BufferedReader(new InputStreamReader(
-						s.getInputStream()));
+				BufferedReader r = new BufferedReader(new InputStreamReader(s.getInputStream()));
 				log.debug("Waiting for reuse server reply");
 				String error = r.readLine();
 				log.debug("Reuse server replied with '" + error + "'");
@@ -559,9 +520,24 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		if (f != null) {
 			//
 			FilePreferencesFactory.setPreferencesFile(new File(f, "javaprefs.properties"));
-			PreferencesStore.init(new File(f, getApplicationName()
-					+ ".properties"));
+			PreferencesStore.init(new File(f, getApplicationName() + ".properties"));
 		}
+
+		boolean useSysIcons = PreferencesStore.getBoolean(SshToolsApplication.PREF_USE_SYSTEM_ICON_THEME, true);
+		System.setProperty("jfreedesktop.alwaysUseDefaultTheme", String.valueOf(!useSysIcons));
+		IconStore store = IconStore.getInstance();
+		try {
+			preConfigureIconStore(store);
+			store.configure(this);
+			postConfigureIconStore(store);
+		} catch (IOException sshe) {
+			throw new SshToolsApplicationException("Failed to setup icons.", sshe);
+		} catch (ParseException sshe) {
+			throw new SshToolsApplicationException("Failed to setup icons.", sshe);
+		}
+
+		loadMRU();
+
 		setLookAndFeel(getDefaultLAF());
 
 		log.debug("Plugin manager initialised, adding global preferences tabs");
@@ -596,24 +572,20 @@ public abstract class SshToolsApplication implements PluginHostContext {
 						reuseServerSocket = new ServerSocket(reusePort, 1);
 						while (true) {
 							s = reuseServerSocket.accept();
-							BufferedReader reader = new BufferedReader(
-									new InputStreamReader(s.getInputStream()));
+							BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
 							String line = null;
 							List<String> args = new ArrayList<String>();
-							while ((line = reader.readLine()) != null
-									&& !line.equals("")) {
+							while ((line = reader.readLine()) != null && !line.equals("")) {
 								args.add(line);
 							}
-							final PrintWriter pw = new PrintWriter(
-									s.getOutputStream());
+							final PrintWriter pw = new PrintWriter(s.getOutputStream());
 							String[] a = new String[args.size()];
 							args.toArray(a);
 							CommandLineParser parser = new PosixParser();
 							Options options = new Options();
 							buildCLIOptions(options);
 							// parse the command line arguments
-							final CommandLine remoteCLI = parser.parse(options,
-									a);
+							final CommandLine remoteCLI = parser.parse(options, a);
 							pw.println("");
 							SwingUtilities.invokeAndWait(new Runnable() {
 								public void run() {
@@ -646,8 +618,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	}
 
 	protected LookAndFeelInfo getDefaultLAF() {
-		return getLAF(PreferencesStore.get(PREF_LAF,
-				UIManager.getSystemLookAndFeelClassName()));
+		return getLAF(PreferencesStore.get(PREF_LAF, UIManager.getSystemLookAndFeelClassName()));
 	}
 
 	protected void initPluginManager(Options options1) throws PluginException {
@@ -671,13 +642,11 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	private void loadMRU() {
 		try {
 			if (System.getSecurityManager() != null) {
-				AccessController.checkPermission(new FilePermission(
-						"<<ALL FILES>>", "write"));
+				AccessController.checkPermission(new FilePermission("<<ALL FILES>>", "write"));
 			}
 			File a = getApplicationPreferencesDirectory();
 			if (a == null) {
-				throw new AccessControlException(
-						"Application preferences directory not specified.");
+				throw new AccessControlException("Application preferences directory not specified.");
 			}
 			InputStream in = null;
 			MRUList mru = new MRUList();
@@ -737,8 +706,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		log(level, null, exception);
 	}
 
-	public SshToolsApplicationContainer newContainer()
-			throws SshToolsApplicationException {
+	public SshToolsApplicationContainer newContainer() throws SshToolsApplicationException {
 		SshToolsApplicationContainer container = null;
 		try {
 			container = defaultContainerClass.newInstance();
@@ -749,8 +717,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		}
 	}
 
-	public void newContainer(SshToolsApplicationContainer container)
-			throws SshToolsApplicationException {
+	public void newContainer(SshToolsApplicationContainer container) throws SshToolsApplicationException {
 		try {
 			log.debug("Creating panel " + panelClass.getName());
 			SshToolsApplicationPanel panel = panelClass.newInstance();
@@ -806,32 +773,22 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	 * @throws SshToolsApplicationException
 	 *             on any error processing the command line
 	 */
-	public abstract void reuseRequest(CommandLine arguments)
-			throws SshToolsApplicationException;
+	public abstract void reuseRequest(CommandLine arguments) throws SshToolsApplicationException;
 
 	public void setLookAndFeel(UIManager.LookAndFeelInfo laf) {
 		if (laf != null) {
 			log.info("Setting Look and Feel to " + laf.getClassName());
 			try {
 				@SuppressWarnings("unchecked")
-				LookAndFeel l = createLookAndFeel((Class<LookAndFeel>) Class
-						.forName(laf.getClassName()));
+				LookAndFeel l = createLookAndFeel((Class<LookAndFeel>) Class.forName(laf.getClassName()));
 				UIManager.setLookAndFeel(l);
 
-				Icon checkIcon = UIManager
-						.getIcon("CheckBoxMenuItem.checkIcon");
-				Icon radioIcon = UIManager
-						.getIcon("RadioButtonMenuItem.checkIcon");
-				UIManager.put(
-						"MenuItem.checkIcon",
-						new EmptyIcon(Math.max(checkIcon.getIconWidth(),
-								radioIcon.getIconWidth()), checkIcon
-								.getIconHeight()));
-				UIManager.put(
-						"Menu.checkIcon",
-						new EmptyIcon(Math.max(checkIcon.getIconWidth(),
-								radioIcon.getIconWidth()), checkIcon
-								.getIconHeight()));
+				Icon checkIcon = UIManager.getIcon("CheckBoxMenuItem.checkIcon");
+				Icon radioIcon = UIManager.getIcon("RadioButtonMenuItem.checkIcon");
+				UIManager.put("MenuItem.checkIcon", new EmptyIcon(
+						Math.max(checkIcon.getIconWidth(), radioIcon.getIconWidth()), checkIcon.getIconHeight()));
+				UIManager.put("Menu.checkIcon", new EmptyIcon(
+						Math.max(checkIcon.getIconWidth(), radioIcon.getIconWidth()), checkIcon.getIconHeight()));
 
 				for (SshToolsApplicationContainer container : containers) {
 					container.updateUI();
@@ -884,7 +841,6 @@ public abstract class SshToolsApplication implements PluginHostContext {
 			}
 		});
 		UIUtil.jGridBagAdd(p, h, gBC, GridBagConstraints.REMAINDER);
-		JOptionPane.showMessageDialog(parent, p, "About",
-				JOptionPane.PLAIN_MESSAGE, getApplicationLargeIcon());
+		JOptionPane.showMessageDialog(parent, p, "About", JOptionPane.PLAIN_MESSAGE, getApplicationLargeIcon());
 	}
 }
