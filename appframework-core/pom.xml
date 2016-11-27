@@ -44,7 +44,7 @@
 		<dependency>
 			<groupId>com.miglayout</groupId>
 			<artifactId>miglayout-swing</artifactId>
-			<version>4.2</version>
+			<version>5.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sshtools</groupId>
@@ -83,8 +83,8 @@
 
 		<dependency>
 			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging-api</artifactId>
-			<version>1.0.4</version>
+			<artifactId>commons-logging</artifactId>
+			<version>1.2</version>
 		</dependency>
 	</dependencies>
 </project>
