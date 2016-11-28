@@ -734,7 +734,7 @@ public class PluginManager {
 				w.plugin.startPlugin(context);
 				w.status.status = STATUS_STARTED;
 				startedPlugins.add(w);
-			} catch (PluginException pe) {
+			} catch (Exception pe) {
 				w.status.exception = pe;
 				w.status.status = STATUS_ERRORED;
 				context.log(

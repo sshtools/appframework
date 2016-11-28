@@ -30,7 +30,8 @@ public abstract class XFileSelector {
 		JFileChooserSelector(String dir) {
 			chooser = new JFileChooser(dir) {
 				{
-					if (SystemUtils.IS_OS_LINUX)
+					if (SystemUtils.IS_OS_LINUX
+							&& UIManager.getLookAndFeel().getClass().getName().indexOf("GTKLookAndFeel") != -1)
 						setUI(new GtkFileChooserUI(this));
 				}
 			};

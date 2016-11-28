@@ -4,6 +4,7 @@ package com.sshtools.appframework.ui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -26,6 +27,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.AccessControlException;
 import java.security.AccessController;
@@ -54,11 +56,6 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import plugspud.PluginException;
-import plugspud.PluginHostContext;
-import plugspud.PluginManager;
-import plugspud.PluginVersion;
-
 import com.sshtools.appframework.api.SshToolsApplicationException;
 import com.sshtools.appframework.api.ui.MultilineLabel;
 import com.sshtools.appframework.api.ui.SshToolsApplicationContainer;
@@ -66,11 +63,15 @@ import com.sshtools.appframework.api.ui.SshToolsApplicationPanel;
 import com.sshtools.appframework.mru.MRUList;
 import com.sshtools.appframework.mru.MRUListModel;
 import com.sshtools.appframework.prefs.FilePreferencesFactory;
-import com.sshtools.appframework.util.BrowserLauncher;
 import com.sshtools.appframework.util.GeneralUtil;
 import com.sshtools.appframework.util.IOUtil;
 import com.sshtools.ui.swing.EmptyIcon;
 import com.sshtools.ui.swing.UIUtil;
+
+import plugspud.PluginException;
+import plugspud.PluginHostContext;
+import plugspud.PluginManager;
+import plugspud.PluginVersion;
 
 /**
  * An abstract application class that provides container management, look and
@@ -728,7 +729,11 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	}
 
 	public void openURL(URL url) throws IOException {
-		BrowserLauncher.openURL(url.toExternalForm());
+		try {
+			Desktop.getDesktop().browse(url.toURI());
+		} catch (URISyntaxException e) {
+			throw new IOException(e);
+		}
 	}
 
 	protected void postConfigureIconStore(IconStore store) throws IOException {
@@ -834,7 +839,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 			@Override
 			public void mouseClicked(MouseEvent evt) {
 				try {
-					BrowserLauncher.openURL(getAboutURL());
+					openURL(new URL(getAboutURL()));
 				} catch (IOException ioe) {
 					ioe.printStackTrace();
 				}

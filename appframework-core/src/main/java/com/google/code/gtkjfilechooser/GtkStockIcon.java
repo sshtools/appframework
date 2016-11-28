@@ -30,6 +30,7 @@ import javax.swing.ImageIcon;
 
 import com.google.code.gtkjfilechooser.FreeDesktopUtil.WellKnownDir;
 import com.google.code.gtkjfilechooser.ui.MissingResourceIcon;
+import com.sshtools.appframework.ui.IconStore;
 
 
 public class GtkStockIcon {
@@ -71,6 +72,10 @@ public class GtkStockIcon {
 	 * @see http://library.gnome.org/devel/gtk/unstable/gtk-Stock-Items.html
 	 */
 	static public Icon get(String name, Size size) {
+		Icon icon = IconStore.getInstance().getIcon(name, size.getSize());
+		if(icon != null)
+			return icon;
+		
 		if (name.startsWith("gtk-")) {
 			return getFromStock(name, size);
 		}

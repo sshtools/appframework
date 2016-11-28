@@ -11,6 +11,7 @@ import com.sshtools.ui.swing.AppAction;
  * Abstract implementation of an {@link AppAction}that can be used to make a
  * connection.
  */
+@SuppressWarnings("serial")
 public abstract class AbstractNewAction extends AbstractAppAction {
 	public final static String VAL_NAME = Messages.getString("AbstractNewAction.Name");
 
