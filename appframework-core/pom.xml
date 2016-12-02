@@ -47,6 +47,11 @@
 			<version>5.0</version>
 		</dependency>
 		<dependency>
+			<groupId>com.googlecode.vfsjfilechooser2</groupId>
+			<artifactId>vfsjfilechooser2</artifactId>
+			<version>0.2.5</version>
+		</dependency>
+		<dependency>
 			<groupId>com.sshtools</groupId>
 			<artifactId>ui</artifactId>
 			<version>${project.version}</version>

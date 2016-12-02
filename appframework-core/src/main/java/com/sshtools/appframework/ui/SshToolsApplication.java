@@ -55,6 +55,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.vfs2.FileObject;
 
 import com.sshtools.appframework.api.SshToolsApplicationException;
 import com.sshtools.appframework.api.ui.MultilineLabel;
@@ -240,6 +241,11 @@ public abstract class SshToolsApplication implements PluginHostContext {
 				}
 			}
 		}
+	}
+	
+	protected void configureChooser() {
+		XFileChooser.Chooser.addChoserImpl(File.class, XFileSelector.class);
+		XFileChooser.Chooser.addChoserImpl(FileObject.class, VFSFileSelector.class);
 	}
 
 	protected void configurePanel(SshToolsApplicationPanel panel, SshToolsApplicationContainer container)
@@ -537,6 +543,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 			throw new SshToolsApplicationException("Failed to setup icons.", sshe);
 		}
 
+		configureChooser();
 		loadMRU();
 
 		setLookAndFeel(getDefaultLAF());

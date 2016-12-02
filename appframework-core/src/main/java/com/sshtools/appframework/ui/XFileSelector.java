@@ -16,7 +16,7 @@ import org.apache.commons.lang.SystemUtils;
 
 import com.google.code.gtkjfilechooser.ui.GtkFileChooserUI;
 
-public abstract class XFileSelector {
+public class XFileSelector implements XFileChooser<File> {
 
 	static {
 		if ("GTK look and feel".equals(UIManager.getLookAndFeel().getName())) {
@@ -24,9 +24,10 @@ public abstract class XFileSelector {
 		}
 	}
 
-	static class JFileChooserSelector extends XFileSelector {
+	static class JFileChooserSelector implements XFileChooser<File> {
 		private JFileChooser chooser;
 
+		@SuppressWarnings("serial")
 		JFileChooserSelector(String dir) {
 			chooser = new JFileChooser(dir) {
 				{
@@ -84,7 +85,7 @@ public abstract class XFileSelector {
 		}
 	}
 
-	static class AWTFileSelector extends XFileSelector {
+	static class AWTFileSelector implements XFileChooser<File> {
 
 		private FileDialog dialog;
 		private boolean multiSelection;
@@ -92,7 +93,7 @@ public abstract class XFileSelector {
 		private int dialogType;
 		private File selectedFile;
 		private File selectedDirectory;
-		private XFileSelector fallback;
+		private XFileChooser<File> fallback;
 
 		AWTFileSelector(String dir) {
 			selectedDirectory = dir == null ? null : new File(dir);
@@ -299,38 +300,62 @@ public abstract class XFileSelector {
 
 	}
 
-	// These are same as JFileChooser for ease of implementation
-	public static final int CANCEL_OPTION = 1;
-	public static final int APPROVE_OPTION = 0;
-	public static final int ERROR_OPTION = -1;
-	public static final int FILES_ONLY = 0;
-	public static final int DIRECTORIES_ONLY = 1;
-	public static final int FILES_AND_DIRECTORIES = 2;
-	public static final int OPEN_DIALOG = 0;
-	public static final int SAVE_DIALOG = 1;
-
-	public void open() {
+	@Deprecated
+	public static XFileChooser<File> create(String dir) {
+		return XFileChooser.Chooser.create(File.class, new File(dir));
 	}
 
-	public static XFileSelector create(String dir) {
-		return new JFileChooserSelector(dir);
+	private JFileChooserSelector chooser;
+
+	public XFileSelector(File home) {
+		// TODO AWT has been deactivated again for now, so only the Swing one is
+		// proxied
+		chooser = new JFileChooserSelector(home.getAbsolutePath());
 	}
 
-	public abstract void setMultiSelectionEnabled(boolean multiSelection);
+	@Override
+	public void setMultiSelectionEnabled(boolean multiSelection) {
+		chooser.setMultiSelectionEnabled(multiSelection);
+	}
 
-	public abstract void setFileSelectionMode(int fileSelectionMode);
+	@Override
+	public void setFileSelectionMode(int fileSelectionMode) {
+		chooser.setFileSelectionMode(fileSelectionMode);
+	}
 
-	public abstract void setSelectedFile(File file);
+	@Override
+	public void setSelectedFile(File file) {
+		chooser.setSelectedFile(file);
+	}
 
-	public abstract void setCurrentDirectory(File file);
+	@Override
+	public void setCurrentDirectory(File file) {
+		chooser.setCurrentDirectory(file);
+	}
 
-	public abstract int showDialog(Component parent, String title);
+	@Override
+	public int showDialog(Component parent, String title) {
+		return chooser.showDialog(parent, title);
+	}
 
-	public abstract File getSelectedFile();
+	@Override
+	public File getSelectedFile() {
+		return chooser.getSelectedFile();
+	}
 
-	public abstract File getCurrentDirectory();
+	@Override
+	public File getCurrentDirectory() {
+		return chooser.getCurrentDirectory();
+	}
 
-	public abstract File[] getSelectedFiles();
+	@Override
+	public File[] getSelectedFiles() {
+		return chooser.getSelectedFiles();
+	}
 
-	public abstract void setDialogType(int openDialog);
+	@Override
+	public void setDialogType(int openDialog) {
+		chooser.setDialogType(openDialog);
+	}
+
 }

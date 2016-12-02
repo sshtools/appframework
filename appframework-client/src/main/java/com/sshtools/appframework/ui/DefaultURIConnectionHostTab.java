@@ -57,6 +57,8 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 	private String title;
 	private String toolTipText;
 
+	protected JPanel mainConnectionDetailsPanel;
+
 	/**
 	 * Creates a new DefaultURIConnectionHostTab object.
 	 * 
@@ -104,37 +106,20 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 		this.showUser = showUser;
 		this.scheme = scheme;
 		// Create the main connection details panel
-		JPanel mainConnectionDetailsPanel = new JPanel(new GridBagLayout());
+		mainConnectionDetailsPanel = new JPanel(new GridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.anchor = GridBagConstraints.NORTHWEST;
 		gbc.insets = new Insets(0, 2, 2, 2);
 		gbc.weightx = 1.0;
 		// Host name
-		if (showHost != OMIT) {
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getHostnameText()), gbc, GridBagConstraints.REMAINDER);
-			gbc.fill = GridBagConstraints.HORIZONTAL;
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, hostnameField, gbc, GridBagConstraints.REMAINDER);
-			focusOn(hostnameField);
-		}
+		addHostnameField(showHost, gbc);
 		// Port
-		if (showPort != OMIT) {
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getPortText()), gbc, GridBagConstraints.REMAINDER);
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, portField, gbc, GridBagConstraints.REMAINDER);
-			focusOn(portField);
-		}
+		addPortField(showPort, gbc);
 		// Path
-		if (showPath != OMIT) {
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getPathText()), gbc, GridBagConstraints.REMAINDER);
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, pathField, gbc, GridBagConstraints.REMAINDER);
-			focusOn(pathField);
-		}
+		addPathField(showPath, gbc);
 		// User
-		if (showUser != OMIT) {
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getUserText()), gbc, GridBagConstraints.REMAINDER);
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, userField, gbc, GridBagConstraints.REMAINDER);
-			focusOn(userField);
-		}
+		addUserField(showUser, gbc);
 		//
 		gbc.weighty = 1.0;
 		UIUtil.jGridBagAdd(mainConnectionDetailsPanel, createAdditionalComponent(), gbc, GridBagConstraints.REMAINDER);
@@ -149,6 +134,39 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 		gbc.weighty = 1.0;
 		gbc.weightx = 1.0;
 		UIUtil.jGridBagAdd(this, mainConnectionDetailsPanel, gbc, GridBagConstraints.REMAINDER);
+	}
+
+	protected void addUserField(int showUser, GridBagConstraints gbc) {
+		if (showUser != OMIT) {
+			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getUserText()), gbc, GridBagConstraints.REMAINDER);
+			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, userField, gbc, GridBagConstraints.REMAINDER);
+			focusOn(userField);
+		}
+	}
+
+	protected void addPathField(int showPath, GridBagConstraints gbc) {
+		if (showPath != OMIT) {
+			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getPathText()), gbc, GridBagConstraints.REMAINDER);
+			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, pathField, gbc, GridBagConstraints.REMAINDER);
+			focusOn(pathField);
+		}
+	}
+
+	protected void addPortField(int showPort, GridBagConstraints gbc) {
+		if (showPort != OMIT) {
+			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getPortText()), gbc, GridBagConstraints.REMAINDER);
+			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, portField, gbc, GridBagConstraints.REMAINDER);
+			focusOn(portField);
+		}
+	}
+
+	protected void addHostnameField(int showHost, GridBagConstraints gbc) {
+		if (showHost != OMIT) {
+			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getHostnameText()), gbc, GridBagConstraints.REMAINDER);
+			gbc.fill = GridBagConstraints.HORIZONTAL;
+			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, hostnameField, gbc, GridBagConstraints.REMAINDER);
+			focusOn(hostnameField);
+		}
 	}
 
 	@Override
