@@ -50,24 +50,27 @@ import org.apache.commons.cli.Options;
 /**
  * All plugin's must implement this
  * 
- * @created 26 May 2002
  */
-public interface Plugin {
+public interface Plugin<T extends PluginHostContext> {
 	/**
 	 * Invoked by Plugspud when it starts the plugin
 	 * 
-	 * @param context context
-	 * @throws PluginException on any initialisation error
+	 * @param context
+	 *            context
+	 * @throws PluginException
+	 *             on any initialisation error
 	 */
-	public void startPlugin(PluginHostContext context) throws PluginException;
+	void startPlugin(T context) throws PluginException;
 
 	/**
 	 * Invoked by Plugspud when it activates the plugin
 	 * 
-	 * @param context context
-	 * @throws PluginException on any initialisation error
+	 * @param context
+	 *            context
+	 * @throws PluginException
+	 *             on any initialisation error
 	 */
-	public void activatePlugin(PluginHostContext context) throws PluginException;
+	void activatePlugin(T context) throws PluginException;
 
 	/**
 	 * Invoked by Plugspud when it wants to stop the plugin (e.g. when it is
@@ -76,12 +79,12 @@ public interface Plugin {
 	 * 
 	 * @return can close
 	 */
-	public boolean canStopPlugin();
+	boolean canStopPlugin();
 
 	/**
 	 * Stop the plugin.
 	 */
-	public void stopPlugin() throws PluginException;
+	void stopPlugin() throws PluginException;
 
-	public void buildCLIOptions(Options options);
+	void buildCLIOptions(Options options);
 }

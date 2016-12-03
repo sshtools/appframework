@@ -56,6 +56,9 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
+import org.apache.commons.vfs2.FileSystemManager;
+import org.apache.commons.vfs2.VFS;
 
 import com.sshtools.appframework.api.SshToolsApplicationException;
 import com.sshtools.appframework.api.ui.MultilineLabel;
@@ -98,6 +101,9 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	private static MRUListModel mruModel;
 
 	private static SshToolsApplication instance;
+	private static FileSystemManager fsManager;
+
+	private static FileSystemManager vfs;
 
 	static {
 		// System.setProperty("java.util.prefs.PreferencesFactory",
@@ -132,6 +138,17 @@ public abstract class SshToolsApplication implements PluginHostContext {
 			}
 		}
 		LAFS.add(laf);
+	}
+	
+	public static FileSystemManager getVFS() throws FileSystemException {
+		if(vfs == null) {
+			vfs = VFS.getManager();
+		}
+		return vfs;
+	}
+	
+	public static void setVFS(FileSystemManager vfs) {
+		SshToolsApplication.vfs = vfs;
 	}
 
 	public static UIManager.LookAndFeelInfo[] getAllLookAndFeelInfo() {

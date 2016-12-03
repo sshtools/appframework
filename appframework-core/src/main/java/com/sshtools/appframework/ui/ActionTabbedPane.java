@@ -22,6 +22,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 
 import com.sshtools.ui.swing.ActionButton;
@@ -42,30 +43,11 @@ public class ActionTabbedPane extends DnDTabbedPane {
 	private boolean dragging;
 
 	public ActionTabbedPane() {
-		this(TOP);
-		addTabDraggedListener(new TabDraggedListener() {
-
-			public void tabbedMoving(int oldIndex, int newIndex) {
-				dragging = true;
-			}
-
-			public void tabbedMoved(int oldIndex, int newIndex) {
-				dragging = false;
-//				TabHeader oh = headers.remove(oldIndex);
-//				if (oldIndex < newIndex) {
-//					headers.add(newIndex - 1, oh);
-//				} else {
-//					headers.add(newIndex, oh);
-//				}
-			}
-
-			public void tabDetached(int index, Point point) {
-			}
-		});
+		this(TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 	}
 
-	public ActionTabbedPane(int tabPlacement) {
-		super(tabPlacement);
+	public ActionTabbedPane(int tabPlacement, int tabLayout) {
+		super(tabPlacement, tabLayout);
 		init();
 	}
 
@@ -87,6 +69,26 @@ public class ActionTabbedPane extends DnDTabbedPane {
 
 	private void init() {
 		actions = new Vector();
+
+		addTabDraggedListener(new TabDraggedListener() {
+
+			public void tabbedMoving(int oldIndex, int newIndex) {
+				dragging = true;
+			}
+
+			public void tabbedMoved(int oldIndex, int newIndex) {
+				dragging = false;
+//				TabHeader oh = headers.remove(oldIndex);
+//				if (oldIndex < newIndex) {
+//					headers.add(newIndex - 1, oh);
+//				} else {
+//					headers.add(newIndex, oh);
+//				}
+			}
+
+			public void tabDetached(int index, Point point) {
+			}
+		});
 	}
 
 	public void removeAllActions() {

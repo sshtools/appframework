@@ -14,6 +14,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import com.sshtools.appframework.api.ui.NumericTextField;
 import com.sshtools.appframework.api.ui.SshToolsConnectionTab;
@@ -39,7 +40,7 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 	protected XTextField hostnameField = new XTextField();
 	protected XTextField pathField = new XTextField();
 	protected NumericTextField portField = new NumericTextField(new Integer(0), new Integer(65535), new Integer(0));
-	protected XTextField userField = new XTextField();
+	protected JTextField userField = new XTextField();
 
 	private String category;
 	private String defaultPath;
@@ -179,9 +180,15 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 		try {
 			URI uri = getURIForSettings();
 			profile.setURI(uri);
+			setupProfile(profile);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(this, e.getMessage());
+		} finally {
+			setAvailable();
 		}
+	}
+
+	protected void setupProfile(ResourceProfile<T> profile) throws Exception {
 	}
 
 	@Override
@@ -240,7 +247,7 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 		return toolTipText;
 	}
 
-	public XTextField getUserField() {
+	public JTextField getUserField() {
 		return userField;
 	}
 
@@ -264,6 +271,7 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 	public void setConnectionProfile(ResourceProfile<T> profile) {
 		this.profile = profile;
 		setBasicFieldsFromProfile(profile);
+		setAvailable();
 	}
 
 	public void setDefaultPath(String defaultPath) {
@@ -388,8 +396,11 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 			pathField.setText(path);
 		}
 		if (showUser != OMIT) {
-			userField.setText(profile == null ? "" : profile.getUsername());
+			userField.setText(profile == null || profile.getUsername() == null ? "" : profile.getUsername());
 		}
+	}
+	
+	protected void setAvailable() {
 	}
 
 }
