@@ -10,7 +10,7 @@
  ******************************************************************************/
 package com.google.code.gtkjfilechooser.ui;
 
-import static com.google.code.gtkjfilechooser.I18N._;
+import static com.google.code.gtkjfilechooser.I18N.i18n;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -57,7 +57,7 @@ public class SaveDialogPanel extends JPanel implements PropertyChangeListener, A
 		SpringLayout layout = new SpringLayout();
 		saveTopPanel.setLayout(layout);
 
-		JLabel nameLabel = new JLabel(_("_Name:"));
+		JLabel nameLabel = new JLabel(i18n("_Name:"));
 		nameTextField = new JTextField();
 		nameTextField.addActionListener(new ActionListener() {			
 			@Override
@@ -66,7 +66,7 @@ public class SaveDialogPanel extends JPanel implements PropertyChangeListener, A
 				fireActionEvent(evt);
 			}
 		});
-		saveFolderLabel = new JLabel(_("Save in _folder:"));
+		saveFolderLabel = new JLabel(i18n("Save in _folder:"));
 		initFoldersComboBox();
 
 		saveTopPanel.add(nameLabel);
@@ -85,7 +85,7 @@ public class SaveDialogPanel extends JPanel implements PropertyChangeListener, A
 		saveTopPanel.setPreferredSize(size);
 		add(saveTopPanel, BorderLayout.PAGE_START);
 
-		expander = new Expander(_("_Browse for other folders"), fileExplorerPanel);
+		expander = new Expander(i18n("_Browse for other folders"), fileExplorerPanel);
 		expander.addPropertyChangeListener(this);
 		add(expander, BorderLayout.CENTER);
 	}

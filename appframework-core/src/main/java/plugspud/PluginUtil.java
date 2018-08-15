@@ -1,7 +1,5 @@
 /*-- 
 
- $Id: PluginUtil.java,v 1.1.2.1 2010-04-30 22:04:38 brett Exp $
-
  Copyright (C) 2003 Brett Smith.
  All rights reserved.
  
@@ -53,9 +51,6 @@ import java.io.OutputStream;
 
 /**
  * Utilities used by the plugin manager API
- *
- *@author     magicthize
- *@created    26 May 2002
  */
 public class PluginUtil
 {
@@ -70,7 +65,7 @@ public class PluginUtil
 	 * true or false instead. If <code>null</code> is supplied as they stream
 	 * then it is just ignored
 	 *
-	 * @param stream stream to close
+	 * @param in stream to close
 	 * @return closed ok
 	 */
 	public static boolean closeStream(InputStream in)
@@ -92,7 +87,7 @@ public class PluginUtil
 	 * true or false instead. If <code>null</code> is supplied as they stream
 	 * then it is just ignored
 	 *
-	 * @param stream stream to close
+	 * @param out stream to close
 	 * @return closed ok
 	 */
 	public static boolean closeStream(OutputStream out)
@@ -115,6 +110,7 @@ public class PluginUtil
 	 * @param in input stream
 	 * @param out output stream
 	 * @param buf buffer size (-1 means don't buffer)
+	 * @throws IOException on I/O error
 	 */
 	public static void copyStreams(InputStream in, OutputStream out, int buf)
 		throws IOException

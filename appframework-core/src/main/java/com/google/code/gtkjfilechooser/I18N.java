@@ -47,7 +47,7 @@ public class I18N {
 	 * @param msgid
 	 * @return the translated string without mnemonics.
 	 */
-	static final public String _(String msgid) {
+	static final public String i18n(String msgid) {
 		// Return a string without mnemonic
 		return getString(msgid).replace("_", "");
 	}
@@ -55,8 +55,8 @@ public class I18N {
 	/**
 	 * @see String#format(String, Object...)
 	 */
-	static final public String _(String msgid, Object args) {
-		return String.format(_(msgid), args);
+	static final public String i18n(String msgid, Object args) {
+		return String.format(i18n(msgid), args);
 	}
 
 	/**

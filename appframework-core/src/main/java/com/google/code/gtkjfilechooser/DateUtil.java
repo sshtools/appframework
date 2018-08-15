@@ -10,7 +10,7 @@
  ******************************************************************************/
 package com.google.code.gtkjfilechooser;
 
-import static com.google.code.gtkjfilechooser.I18N._;
+import static com.google.code.gtkjfilechooser.I18N.i18n;
 
 import java.text.DateFormat;
 import java.util.Calendar;
@@ -49,7 +49,7 @@ public class DateUtil {
 
 		if (days_diff == 1) {
 			// Yesterday
-			String mgsstr = _("Yesterday at %H:%M");
+			String mgsstr = i18n("Yesterday at %H:%M");
 			return new Strftime(mgsstr).format(d);
 		}
 

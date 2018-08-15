@@ -1,7 +1,5 @@
 /*-- 
 
- $Id: PluginException.java,v 1.1.2.1 2010-04-30 22:04:38 brett Exp $
-
  Copyright (C) 2003 Brett Smith.
  All rights reserved.
  
@@ -48,44 +46,32 @@ package plugspud;
 import java.lang.reflect.Method;
 
 /**
- *  Exception thrown by plugin
- *
- *@author     magicthize
- *@created    26 May 2002
+ * Exception thrown by plugin
  */
-public class PluginException extends Exception
-{
-    /**
-     * Construct a new execption
-     *
-     * @param message messages
-     */
-    public PluginException(String message)
-    {
-        super(message);
-    }
+public class PluginException extends Exception {
+	/**
+	 * Construct a new execption
+	 *
+	 * @param message messages
+	 */
+	public PluginException(String message) {
+		super(message);
+	}
 
-    /**
-     * Construct a new execption
-     *
-     * @param message message
-     * @param cause underlying exception
-     */
-    public PluginException(String message, Throwable cause)
-    {
-        super(message);
-        if(cause != null)
-        {
-            try
-            {
-                Method m = getClass().getMethod("initCause", new Class[]
-                    { Throwable.class });
-                m.invoke(this, new Object[] { cause } );
-            }
-            catch(Exception e)
-            {
-            }
-        }
-    }
+	/**
+	 * Construct a new execption
+	 *
+	 * @param message message
+	 * @param cause underlying exception
+	 */
+	public PluginException(String message, Throwable cause) {
+		super(message);
+		if (cause != null) {
+			try {
+				Method m = getClass().getMethod("initCause", new Class[] { Throwable.class });
+				m.invoke(this, new Object[] { cause });
+			} catch (Exception e) {
+			}
+		}
+	}
 }
-

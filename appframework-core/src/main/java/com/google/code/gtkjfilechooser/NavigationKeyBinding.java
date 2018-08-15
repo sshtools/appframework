@@ -44,7 +44,8 @@ import javax.swing.KeyStroke;
  * <tr>
  * <td>down-folder</td>
  * <td>
- * <b>Alt+Down</b></span></td>
+ * <b>Alt+Down</b>
+ * </td>
  * </tr>
  * <tr>
  * <td>home-folder</td>

@@ -43,7 +43,6 @@
  OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  SUCH DAMAGE.
  */
-
 package plugspud;
 
 import java.io.BufferedInputStream;
@@ -74,13 +73,11 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.cli.Options;
 
 public class PluginManager {
-
 	// Plugin statis
 	public final static int STATUS_UNINITIALIZED = 0;
 	public final static int STATUS_STARTED = 1;
 	public final static int STATUS_STOPPED = 2;
 	public final static int STATUS_ERRORED = 3;
-
 	// Plugin properties
 	public final static String PLUGIN_VERSION = "version";
 	public final static String PLUGIN_RESOURCE = "resource";
@@ -94,7 +91,6 @@ public class PluginManager {
 	public final static String PLUGIN_CLASSNAME = "className";
 	public final static String PLUGIN_SHORT_DESCRIPTION = "shortDescription";
 	public final static String PLUGIN_REQUIRED_HOST_VERSION = "requiredHostVersion";
-
 	// Private instance variables
 	private File pluginDir;
 	private ClassLoader classLoader;
@@ -109,19 +105,15 @@ public class PluginManager {
 	/**
 	 * Initialise the plugin manager
 	 * 
-	 * @param context
-	 *            context
+	 * @param context context
 	 * 
-	 * @throws PluginException
-	 *             on any errors
+	 * @throws PluginException on any errors
 	 */
 	public void init(PluginHostContext context) throws PluginException {
 		this.context = context;
-
 		pluginMap = new HashMap<String, PluginManager.PluginWrapper>();
 		plugins = new Vector<PluginWrapper>();
 		startedPlugins = new Vector<PluginWrapper>();
-
 		// Create the plugin directory if it doesn't exist
 		pluginDir = context.getPluginDirectory();
 		if (pluginDir == null) {
@@ -129,7 +121,6 @@ public class PluginManager {
 		} else {
 			if (!pluginDir.exists() && !pluginDir.mkdirs())
 				throw new PluginException("Could not create plugin directory " + pluginDir.getAbsolutePath());
-
 			// First remove any plugins jars that are no longer required
 			File removeFile = new File(pluginDir, "ros.list");
 			if (removeFile.exists() && removeFile.canRead()) {
@@ -140,8 +131,7 @@ public class PluginManager {
 					String line = null;
 					while ((line = reader.readLine()) != null) {
 						File z = new File(line);
-						context.log(PluginHostContext.LOG_INFORMATION,
-								"Deleting plugin library " + z.getAbsolutePath());
+						context.log(PluginHostContext.LOG_INFORMATION, "Deleting plugin library " + z.getAbsolutePath());
 						if (!z.delete())
 							context.log(PluginHostContext.LOG_ERROR, "Failed to delete " + z.getAbsolutePath());
 					}
@@ -161,10 +151,8 @@ public class PluginManager {
 					}
 				}
 			}
-
 			if (!pluginDir.exists() && !pluginDir.mkdirs())
 				throw new PluginException("Could not create plugin directory " + pluginDir.getAbsolutePath());
-
 			// First unzip any newly installed plugin archives
 			File[] newPlugins = pluginDir.listFiles(new FileFilter() {
 				public boolean accept(File f) {
@@ -178,20 +166,16 @@ public class PluginManager {
 						context.log(PluginHostContext.LOG_ERROR,
 								"New plugin archive " + newPlugins[i].getAbsolutePath() + " could not be "
 										+ "deleted. Until this file is removed, this plugin "
-										+ "will continue to be installed every time " + context.getPluginHostName()
-										+ "starts up.");
+										+ "will continue to be installed every time " + context.getPluginHostName() + "starts up.");
 					}
 				} catch (Exception e) {
 					context.log(PluginHostContext.LOG_ERROR, e);
-					throw new PluginException(
-							"Failed to unzip newly installed plugin " + newPlugins[i].getAbsolutePath() + ". "
-									+ e.getMessage() == null ? "<null>" : e.getMessage());
+					throw new PluginException("Failed to unzip newly installed plugin " + newPlugins[i].getAbsolutePath() + ". "
+							+ e.getMessage() == null ? "<null>" : e.getMessage());
 				}
 			}
 		}
-
 		try {
-
 			// Create a classloader for all of the plugin jars
 			Vector<URL> v = new Vector<URL>();
 			if (pluginDir != null) {
@@ -203,10 +187,8 @@ public class PluginManager {
 				v.copyInto(urls);
 			}
 			URL[] urls = (URL[]) v.toArray(new URL[v.size()]);
-			classLoader = new URLClassLoader(urls,
-					parentClassLoader == null ? getClass().getClassLoader() : parentClassLoader);
+			classLoader = new URLClassLoader(urls, parentClassLoader == null ? getClass().getClassLoader() : parentClassLoader);
 			((URLClassLoader) classLoader).getURLs();
-
 			// Add the standard plugins
 			URL url = context.getStandardPluginsResource();
 			if (url != null) {
@@ -216,19 +198,15 @@ public class PluginManager {
 					context.log(PluginHostContext.LOG_ERROR, pe);
 				}
 			} else {
-
 				// Add the plugins
 				for (Enumeration<URL> e = classLoader.getResources("plugins.properties"); e.hasMoreElements();) {
 					URL resource = e.nextElement();
-					context.log(PluginHostContext.LOG_DEBUG,
-							"Found plugins.properties in " + resource.toExternalForm());
+					context.log(PluginHostContext.LOG_DEBUG, "Found plugins.properties in " + resource.toExternalForm());
 					loadPlugins(resource, classLoader, false);
 				}
 			}
-
 			Collections.sort(plugins);
 			checkDependencies();
-
 		} catch (Throwable t) {
 			throw new PluginException("Plugin manager failed to initialise. ", t);
 		}
@@ -251,28 +229,27 @@ public class PluginManager {
 				}
 			}
 		}
-
 	}
 
 	/**
 	 * Set the parent class loader. This must be done before the init() method
 	 * is called
 	 * 
-	 * @param parentClassLoader
-	 *            parent class loader
-	 * @throws IllegalStateException
-	 *             if the plugin manager has been initialised
+	 * @param parentClassLoader parent class loader
+	 * @throws IllegalStateException if the plugin manager has been initialised
 	 */
 	public void setParentClassLoader(ClassLoader parentClassLoader) {
 		if (initialised) {
-			throw new IllegalStateException(
-					"Plugin manager has already been initialise, parent class loader cannot be set");
+			throw new IllegalStateException("Plugin manager has already been initialise, parent class loader cannot be set");
 		}
 		this.parentClassLoader = parentClassLoader;
 	}
 
 	/**
 	 * Manually add a plugin.
+	 * 
+	 * @param plugin plugin
+	 * @param properties properties
 	 */
 	public void addPlugin(Plugin plugin, Properties properties) {
 		PluginWrapper w = new PluginWrapper(plugin, properties);
@@ -283,24 +260,19 @@ public class PluginManager {
 	/**
 	 * Unzip a file
 	 * 
-	 * @param zipFile
-	 *            zip file
-	 * @param dir
-	 *            directory to unzip to
-	 * @throws IOException
-	 *             on any i/o errors
+	 * @param zipFile zip file
+	 * @param dir directory to unzip to
+	 * @throws IOException on any i/o errors
 	 */
 	public void unzip(File zipFile, File dir) throws IOException {
-		context.log(PluginHostContext.LOG_INFORMATION,
-				"Unzipping " + zipFile.getAbsolutePath() + " to " + dir.getAbsolutePath());
+		context.log(PluginHostContext.LOG_INFORMATION, "Unzipping " + zipFile.getAbsolutePath() + " to " + dir.getAbsolutePath());
 		InputStream in = null;
 		try {
 			in = new BufferedInputStream(new FileInputStream(zipFile));
 			ZipInputStream zin = new ZipInputStream(in);
 			ZipEntry e;
 			while ((e = zin.getNextEntry()) != null) {
-				context.log(PluginHostContext.LOG_INFORMATION,
-						"   Deflating " + e.getName() + " (" + e.getSize() + " bytes");
+				context.log(PluginHostContext.LOG_INFORMATION, "   Deflating " + e.getName() + " (" + e.getSize() + " bytes");
 				OutputStream fout = null;
 				File f = new File(dir, e.getName());
 				if (!f.getParentFile().exists() && !f.getParentFile().mkdirs())
@@ -330,12 +302,11 @@ public class PluginManager {
 	 * Load a plugins.properties property sheet into separate property sheets,
 	 * one for each plugin
 	 * 
-	 * @param url
-	 *            location of plugins.properties resource
+	 * @param url location of plugins.properties resource
 	 * @return <code>HashMap</code> of properties
+	 * @throws PluginException on error
 	 */
 	public HashMap loadPluginProperties(URL url) throws PluginException {
-
 		HashMap props = new HashMap();
 		InputStream in = null;
 		try {
@@ -345,25 +316,19 @@ public class PluginManager {
 			for (Enumeration e = p.keys(); e.hasMoreElements();) {
 				String key = (String) e.nextElement();
 				int idx = key.indexOf('.');
-
 				if (idx == -1)
-					throw new PluginException("Invalid property name in " + url.toExternalForm() + ". Must be "
-							+ "<pluginName>.<property>=<value>");
-
+					throw new PluginException(
+							"Invalid property name in " + url.toExternalForm() + ". Must be " + "<pluginName>.<property>=<value>");
 				String name = key.substring(0, idx);
 				String property = key.substring(idx + 1);
-
 				if (property.length() == 0)
-					throw new PluginException("Invalid property name in " + url.toExternalForm() + ". Must be "
-							+ "<pluginName>.<property>=<value>");
-
+					throw new PluginException(
+							"Invalid property name in " + url.toExternalForm() + ". Must be " + "<pluginName>.<property>=<value>");
 				Properties h = (Properties) props.get(name);
-
 				if (h == null) {
 					h = new Properties();
 					props.put(name, h);
 				}
-
 				h.put(property, p.getProperty(key));
 			}
 		} catch (IOException ioe) {
@@ -377,58 +342,38 @@ public class PluginManager {
 	/**
 	 * Load plugins defined in the plugins properties file
 	 * 
-	 * @param url
-	 *            location of plugins.properties
-	 * @param classLoader
-	 *            the class loader to use to load the plugin
-	 * @param standard
-	 *            <code>true</code> if any plugins loaded are standard plugins
+	 * @param url location of plugins.properties
+	 * @param classLoader the class loader to use to load the plugin
+	 * @param standard <code>true</code> if any plugins loaded are standard
+	 *            plugins
 	 * 
-	 * @throws PluginException
-	 *             on any error
+	 * @throws PluginException on any error
 	 */
 	public void loadPlugins(URL url, ClassLoader classLoader, boolean standard) throws PluginException {
 		InputStream in = null;
-
 		try {
 			context.log(PluginHostContext.LOG_INFORMATION, "Loading plugins from " + url.toExternalForm());
-
 			HashMap props = loadPluginProperties(url);
-
 			for (Iterator i = props.keySet().iterator(); i.hasNext();) {
 				String key = (String) i.next();
 				Properties properties = (Properties) props.get(key);
-
 				String name = properties.getProperty(PLUGIN_NAME);
-
 				if (name == null)
-					throw new PluginException(
-							"<pluginName>.name property " + "not specified in " + url.toExternalForm());
-
+					throw new PluginException("<pluginName>.name property " + "not specified in " + url.toExternalForm());
 				String shortDescription = properties.getProperty(PLUGIN_SHORT_DESCRIPTION);
-
 				if (shortDescription == null)
 					throw new PluginException(
 							"<pluginName>.shortDescription property " + "not specified in " + url.toExternalForm());
-
 				String requiredHostVersion = properties.getProperty(PLUGIN_REQUIRED_HOST_VERSION);
-
 				if (requiredHostVersion == null)
 					throw new PluginException(
 							"<pluginName>.requiredHostVersion property " + "not specified in " + url.toExternalForm());
-
 				String className = properties.getProperty("className");
-
 				if (className == null)
-					throw new PluginException(
-							"<pluginName>.className property " + "not specified in " + url.toExternalForm());
-
+					throw new PluginException("<pluginName>.className property " + "not specified in " + url.toExternalForm());
 				String version = properties.getProperty("version");
-
 				if (version == null)
-					throw new PluginException(
-							"<pluginName>.version property " + "not specified in " + url.toExternalForm());
-
+					throw new PluginException("<pluginName>.version property " + "not specified in " + url.toExternalForm());
 				String jars = properties.getProperty(PLUGIN_JARS);
 				String dependencies = properties.getProperty(PLUGIN_DEPENDENCIES);
 				int order = 999;
@@ -439,24 +384,19 @@ public class PluginManager {
 				String pluginURL = properties.getProperty(PLUGIN_URL);
 				String author = properties.getProperty(PLUGIN_AUTHOR);
 				String information = properties.getProperty(PLUGIN_INFORMATION);
-
 				List<PluginWrapper> found = new ArrayList<PluginWrapper>();
-
 				context.log(PluginHostContext.LOG_DEBUG, "Looking for plugin " + name);
 				for (Iterator z = plugins.iterator(); z.hasNext();) {
 					PluginWrapper pw = (PluginWrapper) z.next();
-					context.log(PluginHostContext.LOG_DEBUG,
-							"   Testing againts " + pw.properties.getProperty(PLUGIN_NAME, ""));
+					context.log(PluginHostContext.LOG_DEBUG, "   Testing againts " + pw.properties.getProperty(PLUGIN_NAME, ""));
 					if (pw.properties.getProperty(PLUGIN_NAME, "").equals(name))
 						found.add(pw);
 				}
-
 				if (found.size() > 0)
 					context.log(PluginHostContext.LOG_DEBUG,
 							"Plugin " + name + " [" + className + "] has been found more than once " + found);
 				else {
 					context.log(PluginHostContext.LOG_INFORMATION, "Loading plugin " + name + " [" + className + "]");
-
 					try {
 						PluginVersion reqVersion = null;
 						if (!requiredHostVersion.equalsIgnoreCase("any")) {
@@ -469,12 +409,11 @@ public class PluginManager {
 							// to " + context.getPluginHostVersion() + " = " +
 							// dif);
 							if (dif > 0)
-								throw new PluginException("This plugin requires that " + context.getPluginHostName()
-										+ " is at least of version " + reqVersion.toString()
-										+ ". The plugin host is current at version "
-										+ context.getPluginHostVersion().getVersionString());
+								throw new PluginException(
+										"This plugin requires that " + context.getPluginHostName() + " is at least of version "
+												+ reqVersion.toString() + ". The plugin host is current at version "
+												+ context.getPluginHostVersion().getVersionString());
 						}
-
 						Plugin plugin = (Plugin) Class.forName(className, true, classLoader).newInstance();
 						String resn = plugin.getClass().getName().replace('.', '/') + ".class";
 						context.log(PluginHostContext.LOG_DEBUG, "Looking for resource " + resn);
@@ -483,7 +422,6 @@ public class PluginManager {
 						if (res == null)
 							context.log(PluginHostContext.LOG_ERROR, "Could not locate resource " + resn);
 						else {
-
 							String n = res.toExternalForm();
 							if (n.startsWith("jar:file:")) {
 								n = n.substring(4);
@@ -492,8 +430,8 @@ public class PluginManager {
 									n = n.substring(0, idx);
 								n = n.substring(5);
 								// Windows path?
-								if (n.startsWith("/") && n.length() > 3 && n.charAt(2) == ':'
-										&& Character.isLetter(n.charAt(1)) && n.charAt(3) == '/')
+								if (n.startsWith("/") && n.length() > 3 && n.charAt(2) == ':' && Character.isLetter(n.charAt(1))
+										&& n.charAt(3) == '/')
 									n = n.substring(1);
 								File f = new File(n);
 								resource = f.getAbsolutePath();
@@ -506,21 +444,15 @@ public class PluginManager {
 						pr.put(PLUGIN_CLASSNAME, className);
 						pr.put(PLUGIN_VERSION, version);
 						pr.put(PLUGIN_RESOURCE, resource);
-
 						if (author != null)
 							pr.put(PLUGIN_AUTHOR, author);
-
 						if (jars != null)
 							pr.put(PLUGIN_JARS, jars);
-
 						if (dependencies != null)
 							pr.put(PLUGIN_DEPENDENCIES, dependencies);
-
 						if (information != null)
 							pr.put(PLUGIN_INFORMATION, information);
-
 						pr.put(PLUGIN_ORDER, String.valueOf(order));
-
 						if (pluginURL != null)
 							pr.put(PLUGIN_URL, pluginURL);
 						addPlugin(plugin, pr);
@@ -556,7 +488,6 @@ public class PluginManager {
 						}
 						depName = depName.substring(0, idx);
 					}
-
 					// First check the plugin exists
 					PluginWrapper dep = getPluginWrapper(depName);
 					if (dep == null) {
@@ -571,14 +502,13 @@ public class PluginManager {
 							PluginVersion depVersion = dep.getVersion();
 							if (depVersion.compareTo(reqDepVersion) < 0) {
 								context.log(PluginHostContext.LOG_ERROR,
-										"Plugin " + w.getName() + " depends on " + depName + " (version "
-												+ reqDepVersion.toString() + "), but only version " + depVersion
+										"Plugin " + w.getName() + " depends on " + depName + " (version " + reqDepVersion.toString()
+												+ "), but only version " + depVersion
 												+ " is installed. Please upgrade the dependency");
 								toRemove.add(w);
 							}
 						}
 					}
-
 				}
 			}
 		}
@@ -587,29 +517,25 @@ public class PluginManager {
 			plugins.remove(w);
 			pluginMap.remove(w.getName());
 		}
-
 	}
 
 	/**
 	 * Return the properties for the specified plugin, or <code>null</code> if
 	 * no such plugin exists
 	 * 
-	 * @param name
-	 *            plugin name
+	 * @param name plugin name
 	 * 
 	 * @return properties
 	 */
 	public Properties getPluginProperties(String name) {
 		PluginWrapper w = getPluginWrapper(name);
-
 		return (w == null) ? null : w.properties;
 	}
 
 	/**
 	 * Return the properties for the specified plugin
 	 * 
-	 * @param plugin
-	 *            plugin name
+	 * @param plugin plugin name
 	 * 
 	 * @return properties
 	 */
@@ -633,11 +559,9 @@ public class PluginManager {
 	public PluginWrapper getPluginWrapper(Plugin plugin) {
 		for (Enumeration e = plugins.elements(); e.hasMoreElements();) {
 			PluginWrapper w = (PluginWrapper) e.nextElement();
-
 			if (w.plugin == plugin)
 				return w;
 		}
-
 		return null;
 	}
 
@@ -646,7 +570,6 @@ public class PluginManager {
 			PluginWrapper w = (PluginWrapper) i.next();
 			w.plugin.buildCLIOptions(options1);
 		}
-
 	}
 
 	/**
@@ -655,7 +578,6 @@ public class PluginManager {
 	public void start() {
 		for (Iterator i = plugins.iterator(); i.hasNext();) {
 			PluginWrapper w = (PluginWrapper) i.next();
-
 			try {
 				w.plugin.startPlugin(context);
 				w.status.status = STATUS_STARTED;
@@ -663,8 +585,7 @@ public class PluginManager {
 			} catch (Exception pe) {
 				w.status.exception = pe;
 				w.status.status = STATUS_ERRORED;
-				context.log(PluginHostContext.LOG_ERROR,
-						"Failed to start plugin " + w.properties.getProperty(PLUGIN_NAME), pe);
+				context.log(PluginHostContext.LOG_ERROR, "Failed to start plugin " + w.properties.getProperty(PLUGIN_NAME), pe);
 			}
 		}
 	}
@@ -679,8 +600,7 @@ public class PluginManager {
 			} catch (PluginException pe) {
 				w.status.exception = pe;
 				w.status.status = STATUS_ERRORED;
-				context.log(PluginHostContext.LOG_ERROR,
-						"Failed to start plugin " + w.properties.getProperty(PLUGIN_NAME), pe);
+				context.log(PluginHostContext.LOG_ERROR, "Failed to start plugin " + w.properties.getProperty(PLUGIN_NAME), pe);
 			}
 		}
 	}
@@ -695,8 +615,7 @@ public class PluginManager {
 				w.status.status = STATUS_STOPPED;
 			} catch (PluginException pe) {
 				w.status.exception = pe;
-				context.log(PluginHostContext.LOG_ERROR,
-						"Failed to stop plugin " + w.properties.getProperty(PLUGIN_NAME), pe);
+				context.log(PluginHostContext.LOG_ERROR, "Failed to stop plugin " + w.properties.getProperty(PLUGIN_NAME), pe);
 			}
 		}
 	}
@@ -711,7 +630,6 @@ public class PluginManager {
 			if (!w.plugin.canStopPlugin())
 				return false;
 		}
-
 		return true;
 	}
 
@@ -740,8 +658,7 @@ public class PluginManager {
 	/**
 	 * Return the number plugins at a given index
 	 * 
-	 * @param r
-	 *            index of plugin
+	 * @param r index of plugin
 	 * @return plugin
 	 */
 	public Plugin getPluginAt(int r) {
@@ -752,8 +669,7 @@ public class PluginManager {
 	 * Return the plugin with the specified name or <code>null</code> if no
 	 * plugin can be found
 	 * 
-	 * @param name
-	 *            name of plugin
+	 * @param name name of plugin
 	 * 
 	 * @return plugin
 	 */
@@ -765,14 +681,13 @@ public class PluginManager {
 	/**
 	 * Return the plugin with the specified clazz
 	 * 
-	 * @param name
-	 *            class of plugin
-	 * 
+	 * @param clazz class of plugin
+	 * @param <P> type of plugin
 	 * @return plugin
 	 */
 	public <P extends Plugin<?>> P getPlugin(Class<P> clazz) {
 		PluginWrapper wrapper = getPluginWrapper(clazz);
-		return (wrapper == null) ? null : (P)wrapper.plugin;
+		return (wrapper == null) ? null : (P) wrapper.plugin;
 	}
 
 	/**
@@ -787,24 +702,19 @@ public class PluginManager {
 	/**
 	 * Return all plugins are of the specified class
 	 * 
-	 * @param pluginClass
-	 *            plugin class
+	 * @param pluginClass plugin class
 	 * 
 	 * @return DOCUMENT ME!
 	 */
 	public Plugin[] getPluginsOfClass(Class pluginClass) {
 		Vector v = new Vector();
-
 		for (Iterator i = plugins.iterator(); i.hasNext();) {
 			PluginWrapper w = (PluginWrapper) i.next();
-
 			if (pluginClass.isAssignableFrom(w.plugin.getClass()))
 				v.addElement(w.plugin);
 		}
-
 		Plugin[] p = new Plugin[v.size()];
 		v.copyInto(p);
-
 		return p;
 	}
 
@@ -825,7 +735,6 @@ public class PluginManager {
 			try {
 				order = Integer.parseInt(properties.getProperty(PLUGIN_ORDER));
 			} catch (Exception e) {
-
 			}
 		}
 
@@ -851,23 +760,19 @@ public class PluginManager {
 
 		@Override
 		public String toString() {
-			return "PluginWrapper [order=" + order + ", plugin=" + plugin + ", properties=" + properties + ", status="
-					+ status + ", version=" + version + "]";
+			return "PluginWrapper [order=" + order + ", plugin=" + plugin + ", properties=" + properties + ", status=" + status
+					+ ", version=" + version + "]";
 		}
-
 	}
 
 	/**
 	 * Load a class and instantiate that is accessable by the specified plugins
 	 * class loader.
 	 * 
-	 * @param plugin
-	 *            plugin name
-	 * @param className
-	 *            class name to load
+	 * @param plugin plugin name
+	 * @param className class name to load
 	 * @return class
-	 * @throws ClassNotFoundException
-	 *             if class cannot be loaded
+	 * @throws ClassNotFoundException if class cannot be loaded
 	 */
 	public Class loadClass(String plugin, String className) throws ClassNotFoundException {
 		Plugin p = getPlugin(plugin);
@@ -882,8 +787,7 @@ public class PluginManager {
 	 * be to prevent a plugin from starting after the initialisation is
 	 * complete.
 	 * 
-	 * @param plugin
-	 *            plugin to remove
+	 * @param plugin plugin to remove
 	 */
 	public void removePlugin(Plugin plugin) {
 		PluginWrapper w = getPluginWrapper(plugin);
@@ -908,7 +812,6 @@ public class PluginManager {
 	}
 
 	public class MutableURLClassLoader extends URLClassLoader {
-
 		public MutableURLClassLoader(URL[] arg0) {
 			super(arg0);
 		}
@@ -916,6 +819,5 @@ public class PluginManager {
 		public void addURL(URL arg0) {
 			super.addURL(arg0);
 		}
-
 	}
 }

@@ -37,7 +37,7 @@ package com.google.code.gtkjfilechooser.ui;
 
 import static com.google.code.gtkjfilechooser.ActionPath.RECENTLY_USED_PANEL_ID;
 import static com.google.code.gtkjfilechooser.ActionPath.SEARCH_PANEL_ID;
-import static com.google.code.gtkjfilechooser.I18N._;
+import static com.google.code.gtkjfilechooser.I18N.i18n;
 import static com.google.code.gtkjfilechooser.I18N.getMnemonic;
 import static com.google.code.gtkjfilechooser.NavigationKeyBinding.*;
 import static com.google.code.gtkjfilechooser.ui.ContextMenu.ACTION_ADD_BOOKMARK;
@@ -348,7 +348,7 @@ public class GtkFileChooserUI extends BasicFileChooserUI implements Serializable
 				GtkFileChooserSettings.get().setLocationMode(mode);
 			}
 		});
-		showPositionButton.setToolTipText(_("Type a file name"));
+		showPositionButton.setToolTipText(i18n("Type a file name"));
 		// CurrentDir Combo Buttons
 		pathBarButtons = new GtkPathBar(getFileChooser().getCurrentDirectory());
 		pathBarButtons.addActionListener(pathBarActionListener);
@@ -361,7 +361,7 @@ public class GtkFileChooserUI extends BasicFileChooserUI implements Serializable
 		pathbar.add(Box.createHorizontalStrut(UPPER_BUTTON_GAP));
 		pathbar.add(pathBarButtons);
 		// Create folder button
-		createFolderButton = new JButton(_("Create Fo_lder"));
+		createFolderButton = new JButton(i18n("Create Fo_lder"));
 		createFolderButton.setVisible(false);
 		createFolderButton.setMnemonic(getMnemonic("Create Fo_lder"));
 		createFolderButton.addActionListener(new ActionListener() {
@@ -412,7 +412,7 @@ public class GtkFileChooserUI extends BasicFileChooserUI implements Serializable
 
 	private void addFileBrowserPane() {
 		// Left Panel (Bookmarks)
-		addBookmarkButton = new JButton(_("_Add"));
+		addBookmarkButton = new JButton(i18n("_Add"));
 		addBookmarkButton.setMnemonic(getMnemonic("_Add"));
 		addBookmarkButton.addActionListener(new ActionListener() {
 			@Override
@@ -421,7 +421,7 @@ public class GtkFileChooserUI extends BasicFileChooserUI implements Serializable
 			}
 		});
 		addBookmarkButton.setEnabled(false);
-		removeBookmarkButton = new JButton(_("_Remove"));
+		removeBookmarkButton = new JButton(i18n("_Remove"));
 		removeBookmarkButton.setMnemonic(getMnemonic("_Remove"));
 		// it will be enabled, when we select a bookmark.
 		removeBookmarkButton.setEnabled(false);
@@ -713,13 +713,13 @@ public class GtkFileChooserUI extends BasicFileChooserUI implements Serializable
 	protected void installStrings(JFileChooser fc) {
 		super.installStrings(fc);
 		Locale l = fc.getLocale();
-		fileNameLabelText = _("_Location:");
+		fileNameLabelText = i18n("_Location:");
 		fileNameLabelMnemonic = getMnemonic("_Location:");
 		filesOfTypeLabelText = UIManager.getString("FileChooser.filesOfTypeLabelText", l);
 		// Use gnome l10n resources
-		openButtonText = _("Stock label|_Open");
-		saveButtonText = _("Stock label|_Save");
-		cancelButtonText = _("Stock label|_Cancel");
+		openButtonText = i18n("Stock label|_Open");
+		saveButtonText = i18n("Stock label|_Save");
+		cancelButtonText = i18n("Stock label|_Cancel");
 	}
 
 	FilesListPane getRecentlyUsedPane() {
@@ -756,8 +756,8 @@ public class GtkFileChooserUI extends BasicFileChooserUI implements Serializable
 				return false;
 			}
 			if (selectedFile.exists()) {
-				String head = _("A file named \"%s\" already exists.  Do you want to replace it?", selectedFile.getName());
-				String foot = _("The file already exists in \"%s\".  Replacing it will overwrite its contents.",
+				String head = i18n("A file named \"%s\" already exists.  Do you want to replace it?", selectedFile.getName());
+				String foot = i18n("The file already exists in \"%s\".  Replacing it will overwrite its contents.",
 						selectedFile.getParentFile().getName());
 				String msg = "<html><p width='400px'>" + "<span style='font-weight: bold; font-size: 18pt;'>" + head
 						+ "</span></p><br /><p>" + foot + "</p></html>";
@@ -1180,7 +1180,7 @@ public class GtkFileChooserUI extends BasicFileChooserUI implements Serializable
 		// Enable/disable the "Add to Bookmark" button and update tooltip
 		if (file != null && file.isDirectory()) {
 			addBookmarkButton.setEnabled(true);
-			addBookmarkButton.setToolTipText(_("Add the folder '%s' to the bookmarks", file.getName()));
+			addBookmarkButton.setToolTipText(i18n("Add the folder '%s' to the bookmarks", file.getName()));
 		} else {
 			addBookmarkButton.setEnabled(false);
 			addBookmarkButton.setToolTipText(null);
@@ -1221,7 +1221,7 @@ public class GtkFileChooserUI extends BasicFileChooserUI implements Serializable
 				}
 			}
 			addBookmarkButton.setEnabled(enable);
-			addBookmarkButton.setToolTipText(_("Add the selected folders to the bookmarks"));
+			addBookmarkButton.setToolTipText(i18n("Add the selected folders to the bookmarks"));
 		}
 	}
 
@@ -1269,7 +1269,7 @@ public class GtkFileChooserUI extends BasicFileChooserUI implements Serializable
 				// Enable only if a bookmark is selected.
 				if (path instanceof GtkBookmark) {
 					removeBookmarkButton.setEnabled(true);
-					removeBookmarkButton.setToolTipText(_("Remove the bookmark '%s'", path.getName()));
+					removeBookmarkButton.setToolTipText(i18n("Remove the bookmark '%s'", path.getName()));
 				} else {
 					removeBookmarkButton.setEnabled(false);
 					removeBookmarkButton.setToolTipText(null);

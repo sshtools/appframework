@@ -1,7 +1,5 @@
 /*-- 
 
- $Id: PluginHostContext.java,v 1.1.2.1 2010-04-30 22:04:38 brett Exp $
-
  Copyright (C) 2003 Brett Smith.
  All rights reserved.
  
@@ -53,9 +51,6 @@ import org.apache.commons.cli.CommandLine;
 
 /**
  *  The  hosting application must provide an implementation of this interface.
- *
- *@author     magicthize
- *@created    26 May 2002
  */
 public interface PluginHostContext
 {
@@ -66,6 +61,8 @@ public interface PluginHostContext
 	
 	/**
 	 * Get the parsed command line
+	 * 
+	 * @return command line
 	 */
 	public CommandLine getCommandLine();
 	
@@ -87,7 +84,7 @@ public interface PluginHostContext
 	/**
 	 * Return the version for the plugin host. Each plugin may specify the
 	 * version of the plugin host that it requires. This version string should
-	 * be in the format of <major>.<minor>[.<micro>[-<other>]].
+	 * be in the format of major.minor[.micro[-other]].
 	 * 
 	 * @return plugin host version
 	 */
@@ -176,7 +173,7 @@ public interface PluginHostContext
 	 * value supplied.
 	 * 
 	 * @param key preference name
-	 * @param defaultVal default value
+	 * @param defaultValue default value
 	 * @return value
 	 */
 	public String getPreference(String key, String defaultValue);

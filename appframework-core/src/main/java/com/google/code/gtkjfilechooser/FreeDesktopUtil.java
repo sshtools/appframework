@@ -10,7 +10,7 @@
  ******************************************************************************/
 package com.google.code.gtkjfilechooser;
 
-import static com.google.code.gtkjfilechooser.I18N._;
+import static com.google.code.gtkjfilechooser.I18N.i18n;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -74,12 +74,11 @@ public class FreeDesktopUtil {
 
 	/**
 	 * Retrieve the path of "well known" user directories like the desktop
-	 * folder and the music folder.
+	 * folder and the music folder. See <a href="http://freedesktop.org/wiki/Software/xdg-user-dirs"/>
 	 * 
 	 * @param type
-	 * @return
+	 * @return file
 	 * 
-	 * @see http://freedesktop.org/wiki/Software/xdg-user-dirs
 	 */
 	static public File getWellKnownDirPath(WellKnownDir type) {
 		if (userDirsProps == null) {
@@ -192,7 +191,7 @@ public class FreeDesktopUtil {
 						if (Arrays.binarySearch(diskUUIDs, name) >= 0) {
 							// Removable device without name.
 							// Set a generic name with size
-							name = humanreadble(new File(location).getTotalSpace(),	GB / 2) + " " + _("File System");
+							name = humanreadble(new File(location).getTotalSpace(),	GB / 2) + " " + i18n("File System");
 						}
 
 						device.setName(name);

@@ -10,7 +10,7 @@
  ******************************************************************************/
 package com.google.code.gtkjfilechooser.ui;
 
-import static com.google.code.gtkjfilechooser.I18N._;
+import static com.google.code.gtkjfilechooser.I18N.i18n;
 
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -63,7 +63,7 @@ public class SearchPanel extends JPanel {
 		/**
 		 * Search label
 		 */
-		searchLabel = new JLabel(_("_Search:"));
+		searchLabel = new JLabel(i18n("_Search:"));
 		add(searchLabel);
 		add(Box.createRigidArea(new Dimension(10,0)));
 

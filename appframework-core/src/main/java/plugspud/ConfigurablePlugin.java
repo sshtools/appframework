@@ -1,7 +1,5 @@
 /*-- 
 
- $Id: ConfigurablePlugin.java,v 1.1.2.1 2010-04-30 22:04:38 brett Exp $
-
  Copyright (C) 2003 Brett Smith.
  All rights reserved.
  
@@ -48,20 +46,14 @@ package plugspud;
 import javax.swing.JComponent;
 
 /**
- *  This  interface should be implemented by plugins that wish to have the
+ * This interface should be implemented by plugins that wish to have the
  * configure option enabled in the plugin manager UI.
- * 
- *
- *@author     magicthize
- *@created    26 May 2002
  */
-public interface ConfigurablePlugin extends Plugin
-{
+public interface ConfigurablePlugin extends Plugin {
 	/**
-	 * Invoked by Plugspud when it the user clicks on the 'Configure' button. 
+	 * Invoked by Plugspud when it the user clicks on the 'Configure' button.
 	 *
 	 * @param parent parent component
 	 */
 	public void configure(JComponent parent);
 }
-

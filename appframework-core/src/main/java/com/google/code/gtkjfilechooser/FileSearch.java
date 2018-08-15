@@ -15,7 +15,6 @@ import java.io.FileFilter;
 
 import com.google.code.gtkjfilechooser.FileSearch.FileSearchHandler.Status;
 
-
 /**
  * Find files and directories than contain the searched term (case insensitive).
  * 
@@ -27,7 +26,6 @@ public class FileSearch {
 	private String searchterm;
 	private FileFilter fileFilter;
 	private FileSearchHandler handler;
-
 	private boolean searchHidden = false;
 	private boolean stop = false;
 	private boolean interrupted = false;
@@ -42,18 +40,20 @@ public class FileSearch {
 	 * Set {@code true} if you want to search hidden files or in hidden folders,
 	 * too.
 	 * 
-	 * @param searchHidden
+	 * @param searchHidden search hidden
 	 */
 	public void setSearchHidden(boolean searchHidden) {
 		this.searchHidden = searchHidden;
 	}
-	
+
 	/**
-	 * Set a file filter for the search. If {@code null}, all files are accepted.
-	 * @param fileFilter
+	 * Set a file filter for the search. If {@code null}, all files are
+	 * accepted.
+	 * 
+	 * @param fileFilter file filter
 	 */
 	public void setFileFilter(FileFilter fileFilter) {
-		this.fileFilter = fileFilter;		
+		this.fileFilter = fileFilter;
 	}
 
 	/**
@@ -61,7 +61,6 @@ public class FileSearch {
 	 */
 	public void stop() {
 		this.stop = true;
-
 	}
 
 	/**
@@ -71,15 +70,12 @@ public class FileSearch {
 	public void start() {
 		if (stop) {
 			throw new IllegalStateException(
-					"This search was interruped or has completed. "
-							+ "For a new search you must create a new instance.");
+					"This search was interruped or has completed. " + "For a new search you must create a new instance.");
 		}
-
 		Thread scanFilesThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				scanFiles(new File(targetdir));
-
 				if (!interrupted) {
 					// the search was already interrupted, we don't need to
 					// resend the signal.
@@ -88,7 +84,6 @@ public class FileSearch {
 				}
 			}
 		});
-
 		scanFilesThread.start();
 	}
 
@@ -100,16 +95,12 @@ public class FileSearch {
 				interrupted = true;
 				handler.finished(Status.INTERRUPTED);
 			}
-
 			return;
 		}
-
-		if (file.getName().toLowerCase().contains(searchterm)
-				&& (searchHidden || !isHidden(file))
+		if (file.getName().toLowerCase().contains(searchterm) && (searchHidden || !isHidden(file))
 				&& (fileFilter != null && fileFilter.accept(file))) {
 			handler.found(file);
 		}
-
 		if (file.isDirectory() && (searchHidden || !isHidden(file))) {
 			File[] children = file.listFiles();
 			if (children != null) {
@@ -128,7 +119,6 @@ public class FileSearch {
 		if (".".equals(file.getName())) {
 			return false;
 		}
-
 		return file.isHidden();
 	}
 
@@ -137,7 +127,9 @@ public class FileSearch {
 	 * 
 	 */
 	public interface FileSearchHandler {
-		public enum Status {COMPLETED, INTERRUPTED};
+		public enum Status {
+			COMPLETED, INTERRUPTED
+		};
 
 		/**
 		 * Method invoked when a file is found.
@@ -147,11 +139,12 @@ public class FileSearch {
 		public void found(File file);
 
 		/**
-		 * Method invoked when the search has completed ({@link Status#COMPLETED}) or was
-		 * interrupted ({@link Status#INTERRUPTED}).
+		 * Method invoked when the search has completed
+		 * ({@link Status#COMPLETED}) or was interrupted
+		 * ({@link Status#INTERRUPTED}).
+		 * 
+		 * @param status status
 		 */
 		public void finished(Status status);
 	}
-
-
 }

@@ -161,8 +161,8 @@ public class GettextResource extends ResourceBundle {
 	/**
 	 * Load a spefic .mo file
 	 * 
-	 * @param moFile
-	 * @throws IOException
+	 * @param moFile file
+	 * @throws IOException on I/O error
 	 */
 	public GettextResource(File moFile) {
 		init(moFile);
@@ -194,8 +194,9 @@ public class GettextResource extends ResourceBundle {
 	/**
 	 * Create a new instance a reuse one already existent in the cache.
 	 * 
-	 * @param textdomain
-	 * @throws IOException
+	 * @param loc locale
+	 * @param textdomain text domain
+	 * @throws IOException on I/O error
 	 */
 	public GettextResource(Locale loc, String textdomain) {
 		this(loc, DEFAULT_LOCALES_DIRECTORY, textdomain);
@@ -534,10 +535,10 @@ public class GettextResource extends ResourceBundle {
 
 	/**
 	 * Mark missing translation with one star at the beginning and at the end or
-	 * two if also the context lacks (for example: _("Stock label|Missing" -->
-	 * "**Missing**" or _("Missing" --> "*Missing*").
+	 * two if also the context lacks (for example: _("Stock label|Missing" --&gt;
+	 * "**Missing**" or _("Missing" --&gt; "*Missing*").
 	 * 
-	 * @param showMissingTranslation
+	 * @param showMissingTranslation  show missing translation
 	 */
 	public void markMissingTranslation(boolean showMissingTranslation) {
 		this.showMissingTranslation = showMissingTranslation;
@@ -654,7 +655,7 @@ public class GettextResource extends ResourceBundle {
 		System.out.println("  gettextResource /usr/share/locale/it/LC_MESSAGES/gtk20.mo");
 	}
 
-	/**
+	/*
 	 * Command line user interface.
 	 * 
 	 * <pre>

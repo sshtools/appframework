@@ -46,12 +46,9 @@ import java.io.IOException;
  * "libgtk-x11-2.0.so.0.600.7" is GTK+ 2.6.7, "libgtk-x11-2.0.so.0.1600.1" is
  * GTK+ 2.16.1 an so on...
  * </p>
+ * <p> See <a href="http://library.gnome.org/devel/gtk/unstable/gtk-Feature-Test-Macros.html"/>
+ * and <a href="http://git.gnome.org/cgit/gtk+/tree/gtk/gtkversion.h.in"/> 
  * 
- * 
- * 
- * @see {@link http
- *      ://library.gnome.org/devel/gtk/unstable/gtk-Feature-Test-Macros.html}
- * @see {@link http://git.gnome.org/cgit/gtk+/tree/gtk/gtkversion.h.in}
  * 
  * @author Costantino Cerbo
  * 
@@ -94,9 +91,9 @@ public class GtkVersion {
 	 * Checks that the GTK+ library in use is compatible (the same or newer)
 	 * with the given version.
 	 * 
-	 * @param required_major
-	 * @param required_minor
-	 * @param required_micro
+	 * @param major required major
+	 * @param minor required minor
+	 * @param micro required micro
 	 * @return {@code null} if the GTK+ library is compatible with the given
 	 *         version, or a string describing the version mismatch. The
 	 *         returned string is owned by GTK+ and should not be modified or

@@ -11,7 +11,7 @@
  ******************************************************************************/
 package com.google.code.gtkjfilechooser.ui;
 
-import static com.google.code.gtkjfilechooser.I18N._;
+import static com.google.code.gtkjfilechooser.I18N.i18n;
 import static com.google.code.gtkjfilechooser.I18N.getMnemonic;
 
 import java.awt.BorderLayout;
@@ -221,7 +221,7 @@ public class GtkLocationsPane extends JPanel {
 	/* If bookmark is null will create a "dummy" popup menu with disabled items */
 	private JPopupMenu createEditPopup(final MouseEvent evt, final GtkBookmark bookmark) {
 		JPopupMenu popup = new JPopupMenu();
-		JMenuItem removeItem = new JMenuItem(_("_Remove"));
+		JMenuItem removeItem = new JMenuItem(i18n("_Remove"));
 		removeItem.setMnemonic(getMnemonic("_Remove"));
 		if(bookmark != null) {
 			removeItem.addActionListener(new ActionListener() {
@@ -237,7 +237,7 @@ public class GtkLocationsPane extends JPanel {
 			removeItem.setEnabled(false);
 		}
 
-		JMenuItem renameItem = new JMenuItem(_("Rename..."));
+		JMenuItem renameItem = new JMenuItem(i18n("Rename..."));
 		if(bookmark != null) {
 			renameItem.addActionListener(new ActionListener() {
 				@Override
@@ -479,7 +479,7 @@ public class GtkLocationsPane extends JPanel {
 
 		@Override
 		public String getColumnName(int columnIndex) {
-			return _("Places");
+			return i18n("Places");
 		}
 
 		@Override

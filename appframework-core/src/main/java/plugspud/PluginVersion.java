@@ -1,7 +1,5 @@
 /*-- 
 
- $Id: PluginVersion.java,v 1.1.2.1 2010-04-30 22:04:38 brett Exp $
-
  Copyright (C) 2003 Brett Smith.
  All rights reserved.
  
@@ -51,9 +49,6 @@ import java.util.StringTokenizer;
  * Encapsule a version of either the plugin host or a plugin. A version consists
  * of a major version number and option minor, micro and other elements. Each
  * numeric element of the version cannot have a value of more than 1000.
- * 
- * @author magicthize
- * @created 26 May 2002
  */
 public class PluginVersion implements Comparable {
 
@@ -115,10 +110,10 @@ public class PluginVersion implements Comparable {
 
     /**
      * Construct a new PluginVersion given a string. The string must be in the
-     * format <code><b>Version string must be in format <major>[.<minor>[.
-     * <micro>[-<other>]]]</b></code>.
+     * format <b>Version string must be in <code>format major[.minor[.
+     * micro[-other]]]</code></b>.
      * 
-     * @param versionString
+     * @param versionString version string
      * @throws IllegalArgumentException
      *             if version string is in incorrect format
      */

@@ -10,7 +10,7 @@
  ******************************************************************************/
 package com.google.code.gtkjfilechooser.ui;
 
-import static com.google.code.gtkjfilechooser.I18N._;
+import static com.google.code.gtkjfilechooser.I18N.i18n;
 import static com.google.code.gtkjfilechooser.ui.ContextMenu.ACTION_ADD_BOOKMARK;
 import static com.google.code.gtkjfilechooser.ui.ContextMenu.SHOW_SIZE_COLUMN_CHANGED_PROPERTY;
 import static javax.swing.JFileChooser.*;
@@ -328,7 +328,7 @@ public class FileBrowserPane extends FilesListPane {
 
 		JTextField editorComponent = (JTextField) table.getEditorComponent();
 		if (editorComponent != null) {
-			editorComponent.setText(_("Type name of new folder"));
+			editorComponent.setText(i18n("Type name of new folder"));
 			editorComponent.selectAll();
 			editorComponent.requestFocusInWindow();
 
@@ -378,7 +378,7 @@ public class FileBrowserPane extends FilesListPane {
 						newFolderName = (String) cellValue;
 					}
 
-					if (_("Type name of new folder").equals(newFolderName)) {
+					if (i18n("Type name of new folder").equals(newFolderName)) {
 						// Avoid to create folder with the tip text.
 						removeEmtpyRow();
 						return;
@@ -388,7 +388,7 @@ public class FileBrowserPane extends FilesListPane {
 					if (newFolder.exists()) {
 						JOptionPane.showMessageDialog(FileBrowserPane.this,
 								"<html><p width='250px'>" + 
-								_("The folder could not be created, as a file with the same name already exists.  Try using a different name for the folder, or rename the file first.") + 
+								i18n("The folder could not be created, as a file with the same name already exists.  Try using a different name for the folder, or rename the file first.") + 
 								"</p></html>",
 								"",
 								JOptionPane.ERROR_MESSAGE);

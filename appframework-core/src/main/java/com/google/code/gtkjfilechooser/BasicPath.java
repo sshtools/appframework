@@ -10,7 +10,7 @@
  ******************************************************************************/
 package com.google.code.gtkjfilechooser;
 
-import static com.google.code.gtkjfilechooser.I18N._;
+import static com.google.code.gtkjfilechooser.I18N.i18n;
 
 import java.io.File;
 
@@ -34,7 +34,7 @@ public class BasicPath implements Path {
 		}		
 	}
 
-	static public final BasicPath ROOT = new BasicPath(_("File System"), "/", "gtk-harddisk"); 
+	static public final BasicPath ROOT = new BasicPath(i18n("File System"), "/", "gtk-harddisk"); 
 
 	private static final long serialVersionUID = 1L;
 

@@ -10,7 +10,7 @@
  ******************************************************************************/
 package com.google.code.gtkjfilechooser;
 
-import static com.google.code.gtkjfilechooser.I18N._;
+import static com.google.code.gtkjfilechooser.I18N.i18n;
 
 /**
  * To an {@link ActionPath} corresponds no location, but is like an button to
@@ -26,8 +26,8 @@ public class ActionPath implements Path {
 	static final public int RECENTLY_USED_PANEL_ID = 1001;
 	static final public int SEARCH_PANEL_ID = 1002;
 
-	static public final ActionPath SEARCH = new ActionPath(_("Search"), SEARCH_PANEL_ID, "search", "actions/stock_search");
-	static public final ActionPath RECENTLY_USED = new ActionPath(_("Recently Used"), RECENTLY_USED_PANEL_ID, "recently_used", "actions/document-open-recent");
+	static public final ActionPath SEARCH = new ActionPath(i18n("Search"), SEARCH_PANEL_ID, "search", "actions/stock_search");
+	static public final ActionPath RECENTLY_USED = new ActionPath(i18n("Recently Used"), RECENTLY_USED_PANEL_ID, "recently_used", "actions/document-open-recent");
 
 	private String name;
 	private int id;

@@ -49,6 +49,7 @@ public class BookmarkManager implements Serializable {
 	 * @param name
 	 *            the name of the bookmark. If {@code null}, the name is the
 	 *            simple directory name.
+	 * @return bookmark
 	 */
 	public GtkBookmark add(File dir, String name) {
 		if (!dir.exists()) {

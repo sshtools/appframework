@@ -11,7 +11,7 @@
  ******************************************************************************/
 package com.google.code.gtkjfilechooser.ui;
 
-import static com.google.code.gtkjfilechooser.I18N._;
+import static com.google.code.gtkjfilechooser.I18N.i18n;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -303,7 +303,7 @@ public class FilesListPane extends JComponent implements ActionDispatcher {
 			this.columnNames = new String[columnIds.length];
 			for (int i = 0; i < columnIds.length; i++) {
 				String columnId = columnIds[i];
-				columnNames[i] = _(columnId);
+				columnNames[i] = i18n(columnId);
 			}
 			for (File file : fileEntries) {
 				addFileEntryInternal(file);

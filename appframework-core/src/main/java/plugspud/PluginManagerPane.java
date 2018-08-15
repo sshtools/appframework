@@ -171,6 +171,7 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 	 * 
 	 * @param manager the plugin mananager
 	 * @param context context
+	 * @param showBuiltInPlugins show built-in plugins
 	 */
 	public PluginManagerPane(PluginManager manager, PluginHostContext context, boolean showBuiltInPlugins) {
 		super(new BorderLayout());
@@ -316,10 +317,9 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 	 * Restore table column positions and sizes. Note, the table must have its
 	 * auto resize mode set to off, i.e.
 	 * 
-	 * @param table
-	 * @param registry prefix
-	 * @param table name
-	 * @param default column widths
+	 * @param table table
+	 * @param propertyName registry prefix
+	 * @param defaultWidths default column widths
 	 */
 	public void restoreTableMetrics(JTable table, String propertyName, int[] defaultWidths) {
 		if (table.getAutoResizeMode() != JTable.AUTO_RESIZE_OFF)
