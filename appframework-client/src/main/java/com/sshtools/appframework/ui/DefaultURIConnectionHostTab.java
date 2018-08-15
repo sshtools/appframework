@@ -345,7 +345,7 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 	}
 
 	protected void processPortUriPortion(URI uri) throws MalformedURIException {
-		if (showPort == REQUIRED || (showPort == OPTIONAL && portField.getValue().intValue() > 0)) {
+		if (hostnameField.getText().trim().length() > 0 && ( showPort == REQUIRED || (showPort == OPTIONAL && portField.getValue().intValue() > 0))) {
 			int portValue = Integer.valueOf(portField.getText()).intValue();
 			if (portValue == defaultPort) {
 				uri.setPort(-1);
