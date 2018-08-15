@@ -53,7 +53,7 @@ public abstract class SchemeHandler<T extends ProfileTransport<?>> {
 	/**
 	 * Create the {@link ProfileTransport} appropriate for this scheme
 	 * 
-	 * @param profile
+	 * @param profile profile
 	 * 
 	 * @return profile transport
 	 * @throws ProfileException on profile error

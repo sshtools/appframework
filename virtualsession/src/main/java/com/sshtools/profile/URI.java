@@ -1473,7 +1473,6 @@ public class URI implements Serializable {
 	 * Returns a hash-code value for this URI. The hash code is based upon all
 	 * of the URI's components, and satisfies the general contract of the
 	 * {@link java.lang.Object#hashCode() Object.hashCode} method.
-	 * </p>
 	 *
 	 * @return A hash-code value for this URI
 	 */
@@ -1552,7 +1551,7 @@ public class URI implements Serializable {
 	 * '.'. Each group must consist of one to three digits. See RFC 2732 Section
 	 * 3, and RFC 2373 Section 2.2, for the definition of IPv6 references. A
 	 * hostname consists of domain labels (each of which must begin and end with
-	 * an alphanumeric but may contain '-') separated & by a '.'. See RFC 2396
+	 * an alphanumeric but may contain '-') separated by a '.'. See RFC 2396
 	 * Section 3.2.2.
 	 * 
 	 * @param address address

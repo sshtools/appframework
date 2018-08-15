@@ -8,7 +8,6 @@ import java.util.List;
  * The ConnectionManager is responsible for accepting registrations of
  * {@link SchemeHandler} implementations and all them to be accessed by the
  * scheme name.
- * </p>
  */
 public class ConnectionManager {
 	private static ConnectionManager instance;

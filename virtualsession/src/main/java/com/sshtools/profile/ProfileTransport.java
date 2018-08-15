@@ -8,7 +8,7 @@ import java.io.IOException;
  * connection to a resource. The resource {@link URI} is determined from the
  * {@link ResourceProfile} provided when <code>connect()</code> is called.
  * 
- * @param <S>
+ * @param <S> type of {@link SchemeHandler}
  */
 public interface ProfileTransport<S> {
 	/**

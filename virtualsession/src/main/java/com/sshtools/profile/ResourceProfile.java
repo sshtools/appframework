@@ -37,7 +37,7 @@ import nanoxml.XMLElement;
  * <br>
  * When used in an application context, it may be useful to store application
  * specific properties along with a profile. A profile provides this using its
- * <i>Application Properties</code>. The simple name / value pairs are will also
+ * <i>Application Properties</i>. The simple name / value pairs are will also
  * be persisted in the XML representation of the profile. Several convenience
  * methods for getting primitive types as well as strings are available.<br>
  * <br>
@@ -73,10 +73,9 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	/**
 	 * Configure this profile from another.
 	 * 
-	 * @param profile
-	 * @throws Error
+	 * @param profile other profile
 	 */
-	public void setFromProfile(ResourceProfile<?> profile) throws Error {
+	public void setFromProfile(ResourceProfile<?> profile) {
 		if (profile == this) {
 			throw new IllegalArgumentException("Cannot set profile from itself.");
 		}
@@ -187,7 +186,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	/**
 	 * Get if this profile has any scheme options for the given class.
 	 * 
-	 * @param clazz
+	 * @param clazz class of {@link SchemeOptions}
 	 * @return has scheme options
 	 */
 	public boolean hasSchemeOptions(Class<? extends SchemeOptions> clazz) {
@@ -197,7 +196,8 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	/**
 	 * Get the SchemeOptions
 	 * 
-	 * @param clazz the class ofthe scheme options objecct
+	 * @param clazz the class ofthe scheme options object
+	 * @param <C> the type of scheme options
 	 * @return scheme options
 	 */
 	public <C extends SchemeOptions> C getSchemeOptions(Class<C> clazz) {
@@ -485,7 +485,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	 * Determine whether an application extension XML element is available
 	 * within the profile.
 	 * 
-	 * @param name
+	 * @param name name
 	 * @return has extension element
 	 */
 	public boolean hasApplicationExtension(String name) {
@@ -495,7 +495,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	/**
 	 * Get an application extension to the profile.
 	 * 
-	 * @param name
+	 * @param name name
 	 * @return extension element
 	 */
 	public XMLElement getApplicationExtension(String name) {
@@ -505,7 +505,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	/**
 	 * Add an application extension to the profile.
 	 * 
-	 * @param name
+	 * @param name name
 	 */
 	public void addApplicationExtension(String name) {
 		XMLElement xml = new XMLElement();
@@ -563,7 +563,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	/**
 	 * Set the password.
 	 * 
-	 * @param password
+	 * @param password password
 	 */
 	public void setPassword(String password) {
 		String username = getUsername();
@@ -631,7 +631,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	/**
 	 * Load a profile from a file.
 	 * 
-	 * @param file
+	 * @param file file
 	 * @return profile
 	 * @throws IOException on any error
 	 */

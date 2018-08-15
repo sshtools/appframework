@@ -52,7 +52,7 @@ public interface SchemeOptions {
 	/**
 	 * Return if these options are appropriate for a scheme
 	 * 
-	 * @param schemeName
+	 * @param schemeName scheme name
 	 * @return <code>true</code> if these options are appropriate for a scheme
 	 */
 	public boolean isAppropriateForScheme(String schemeName);
@@ -69,7 +69,7 @@ public interface SchemeOptions {
 	 * Clone these scheme options.
 	 * 
 	 * @return cloned scheme options
-	 * @throws CloneNotSupportedException
+	 * @throws CloneNotSupportedException if cloning is not support
 	 */
 	public Object clone() throws CloneNotSupportedException;
 

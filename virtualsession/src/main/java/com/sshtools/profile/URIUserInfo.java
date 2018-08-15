@@ -26,7 +26,7 @@ public class URIUserInfo {
 	/**
 	 * User info
 	 * 
-	 * @param userInfo
+	 * @param userInfo user info
 	 */
 	public URIUserInfo(String userInfo) {
 		if (userInfo != null) {
