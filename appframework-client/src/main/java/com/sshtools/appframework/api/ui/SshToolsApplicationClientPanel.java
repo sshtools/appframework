@@ -54,13 +54,44 @@ import com.sshtools.ui.swing.AppAction;
 import com.sshtools.ui.swing.OptionDialog;
 
 public abstract class SshToolsApplicationClientPanel extends SshToolsApplicationPanel {
+	class ConnectionFileFilter extends javax.swing.filechooser.FileFilter {
+		@Override
+		public boolean accept(File f) {
+			return f.isDirectory() || f.getName().toLowerCase().endsWith(".xml");
+		}
+
+		@Override
+		public String getDescription() {
+			return "Connection files (*.xml)";
+		}
+	}
+	class MenuItemActionComparator implements Comparator<AppAction> {
+		@Override
+		public int compare(AppAction o1, AppAction o2) {
+			int i = ((Integer) (o1).getValue(AppAction.MENU_ITEM_GROUP))
+					.compareTo((Integer) (o2).getValue(AppAction.MENU_ITEM_GROUP));
+			return (i == 0) ? ((Integer) (o1).getValue(AppAction.MENU_ITEM_WEIGHT))
+					.compareTo((Integer) (o2).getValue(AppAction.MENU_ITEM_WEIGHT)) : i;
+		}
+	}
+	class ToolBarActionComparator implements Comparator<AppAction> {
+		@Override
+		public int compare(AppAction o1, AppAction o2) {
+			int i = ((Integer) (o1).getValue(AppAction.TOOLBAR_GROUP)).compareTo((Integer) (o2).getValue(AppAction.TOOLBAR_GROUP));
+			return (i == 0) ? ((Integer) (o1).getValue(AppAction.TOOLBAR_WEIGHT))
+					.compareTo((Integer) (o2).getValue(AppAction.TOOLBAR_WEIGHT)) : i;
+		}
+	}
 	public final static int BANNER_TIMEOUT = 2000;
 	public final static String PREF_CONNECTION_FILE_DIRECTORY = "sshapps.connectionFile.directory";
 	private static final long serialVersionUID = 1L;
 	protected javax.swing.filechooser.FileFilter connectionFileFilter = new ConnectionFileFilter();
 	protected File currentConnectionFile;
+
 	protected ResourceProfile<ProfileTransport<?>> currentConnectionProfile;
+
 	protected boolean needSave;
+
 	private ProfileTransport<?> transport;
 
 	/**
@@ -114,9 +145,9 @@ public abstract class SshToolsApplicationClientPanel extends SshToolsApplication
 	}
 
 	/**
+	 * Connect.
 	 * 
-	 * 
-	 * @throws SshException
+	 * @throws ApplicationException om errpr
 	 */
 	public void connect() throws ApplicationException {
 		if (getCurrentProfile() == null) {
@@ -194,9 +225,9 @@ public abstract class SshToolsApplicationClientPanel extends SshToolsApplication
 	}
 
 	/**
+	 * Get additional tabs to add to the connection dialog.
 	 * 
-	 * 
-	 * @return
+	 * @return tabs
 	 */
 	public abstract List<SshToolsConnectionTab<ProfileTransport<?>>> getAdditionalConnectionTabs();
 
@@ -225,11 +256,10 @@ public abstract class SshToolsApplicationClientPanel extends SshToolsApplication
 	}
 
 	/**
-	 * 
+	 * Create a new profile.
 	 * 
 	 * @param profile
-	 * 
-	 * @return
+	 * @return profile
 	 */
 	public ResourceProfile<?> newConnectionProfile(ResourceProfile<ProfileTransport<?>> profile) {
 		return SshToolsConnectionPanel.showConnectionDialog(SshToolsApplicationClientPanel.this, profile,
@@ -314,13 +344,13 @@ public abstract class SshToolsApplicationClientPanel extends SshToolsApplication
 	}
 
 	/**
+	 * Save connection.
 	 * 
+	 * @param saveAs save as
+	 * @param file file
+	 * @param profile profile
 	 * 
-	 * @param saveAs
-	 * @param file
-	 * @param profile
-	 * 
-	 * @return
+	 * @return file
 	 */
 	public File saveConnection(boolean saveAs, File file, ResourceProfile<ProfileTransport<?>> profile) {
 		if (profile != null) {
@@ -382,36 +412,5 @@ public abstract class SshToolsApplicationClientPanel extends SshToolsApplication
 
 	protected boolean allowConnectionSettingsEditing() {
 		return true;
-	}
-
-	class ConnectionFileFilter extends javax.swing.filechooser.FileFilter {
-		@Override
-		public boolean accept(File f) {
-			return f.isDirectory() || f.getName().toLowerCase().endsWith(".xml");
-		}
-
-		@Override
-		public String getDescription() {
-			return "Connection files (*.xml)";
-		}
-	}
-
-	class MenuItemActionComparator implements Comparator<AppAction> {
-		@Override
-		public int compare(AppAction o1, AppAction o2) {
-			int i = ((Integer) (o1).getValue(AppAction.MENU_ITEM_GROUP))
-					.compareTo((Integer) (o2).getValue(AppAction.MENU_ITEM_GROUP));
-			return (i == 0) ? ((Integer) (o1).getValue(AppAction.MENU_ITEM_WEIGHT))
-					.compareTo((Integer) (o2).getValue(AppAction.MENU_ITEM_WEIGHT)) : i;
-		}
-	}
-
-	class ToolBarActionComparator implements Comparator<AppAction> {
-		@Override
-		public int compare(AppAction o1, AppAction o2) {
-			int i = ((Integer) (o1).getValue(AppAction.TOOLBAR_GROUP)).compareTo((Integer) (o2).getValue(AppAction.TOOLBAR_GROUP));
-			return (i == 0) ? ((Integer) (o1).getValue(AppAction.TOOLBAR_WEIGHT))
-					.compareTo((Integer) (o2).getValue(AppAction.TOOLBAR_WEIGHT)) : i;
-		}
 	}
 }

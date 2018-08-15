@@ -11,7 +11,7 @@ import com.sshtools.profile.ProfileTransport;
 import com.sshtools.profile.SchemeHandler;
 
 /**
- *
+ * @param <T> type of transport
  */
 public abstract class SshToolsSchemeHandler<T extends ProfileTransport<?>> extends SchemeHandler<T> {
 
@@ -28,6 +28,7 @@ public abstract class SshToolsSchemeHandler<T extends ProfileTransport<?>> exten
 	 * @param weight weight
 	 * @param category category
 	 * @param icon icon
+	 * @param internal internal scheme
 	 */
 	public SshToolsSchemeHandler(String name, String description, int weight, String category, Icon icon, boolean internal) {
 		super(name, description);

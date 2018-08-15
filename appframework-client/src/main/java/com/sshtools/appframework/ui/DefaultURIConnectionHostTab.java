@@ -38,10 +38,11 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 
 	// Private instance variables
 	protected XTextField hostnameField = new XTextField();
+	protected JPanel mainConnectionDetailsPanel;
 	protected XTextField pathField = new XTextField();
 	protected NumericTextField portField = new NumericTextField(new Integer(0), new Integer(65535), new Integer(0));
-	protected JTextField userField = new XTextField();
 
+	protected JTextField userField = new XTextField();
 	private String category;
 	private String defaultPath;
 	private int defaultPort;
@@ -56,9 +57,8 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 	private int showUser;
 	private Icon smallIcon;
 	private String title;
-	private String toolTipText;
 
-	protected JPanel mainConnectionDetailsPanel;
+	private String toolTipText;
 
 	/**
 	 * Creates a new DefaultURIConnectionHostTab object.
@@ -137,39 +137,6 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 		UIUtil.jGridBagAdd(this, mainConnectionDetailsPanel, gbc, GridBagConstraints.REMAINDER);
 	}
 
-	protected void addUserField(int showUser, GridBagConstraints gbc) {
-		if (showUser != OMIT) {
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getUserText()), gbc, GridBagConstraints.REMAINDER);
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, userField, gbc, GridBagConstraints.REMAINDER);
-			focusOn(userField);
-		}
-	}
-
-	protected void addPathField(int showPath, GridBagConstraints gbc) {
-		if (showPath != OMIT) {
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getPathText()), gbc, GridBagConstraints.REMAINDER);
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, pathField, gbc, GridBagConstraints.REMAINDER);
-			focusOn(pathField);
-		}
-	}
-
-	protected void addPortField(int showPort, GridBagConstraints gbc) {
-		if (showPort != OMIT) {
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getPortText()), gbc, GridBagConstraints.REMAINDER);
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, portField, gbc, GridBagConstraints.REMAINDER);
-			focusOn(portField);
-		}
-	}
-
-	protected void addHostnameField(int showHost, GridBagConstraints gbc) {
-		if (showHost != OMIT) {
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getHostnameText()), gbc, GridBagConstraints.REMAINDER);
-			gbc.fill = GridBagConstraints.HORIZONTAL;
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, hostnameField, gbc, GridBagConstraints.REMAINDER);
-			focusOn(hostnameField);
-		}
-	}
-
 	@Override
 	public void applyTab() {
 		applyTab(profile);
@@ -186,9 +153,6 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 		} finally {
 			setAvailable();
 		}
-	}
-
-	protected void setupProfile(ResourceProfile<T> profile) throws Exception {
 	}
 
 	@Override
@@ -299,6 +263,39 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 		return true;
 	}
 
+	protected void addHostnameField(int showHost, GridBagConstraints gbc) {
+		if (showHost != OMIT) {
+			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getHostnameText()), gbc, GridBagConstraints.REMAINDER);
+			gbc.fill = GridBagConstraints.HORIZONTAL;
+			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, hostnameField, gbc, GridBagConstraints.REMAINDER);
+			focusOn(hostnameField);
+		}
+	}
+
+	protected void addPathField(int showPath, GridBagConstraints gbc) {
+		if (showPath != OMIT) {
+			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getPathText()), gbc, GridBagConstraints.REMAINDER);
+			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, pathField, gbc, GridBagConstraints.REMAINDER);
+			focusOn(pathField);
+		}
+	}
+
+	protected void addPortField(int showPort, GridBagConstraints gbc) {
+		if (showPort != OMIT) {
+			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getPortText()), gbc, GridBagConstraints.REMAINDER);
+			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, portField, gbc, GridBagConstraints.REMAINDER);
+			focusOn(portField);
+		}
+	}
+
+	protected void addUserField(int showUser, GridBagConstraints gbc) {
+		if (showUser != OMIT) {
+			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getUserText()), gbc, GridBagConstraints.REMAINDER);
+			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, userField, gbc, GridBagConstraints.REMAINDER);
+			focusOn(userField);
+		}
+	}
+
 	protected JComponent createAdditionalComponent() {
 		return new JLabel();
 	}
@@ -338,9 +335,27 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 		return uri;
 	}
 
+	protected String getUserText() {
+		return "User";
+	}
+
+	protected String getUserValue() {
+		return userField.getText().trim();
+	}
+
 	protected void processHostUriPortion(URI uri) throws MalformedURIException {
 		if (showHost != OMIT && !hostnameField.getText().trim().equals("")) {
 			uri.setHost(hostnameField.getText().trim());
+		}
+	}
+
+	protected void processPathUriPortion(URI uri) throws MalformedURIException {
+		String path = pathField.getText().trim();
+		if (showPath != OMIT && !path.equals("")) {
+			if (!path.startsWith("/")) {
+				path = "/" + path;
+			}
+			uri.setPath(path);
 		}
 	}
 
@@ -355,16 +370,6 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 		}
 	}
 
-	protected void processPathUriPortion(URI uri) throws MalformedURIException {
-		String path = pathField.getText().trim();
-		if (showPath != OMIT && !path.equals("")) {
-			if (!path.startsWith("/")) {
-				path = "/" + path;
-			}
-			uri.setPath(path);
-		}
-	}
-
 	protected void processUserUriPortion(URI uri) throws MalformedURIException {
 		if (showUser != OMIT && !getUserValue().equals("")) {
 			try {
@@ -374,12 +379,7 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 		}
 	}
 
-	protected String getUserValue() {
-		return userField.getText().trim();
-	}
-
-	protected String getUserText() {
-		return "User";
+	protected void setAvailable() {
 	}
 
 	protected void setBasicFieldsFromProfile(ResourceProfile<T> profile) {
@@ -400,7 +400,7 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 		}
 	}
 	
-	protected void setAvailable() {
+	protected void setupProfile(ResourceProfile<T> profile) throws Exception {
 	}
 
 }
