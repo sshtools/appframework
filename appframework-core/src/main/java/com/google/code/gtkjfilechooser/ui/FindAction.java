@@ -234,13 +234,15 @@ public abstract class FindAction extends AbstractAction implements
 
 	/**
 	 * Should search for given text and select item and
-	 * 
+	 *
+	 * @param comp component
+	 * @param text text
 	 * @return true if search is successful
 	 */
 	protected abstract boolean changed(JComponent comp, String text,
 			Position.Bias bias);
 
-	/**
+	/*
 	 * Can be overridden by subclasses to change initial search text etc.
 	 */
 	protected void initSearch(ActionEvent ae) {

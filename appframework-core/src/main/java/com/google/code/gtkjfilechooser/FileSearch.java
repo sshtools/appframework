@@ -43,7 +43,7 @@ public class FileSearch {
 		/**
 		 * Method invoked when a file is found.
 		 * 
-		 * @param file
+		 * @param file file
 		 */
 		public void found(File file);
 	}

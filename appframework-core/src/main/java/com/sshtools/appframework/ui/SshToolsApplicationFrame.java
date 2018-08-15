@@ -108,12 +108,6 @@ public class SshToolsApplicationFrame extends JFrame implements SshToolsApplicat
 		return panel;
 	}
 
-	/**
-	 * @param application
-	 * @param panel
-	 * 
-	 * @throws SshToolsApplicationException
-	 */
 	@Override
 	public void init(final SshToolsApplication application, SshToolsApplicationPanel panel) throws SshToolsApplicationException {
 		log.debug("Initialising frame");
@@ -230,20 +224,11 @@ public class SshToolsApplicationFrame extends JFrame implements SshToolsApplicat
 		return isVisible();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.sshtools.appframework.ui.SshToolsApplicationContainer#packContainer()
-	 */
 	@Override
 	public void packContainer() throws SshToolsApplicationException {
 		pack();
 	}
 
-	/**
-	 * @param title
-	 */
 	@Override
 	public void setContainerTitle(String title) {
 		setTitle(title);
@@ -266,11 +251,6 @@ public class SshToolsApplicationFrame extends JFrame implements SshToolsApplicat
 		this.showNewWindowAction = showNewWindowAction;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.sshtools.appframework.ui.SshToolsApplicationContainer#updateUI()
-	 */
 	@Override
 	public void updateUI() {
 		SwingUtilities.updateComponentTreeUI(this);

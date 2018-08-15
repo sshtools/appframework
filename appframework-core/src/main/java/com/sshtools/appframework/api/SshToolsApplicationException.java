@@ -18,7 +18,6 @@
  *  License document supplied with your distribution for more details.
  *
  */
-
 package com.sshtools.appframework.api;
 
 import java.lang.reflect.Method;
@@ -28,61 +27,46 @@ import java.lang.reflect.Method;
  *
  * @author $author$
  */
+public class SshToolsApplicationException extends Exception {
+	/**
+	 * Creates a new SshToolsApplicationException object.
+	 */
+	public SshToolsApplicationException() {
+		this(null, null);
+	}
 
-public class SshToolsApplicationException
+	/**
+	 * Creates a new SshToolsApplicationException object.
+	 *
+	 * @param msg message
+	 */
+	public SshToolsApplicationException(String msg) {
+		this(msg, null);
+	}
 
-    extends Exception {
+	/**
+	 * Creates a new SshToolsApplicationException object.
+	 *
+	 * @param msg message
+	 * @param cause cause
+	 */
+	public SshToolsApplicationException(String msg, Throwable cause) {
+		super(msg);
+		if (cause != null) {
+			try {
+				Method m = getClass().getMethod("initCause", new Class[] { Throwable.class });
+				m.invoke(this, new Object[] { cause });
+			} catch (Exception e) {
+			}
+		}
+	}
 
-  /**
-   * Creates a new SshToolsApplicationException object.
-   */
-
-  public SshToolsApplicationException() {
-    this(null, null);
-
-  }
-
-  /**
-   * Creates a new SshToolsApplicationException object.
-   *
-   * @param msg
-   */
-
-  public SshToolsApplicationException(String msg) {
-    this(msg, null);
-
-  }
-
-  /**
-   * Creates a new SshToolsApplicationException object.
-   *
-   * @param msg
-   * @param cause
-   */
-
-  public SshToolsApplicationException(String msg, Throwable cause) {
-    super(msg);
-    if (cause != null) {
-      try {
-        Method m = getClass().getMethod("initCause",
-                                        new Class[] {Throwable.class});
-        m.invoke(this, new Object[] {cause});
-      }
-      catch (Exception e) {
-      }
-    }
-
-  }
-
-  /**
-   * Creates a new SshToolsApplicationException object.
-   *
-   * @param cause
-   */
-
-  public SshToolsApplicationException(Throwable cause) {
-    this(null, cause);
-
-  }
-
+	/**
+	 * Creates a new SshToolsApplicationException object.
+	 *
+	 * @param cause cause
+	 */
+	public SshToolsApplicationException(Throwable cause) {
+		this(null, cause);
+	}
 }

@@ -1,5 +1,4 @@
 /* HEADER */
-
 package com.sshtools.appframework.ui.wizard;
 
 import java.awt.BorderLayout;
@@ -22,9 +21,9 @@ public class WizardWelcomePanel extends JPanel {
 	/**
 	 * Creates a new WizardWelcomePanel object.
 	 * 
-	 * @param title
-	 * @param description
-	 * @param icon
+	 * @param title title
+	 * @param description description
+	 * @param icon icon
 	 */
 	public WizardWelcomePanel(String title, String description, Icon icon) {
 		this.icon = icon;
@@ -37,6 +36,14 @@ public class WizardWelcomePanel extends JPanel {
 		}
 	}
 
+	/**
+	 * Creates a new WizardWelcomePanel object.
+	 * 
+	 * @param title title
+	 * @param description description
+	 * @param icon icon
+	 * @param welcomeLabel wecome label
+	 */
 	public WizardWelcomePanel(String title, String description, Icon icon, JLabel welcomeLabel) {
 		this.icon = icon;
 		this.description = description;
@@ -55,7 +62,6 @@ public class WizardWelcomePanel extends JPanel {
 		top.setOpaque(false);
 		top.setBorder(BorderFactory.createEmptyBorder(16, 16, 0, 8));
 		TextBox welcomeTitle = new TextBox(title);
-
 		// Add the welcome label if we have one
 		if (welcomeLabel == null) {
 			welcomeTitle.setFont(new java.awt.Font("Dialog", 1, 16));
@@ -64,7 +70,6 @@ public class WizardWelcomePanel extends JPanel {
 		} else {
 			top.add(welcomeLabel, BorderLayout.CENTER);
 		}
-
 		JPanel middle = new JPanel(new BorderLayout());
 		middle.setOpaque(false);
 		middle.setBorder(BorderFactory.createEmptyBorder(24, 16, 0, 8));

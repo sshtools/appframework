@@ -77,8 +77,8 @@ public class JPanelUtil {
 	 * Create a panel using the given {@link LayoutManager} and adding the
 	 * {@link Component}s in the order they are passed.
 	 * 
-	 * @param layoutManager
-	 * @param components
+	 * @param layoutManager layout manager
+	 * @param components components
 	 * @return The desired panel
 	 */
 	static public JPanel createPanel(LayoutManager layoutManager, Component... components) {

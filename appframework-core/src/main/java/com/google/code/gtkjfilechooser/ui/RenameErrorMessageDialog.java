@@ -47,7 +47,7 @@ public class RenameErrorMessageDialog {
 
 	/**
 	 * Show error file already exists.
-	 * @param oldFileName
+	 * @param oldFileName old file name
 	 */
 	public void showRenameErrorFileExists(String oldFileName) {
 		JOptionPane.showMessageDialog(chooser, MessageFormat.format(

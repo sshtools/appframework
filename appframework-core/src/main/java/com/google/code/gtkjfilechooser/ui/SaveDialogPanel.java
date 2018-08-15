@@ -146,7 +146,7 @@ public class SaveDialogPanel extends JPanel implements PropertyChangeListener, A
 	/**
 	 * External path typicall set in the file browser panel.
 	 * 
-	 * @param externalPath
+	 * @param externalPath external path
 	 */
 	public void setExternalPath(String externalPath) {
 		this.externalPath = externalPath;
@@ -156,7 +156,7 @@ public class SaveDialogPanel extends JPanel implements PropertyChangeListener, A
 	 * Set the content of the text field. This setter does't influence the
 	 * method {@link #getFilename()}.
 	 * 
-	 * @param simplyname
+	 * @param simplyname name
 	 */
 	public void setFilenameText(String simplyname) {
 		nameTextField.setText(simplyname);

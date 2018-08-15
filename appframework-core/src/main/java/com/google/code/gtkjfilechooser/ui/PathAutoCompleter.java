@@ -81,7 +81,7 @@ public class PathAutoCompleter extends Autocompleter {
 	/**
 	 * Show hidden files?
 	 * 
-	 * @param showHidden
+	 * @param showHidden show hidden
 	 */
 	public void setShowHidden(boolean showHidden) {
 		this.showHidden = showHidden;

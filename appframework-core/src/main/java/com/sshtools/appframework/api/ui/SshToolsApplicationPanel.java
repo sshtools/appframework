@@ -270,7 +270,7 @@ public abstract class SshToolsApplicationPanel extends JPanel {
 	/**
 	 * Get an action by name
 	 * 
-	 * @param name
+	 * @param name name
 	 * @return action
 	 */
 	public AppAction getAction(String name) {
@@ -285,7 +285,7 @@ public abstract class SshToolsApplicationPanel extends JPanel {
 	/**
 	 * Gets a menu by name
 	 * 
-	 * @param actionMenuName
+	 * @param actionMenuName name
 	 * @return action menu
 	 */
 	public ActionMenu getActionMenu(String actionMenuName) {
@@ -361,8 +361,7 @@ public abstract class SshToolsApplicationPanel extends JPanel {
 	/**
 	 * Initialize the panel
 	 * 
-	 * @param application
-	 * 
+	 * @param application application
 	 * @throws SshToolsApplicationException
 	 */
 	public void init(SshToolsApplication application) throws SshToolsApplicationException {
@@ -458,8 +457,8 @@ public abstract class SshToolsApplicationPanel extends JPanel {
 	/**
 	 * Set an actions visible state
 	 * 
-	 * @param name
-	 * @param visible
+	 * @param name name
+	 * @param visible visible
 	 */
 	public void setActionVisible(String name, boolean visible) {
 		actionsVisible.put(name, new Boolean(visible));
@@ -499,7 +498,7 @@ public abstract class SshToolsApplicationPanel extends JPanel {
 	/**
 	 * Set the visible state of the menu bar
 	 * 
-	 * @param visible
+	 * @param visible visible
 	 */
 	public void setMenuBarVisible(boolean visible) {
 		if ((getJMenuBar() != null)) {

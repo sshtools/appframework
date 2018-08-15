@@ -56,10 +56,8 @@ public class X11Util {
 	/**
 	 * Get the X11 cookie.
 	 *
-	 * @param displayNumber
-	 *
+	 * @param displayNumber display number
 	 * @return cookie
-	 *
 	 * @throws IOException
 	 */
 	public static String getCookie(int displayNumber) throws IOException {

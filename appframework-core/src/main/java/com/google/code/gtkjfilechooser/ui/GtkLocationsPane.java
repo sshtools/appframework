@@ -360,7 +360,7 @@ public class GtkLocationsPane extends JPanel {
 	/**
 	 * Delete a Bookmark
 	 * 
-	 * @param bookmark
+	 * @param bookmark bookmark
 	 */
 	public void remove(GtkBookmark bookmark) {
 		manager.delete(bookmark.getName());

@@ -16,7 +16,7 @@ public class Messages {
 	/**
 	 * Get string.
 	 * 
-	 * @param key
+	 * @param key key
 	 * @return value key
 	 */
 	public static String getString(String key) {

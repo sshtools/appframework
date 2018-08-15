@@ -18,22 +18,15 @@
  *  License document supplied with your distribution for more details.
  *
  */
-
 package com.sshtools.appframework.util;
 
-/**
- *
- *
- * @author $author$
- */
-public class UIDException
-    extends Exception {
-  /**
-   * Creates a new UIDException object.
-   *
-   * @param msg
-   */
-  public UIDException(String msg) {
-    super(msg);
-  }
+public class UIDException extends Exception {
+	/**
+	 * Creates a new UIDException object.
+	 *
+	 * @param msg message
+	 */
+	public UIDException(String msg) {
+		super(msg);
+	}
 }

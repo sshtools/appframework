@@ -216,8 +216,8 @@ public class NumericTextField extends XTextField {
 	/**
 	 * Creates a new NumericTextField object.
 	 *
-	 * @param min
-	 * @param max
+	 * @param min min
+	 * @param max max
 	 */
 	public NumericTextField(Number min, Number max) {
 		this(min, max, min);
@@ -226,9 +226,9 @@ public class NumericTextField extends XTextField {
 	/**
 	 * Creates a new NumericTextField object.
 	 *
-	 * @param min
-	 * @param max
-	 * @param initial
+	 * @param min min
+	 * @param max max
+	 * @param initial initial
 	 */
 	public NumericTextField(Number min, Number max, Number initial) {
 		this(min, max, initial, true);
@@ -237,10 +237,10 @@ public class NumericTextField extends XTextField {
 	/**
 	 * Creates a new NumericTextField object.
 	 *
-	 * @param min
-	 * @param max
-	 * @param initial
-	 * @param rightJustify
+	 * @param min min
+	 * @param max max
+	 * @param initial initial
+	 * @param rightJustify right justify
 	 */
 	public NumericTextField(Number min, Number max, Number initial, boolean rightJustify) {
 		this(min, max, initial, rightJustify, null);
@@ -249,11 +249,11 @@ public class NumericTextField extends XTextField {
 	/**
 	 * Creates a new NumericTextField object.
 	 *
-	 * @param min
-	 * @param max
-	 * @param initial
-	 * @param rightJustify
-	 * @param numberFormat
+	 * @param min min
+	 * @param max max
+	 * @param initial initial
+	 * @param rightJustify right justify
+	 * @param numberFormat number format
 	 *
 	 * @throws IllegalArgumentException
 	 */

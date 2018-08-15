@@ -1,5 +1,4 @@
 /* HEADER */
-
 package com.sshtools.appframework.ui.wizard;
 
 import java.awt.BorderLayout;
@@ -61,6 +60,7 @@ public abstract class WizardPanel extends JPanel {
 			cancel();
 		}
 	}
+
 	class NextAction extends AppAction {
 		private static final long serialVersionUID = 1L;
 
@@ -79,7 +79,6 @@ public abstract class WizardPanel extends JPanel {
 	}
 
 	protected static final int BACK = 2;
-
 	protected static final int NEXT = 1;
 	static final Dimension SCREEN_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
 	private static final long serialVersionUID = 1L;
@@ -97,7 +96,6 @@ public abstract class WizardPanel extends JPanel {
 	private final JPanel navigationPage = new JPanel();
 	private final JButton next = new JButton();
 	private TextBox pageDescription;
-
 	private final CardLayout pageLayout = new CardLayout();
 	private final JPanel pagesContainer = new JPanel();
 	private final JLabel pageTitle = new JLabel();
@@ -105,26 +103,34 @@ public abstract class WizardPanel extends JPanel {
 	private String welcomeDescription;
 	private final WizardWelcomePanel welcomePage;
 	private String welcomeTitle;
-
 	private Icon wizardIcon;
-
 	private final CardLayout wizardLayout = new CardLayout();
-
 	private final JPanel wizardPanel = new JPanel();
 
 	/**
 	 * Creates a new WizardPanel object.
 	 * 
-	 * @param wizardTitle
-	 * @param wizardDescription
-	 * @param wizardIcon
-	 * @param welcomeIcon
-	 * @param wizarddimensions
+	 * @param wizardTitle title
+	 * @param wizardDescription description
+	 * @param wizardIcon wizard icon
+	 * @param welcomeIcon welcome icon
+	 * @param wizarddimensions size
 	 */
-	public WizardPanel(String wizardTitle, String wizardDescription, Icon wizardIcon, Icon welcomeIcon, Dimension wizarddimensions) {
+	public WizardPanel(String wizardTitle, String wizardDescription, Icon wizardIcon, Icon welcomeIcon,
+			Dimension wizarddimensions) {
 		this(wizardTitle, wizardDescription, wizardIcon, welcomeIcon, wizarddimensions, null);
 	}
 
+	/**
+	 * Creates a new WizardPanel object.
+	 * 
+	 * @param wizardTitle title
+	 * @param wizardDescription description
+	 * @param wizardIcon wizard icon
+	 * @param welcomeIcon welcome icon
+	 * @param wizarddimensions size
+	 * @param welcomeLabel welcome label
+	 */
 	public WizardPanel(String wizardTitle, String wizardDescription, Icon wizardIcon, Icon welcomeIcon, Dimension wizarddimensions,
 			JLabel welcomeLabel) {
 		this.wizardIcon = wizardIcon;
@@ -184,12 +190,10 @@ public abstract class WizardPanel extends JPanel {
 		try {
 			if (finish) {
 				if (finishPanel == null) {
-
 					if (finishedPage.getSelectedName().trim().equals("")) {
 						JOptionPane.showMessageDialog(this, Messages.getString("WizardPanel.SelectName"),
-							Messages.getString("WizardPanel.Complete"), JOptionPane.INFORMATION_MESSAGE);
+								Messages.getString("WizardPanel.Complete"), JOptionPane.INFORMATION_MESSAGE);
 					} else {
-
 						validateComplete(finishedPage.getSelectedName());
 						// Do something to finish
 						finish(finishedPage.getSelectedName());
@@ -200,7 +204,6 @@ public abstract class WizardPanel extends JPanel {
 					finish(finishedPage.getSelectedName());
 				}
 			} else {
-
 				if (currentPage != null) {
 					currentPage.validatePage();
 				}
@@ -219,7 +222,6 @@ public abstract class WizardPanel extends JPanel {
 				} else {
 					// Show the completion screen
 					finish = true;
-
 					if (finishPanel != null) {
 						wizardLayout.show(wizardPanel, ALTERNATIVE_FINISH_PAGE);
 					} else {
@@ -236,10 +238,10 @@ public abstract class WizardPanel extends JPanel {
 				back.setEnabled(true);
 			}
 		} catch (ValidationException ve) {
-			JOptionPane.showMessageDialog(this, ve.getMessage(), currentPage == null ? Messages.getString("WizardPanel.Finish")
-				: currentPage.getPageTitle(), JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(this, ve.getMessage(),
+					currentPage == null ? Messages.getString("WizardPanel.Finish") : currentPage.getPageTitle(),
+					JOptionPane.INFORMATION_MESSAGE);
 		}
-
 	}
 
 	public abstract WizardPage selectNextPage(WizardPage previous, int direction);
@@ -281,7 +283,6 @@ public abstract class WizardPanel extends JPanel {
 		// Info panel - This is the panel that holds the page descriptions
 		info.setOpaque(false);
 		info.setBorder(BorderFactory.createEmptyBorder(8, 8, 0, 0));
-
 		info.setLayout(new GridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.BOTH;

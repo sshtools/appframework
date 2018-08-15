@@ -40,8 +40,8 @@ public class IconWrapperPanel extends JPanel {
     /**
      * Creates a new IconWrapperPanel object.
      * 
-     * @param icon
-     * @param component
+     * @param icon icon
+     * @param component component
      */
     public IconWrapperPanel(Icon icon, Component component) {
         super(new BorderLayout());

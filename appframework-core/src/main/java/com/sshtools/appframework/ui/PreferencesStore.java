@@ -172,13 +172,12 @@ public class PreferencesStore {
 	}
 
 	/**
+	 * Restore a table.
 	 *
-	 *
-	 * @param table
-	 * @param pref
-	 * @param defaultWidths
-	 *
-	 * @throws IllegalArgumentException
+	 * @param table table
+	 * @param pref pref
+	 * @param defaultWidths default widths
+	 * @throws IllegalArgumentException on error
 	 */
 	public static void restoreTableMetrics(JTable table, String pref, int[] defaultWidths) {
 		// Check the table columns may be resized correctly
@@ -222,12 +221,6 @@ public class PreferencesStore {
 		}
 	}
 
-	/**
-	 *
-	 *
-	 * @param table
-	 * @param pref
-	 */
 	public static void saveTableMetrics(JTable table, String pref) {
 		for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
 			int w = table.getColumnModel().getColumn(i).getWidth();

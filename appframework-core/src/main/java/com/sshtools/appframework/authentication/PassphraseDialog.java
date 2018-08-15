@@ -46,11 +46,12 @@ import com.sshtools.ui.swing.UIUtil;
 public class PassphraseDialog extends JDialog {
 	// Statics
 	final static String PASSPHRASE_ICON = "/images/passphrase-32x32.png";
+
 	/**
 	 * 
-	 * Return a new instance of a PassphraseDialog given a parent
-	 * component to make the dialog modal against with "Passphrase" as
-	 * the dialog title and the default icon
+	 * Return a new instance of a PassphraseDialog given a parent component to
+	 * make the dialog modal against with "Passphrase" as the dialog title and
+	 * the default icon
 	 * 
 	 * @param parent parent component
 	 * @return PassphraseDialog instance
@@ -59,12 +60,12 @@ public class PassphraseDialog extends JDialog {
 	public static PassphraseDialog getInstance(Component parent) {
 		return getInstance(parent, null, null);
 	}
+
 	/**
-	 * Return a new instance of a PassphraseDialog given a parent
-	 * component to make the dialog modal against, a frame title and
-	 * the panel icon. <code>null</code> for either of these values
-	 * means the dialog will use the default title of "Passphrase" and
-	 * the standard passphrase icon.
+	 * Return a new instance of a PassphraseDialog given a parent component to
+	 * make the dialog modal against, a frame title and the panel icon.
+	 * <code>null</code> for either of these values means the dialog will use
+	 * the default title of "Passphrase" and the standard passphrase icon.
 	 *
 	 * @param parent parent component
 	 * @param title title
@@ -84,13 +85,12 @@ public class PassphraseDialog extends JDialog {
 		}
 		return dialog;
 	}
+
 	// Private instance variables
 	private JButton jButtonCancel = new JButton();
 	private JButton jButtonOK = new JButton();
 	private JPasswordField jPasswordField = new JPasswordField(20);
-
 	private JLabel message = new JLabel(Messages.getString("PassphraseDialog.EnterPass"));
-
 	private boolean userCancelled = false;
 
 	/**
@@ -103,15 +103,10 @@ public class PassphraseDialog extends JDialog {
 	}
 
 	/**
-	 * 
 	 * Creates a new PassphraseDialog given a dialog to make the dialog modal
-	 * 
 	 * against. "Passphrase" will be used as the default dialog title.
-	 *
 	 * 
-	 * 
-	 * @param parent
-	 * 
+	 * @param parent parent
 	 */
 	public PassphraseDialog(Dialog parent) {
 		super(parent, Messages.getString("PassphraseDialog.Passphrase"));
@@ -121,9 +116,8 @@ public class PassphraseDialog extends JDialog {
 	 * Creates a new PassphraseDialog given a dialog to make the dialog modal
 	 * against and a title.
 	 * 
-	 * @param parent
+	 * @param parent parent
 	 * @param title title
-	 * 
 	 */
 	public PassphraseDialog(Dialog parent, String title) {
 		this(parent, title, null);
@@ -143,12 +137,8 @@ public class PassphraseDialog extends JDialog {
 	}
 
 	/**
-	 * 
 	 * Creates a new PassphraseDialog given a frame to make the dialog modal
-	 * 
 	 * against. "Passphrase" will be used as the default dialog title.
-	 *
-	 * 
 	 * 
 	 * @param parent
 	 * 
@@ -160,19 +150,11 @@ public class PassphraseDialog extends JDialog {
 	}
 
 	/**
-	 * 
 	 * Creates a new PassphraseDialog given a frame to make the dialog modal
-	 * 
 	 * against and an identity string that will be used as the title for the
-	 * 
 	 * dialog.
 	 *
-	 * 
-	 * 
-	 * @param parent
-	 * 
-	 *            parent frame
-	 * 
+	 * @param parent parent frame
 	 * @param title
 	 * 
 	 */
@@ -181,23 +163,13 @@ public class PassphraseDialog extends JDialog {
 	}
 
 	/**
-	 * 
 	 * Creates a new PassphraseDialog given a frame to make the dialog modal
-	 * 
 	 * against and an identity string that will be used as the title for the
-	 * 
 	 * dialog.
 	 *
-	 * 
-	 * 
-	 * @param parent
-	 * 
-	 *            parent frame
-	 * 
-	 * @param title
-	 * 
+	 * @param parent parent frame
+	 * @param title title
 	 * @param icon icon
-	 * 
 	 */
 	public PassphraseDialog(Frame parent, String title, Icon icon) {
 		super(parent, title, true);
@@ -215,15 +187,9 @@ public class PassphraseDialog extends JDialog {
 	}
 
 	/**
-	 * 
 	 * Set the message to display on the dialog
 	 *
-	 * 
-	 * 
-	 * @param message
-	 * 
-	 *            message
-	 * 
+	 * @param message message
 	 */
 	public void setMessage(String message) {
 		this.message.setText(message);

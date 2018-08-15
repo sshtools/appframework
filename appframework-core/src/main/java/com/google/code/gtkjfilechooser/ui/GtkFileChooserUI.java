@@ -119,12 +119,6 @@ import com.google.code.gtkjfilechooser.filewatcher.FileListener;
 import com.google.code.gtkjfilechooser.filewatcher.FileWatcher;
 import com.google.code.gtkjfilechooser.ui.JPanelUtil.PanelElement;
 
-/**
- * GtkFileChooserUI basen on the Metal L&F implementation of a FileChooser.
- * 
- * @version 1.95 10/02/08
- * @author Costantino Cerbo
- */
 public class GtkFileChooserUI extends BasicFileChooserUI implements Serializable, PropertyChangeListener, ActionListener {
 	/**
 	 * Action to select a file or select/browse a directory (according to the
@@ -191,6 +185,9 @@ public class GtkFileChooserUI extends BasicFileChooserUI implements Serializable
 	private static final int UPPER_BUTTON_GAP = 12;
 	/**
 	 * ComponentUI Interface Implementation methods
+	 * 
+	 * @param c component
+	 * @return UI
 	 */
 	public static ComponentUI createUI(JComponent c) {
 		GtkFileChooserUI ui = new GtkFileChooserUI((JFileChooser) c);
@@ -682,6 +679,8 @@ public class GtkFileChooserUI extends BasicFileChooserUI implements Serializable
 
 	/**
 	 * The Button panel to cancel, open/save or custom names.
+	 * 
+	 * @return button panel
 	 */
 	protected JPanel getButtonPanel() {
 		if (buttonPanel == null) {

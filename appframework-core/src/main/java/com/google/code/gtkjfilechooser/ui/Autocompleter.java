@@ -203,7 +203,7 @@ public abstract class Autocompleter {
 	 *            The selected entry.
 	 * @param caretPosition
 	 *            The position of the cursor in the text field.
-	 * @return
+	 * @return completion value
 	 */
 	protected String completion(String selected, int caretPosition) {
 		return selected.substring(caretPosition);

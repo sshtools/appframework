@@ -260,7 +260,7 @@ public class FileBrowserPane extends FilesListPane {
 	/**
 	 * Set the current dir and update the view.
 	 * 
-	 * @param currentDir
+	 * @param currentDir current directory
 	 */
 	public void setCurrentDir(File currentDir) {
 		Object oldValue = this.currentDir;

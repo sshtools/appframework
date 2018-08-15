@@ -23,12 +23,6 @@ import javax.swing.UIManager;
 
 import com.sshtools.ui.swing.FontUtil;
 
-/**
- * Description of the Class
- * 
- * @author magicthize
- * @created 26 May 2002
- */
 public class TextBox extends JTextArea {
 	private String text;
 

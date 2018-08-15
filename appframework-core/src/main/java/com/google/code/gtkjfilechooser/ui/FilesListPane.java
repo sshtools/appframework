@@ -531,7 +531,7 @@ public class FilesListPane extends JComponent implements ActionDispatcher {
 	 * Set if the the files are enabled/selectable; for example when
 	 * FileSelectionMode = DIRECTORIES_ONLY.
 	 * 
-	 * @param filesSelectable
+	 * @param filesSelectable files selectable
 	 */
 	public void setFilesSelectable(boolean filesSelectable) {
 		this.filesSelectable = filesSelectable;

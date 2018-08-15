@@ -25,6 +25,7 @@ import java.util.Scanner;
 import java.util.Map.Entry;
 
 /**
+ * <p>
  * {@code GKeyFile} lets you parse, edit or create files containing groups of
  * key-value pairs, which we call <em>key files</em> for lack of a better name.
  * Several freedesktop.org specifications use key files now, e.g the
@@ -66,8 +67,8 @@ import java.util.Map.Entry;
  * which have the form
  * 
  * <code class="literal">key[locale]=value</code>, with a locale identifier of
- * the form <code class="literal">lang_COUNTRY<em class="parameter">
- * <code>MODIFIER</code> </em></code> where <code class="literal">COUNTRY</code>
+ * the form <code class="literal">lang_COUNTRY</code><em class="parameter">
+ * <code>MODIFIER</code> </em>  where <code class="literal">COUNTRY</code>
  * and <code class="literal">MODIFIER</code> are optional. Space before and
  * after the '=' character are ignored. Newline, tab, carriage return and
  * backslash characters in value are escaped as \n, \t, \r, and \\,
