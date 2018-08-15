@@ -155,8 +155,7 @@ public class PassphraseDialog extends JDialog {
 	 * dialog.
 	 *
 	 * @param parent parent frame
-	 * @param title
-	 * 
+	 * @param title title
 	 */
 	public PassphraseDialog(Frame parent, String title) {
 		this(parent, title, null);

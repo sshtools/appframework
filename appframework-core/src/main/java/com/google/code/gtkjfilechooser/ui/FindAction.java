@@ -237,6 +237,7 @@ public abstract class FindAction extends AbstractAction implements
 	 *
 	 * @param comp component
 	 * @param text text
+	 * @param bias bias
 	 * @return true if search is successful
 	 */
 	protected abstract boolean changed(JComponent comp, String text,

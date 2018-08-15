@@ -58,7 +58,7 @@ public class X11Util {
 	 *
 	 * @param displayNumber display number
 	 * @return cookie
-	 * @throws IOException
+	 * @throws IOException on I/O error
 	 */
 	public static String getCookie(int displayNumber) throws IOException {
 		Process process = null;

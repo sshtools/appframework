@@ -362,7 +362,7 @@ public abstract class SshToolsApplicationPanel extends JPanel {
 	 * Initialize the panel
 	 * 
 	 * @param application application
-	 * @throws SshToolsApplicationException
+	 * @throws SshToolsApplicationException on error
 	 */
 	public void init(SshToolsApplication application) throws SshToolsApplicationException {
 		this.application = application;
@@ -518,7 +518,7 @@ public abstract class SshToolsApplicationPanel extends JPanel {
 	/**
 	 * Set the visible state of the toolbar
 	 * 
-	 * @param visible
+	 * @param visible visible
 	 */
 	public void setToolBarVisible(boolean visible) {
 		if ((getToolBar() != null)) {

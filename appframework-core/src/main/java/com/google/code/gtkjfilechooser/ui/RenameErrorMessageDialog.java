@@ -18,41 +18,36 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 public class RenameErrorMessageDialog {
-
 	private JFileChooser chooser;
 	private final String renameErrorFileExistsText;
 	private final String renameErrorText;
-
 	private final String renameErrorTitleText;
 
 	public RenameErrorMessageDialog(JFileChooser chooser) {
 		this.chooser = chooser;
-
 		Locale locale = chooser.getLocale();
-		renameErrorTitleText = UIManager.getString("FileChooser.renameErrorTitleText",
-				locale);
+		renameErrorTitleText = UIManager.getString("FileChooser.renameErrorTitleText", locale);
 		renameErrorText = UIManager.getString("FileChooser.renameErrorText", locale);
-		renameErrorFileExistsText = UIManager.getString(
-				"FileChooser.renameErrorFileExistsText", locale);
+		renameErrorFileExistsText = UIManager.getString("FileChooser.renameErrorFileExistsText", locale);
 	}
 
 	/**
 	 * Show generic rename error.
-	 * @param oldFileName
+	 * 
+	 * @param oldFileName old file name
 	 */
 	public void showRenameError(String oldFileName) {
-		JOptionPane.showMessageDialog(chooser, MessageFormat.format(renameErrorText,
-				oldFileName), renameErrorTitleText, JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(chooser, MessageFormat.format(renameErrorText, oldFileName), renameErrorTitleText,
+				JOptionPane.ERROR_MESSAGE);
 	}
 
 	/**
 	 * Show error file already exists.
+	 * 
 	 * @param oldFileName old file name
 	 */
 	public void showRenameErrorFileExists(String oldFileName) {
-		JOptionPane.showMessageDialog(chooser, MessageFormat.format(
-				renameErrorFileExistsText, oldFileName), renameErrorTitleText,
+		JOptionPane.showMessageDialog(chooser, MessageFormat.format(renameErrorFileExistsText, oldFileName), renameErrorTitleText,
 				JOptionPane.ERROR_MESSAGE);
 	}
-
 }

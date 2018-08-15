@@ -12,7 +12,7 @@ import java.util.prefs.PreferencesFactory;
  * <tt>java.util.prefs.PreferencesFactory</tt> to
  * <tt>net.infotrek.util.prefs.FilePreferencesFactory</tt>
  * </p>
- * </p>
+ * <p>
  * The file defaults to [user.home]/.fileprefs, but may be overridden with the
  * system property <tt>net.infotrek.util.prefs.FilePreferencesFactory.file</tt>
  * </p>

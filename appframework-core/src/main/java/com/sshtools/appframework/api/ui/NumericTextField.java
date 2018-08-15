@@ -254,8 +254,7 @@ public class NumericTextField extends XTextField {
 	 * @param initial initial
 	 * @param rightJustify right justify
 	 * @param numberFormat number format
-	 *
-	 * @throws IllegalArgumentException
+	 * @throws IllegalArgumentException on error
 	 */
 	public NumericTextField(Number min, Number max, Number initial, boolean rightJustify, NumberFormat numberFormat) {
 		super(Math.max(min.toString().length(), max.toString().length()));
@@ -335,11 +334,6 @@ public class NumericTextField extends XTextField {
 		}
 	}
 
-	/**
-	 *
-	 *
-	 * @param i
-	 */
 	public void setValue(Number i) {
 		setText(i.toString());
 	}
