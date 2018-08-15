@@ -20,7 +20,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.sshtools</groupId>
 	<artifactId>appframework</artifactId>
-	<version>2.1.2</version>
+	<version>3.0.0</version>
 	<name>Appframework</name>
 	<description>Parent project for appframework, consisting of a Swing framework for applications and
 	modules that are used across a number of projects.</description>
