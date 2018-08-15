@@ -14,6 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 import com.sshtools.appframework.ui.TextBox;
@@ -21,9 +22,9 @@ import com.sshtools.ui.swing.UIUtil;
 
 public class WizardFinishPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
-	private TextBox title, description, summary, nameDescription;
 	private JLabel icon;
 	private JTextField name;
+	private TextBox title, description, summary, nameDescription;
 
 	public WizardFinishPanel() {
 		try {
@@ -31,6 +32,39 @@ public class WizardFinishPanel extends JPanel {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	public String getSelectedName() {
+		return name.getText();
+	}
+
+	public void setDefaultName(String name) {
+		this.name.setText(name);
+	}
+
+	public void setDescription(String description) {
+		this.description.setText(description);
+	}
+
+	public void setIcon(Icon icon) {
+		this.icon.setIcon(icon);
+	}
+
+	public void setNameVisible(boolean nameVisible) {
+		name.setVisible(nameVisible);
+		nameDescription.setVisible(nameVisible);
+	}
+
+	public void setSelectNameDescription(String str) {
+		nameDescription.setText(str);
+	}
+
+	public void setSummary(String summary) {
+		this.summary.setText(summary);
+	}
+
+	public void setTitle(String title) {
+		this.title.setText(title);
 	}
 
 	void jbInit() throws Exception {
@@ -71,6 +105,7 @@ public class WizardFinishPanel extends JPanel {
 		JPanel left = new JPanel(new BorderLayout()) {
 			private static final long serialVersionUID = 1L;
 
+			@Override
 			public Dimension getPreferredSize() {
 				return new Dimension(120, super.getPreferredSize().height);
 			}
@@ -80,8 +115,8 @@ public class WizardFinishPanel extends JPanel {
 		left.setOpaque(true);
 		icon = new JLabel();
 		icon.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-		icon.setHorizontalAlignment(JLabel.CENTER);
-		icon.setVerticalAlignment(JLabel.TOP);
+		icon.setHorizontalAlignment(SwingConstants.CENTER);
+		icon.setVerticalAlignment(SwingConstants.TOP);
 		left.add(icon, BorderLayout.NORTH);
 		// Right
 		JPanel right = new JPanel(new GridBagLayout());
@@ -100,38 +135,5 @@ public class WizardFinishPanel extends JPanel {
 		this.setForeground(UIManager.getColor("Scrollpane.foreground"));
 		this.add(left, BorderLayout.WEST);
 		this.add(right, BorderLayout.CENTER);
-	}
-
-	public void setNameVisible(boolean nameVisible) {
-		name.setVisible(nameVisible);
-		nameDescription.setVisible(nameVisible);
-	}
-
-	public void setSummary(String summary) {
-		this.summary.setText(summary);
-	}
-
-	public void setSelectNameDescription(String str) {
-		nameDescription.setText(str);
-	}
-
-	public void setDefaultName(String name) {
-		this.name.setText(name);
-	}
-
-	public String getSelectedName() {
-		return name.getText();
-	}
-
-	public void setTitle(String title) {
-		this.title.setText(title);
-	}
-
-	public void setDescription(String description) {
-		this.description.setText(description);
-	}
-
-	public void setIcon(Icon icon) {
-		this.icon.setIcon(icon);
 	}
 }

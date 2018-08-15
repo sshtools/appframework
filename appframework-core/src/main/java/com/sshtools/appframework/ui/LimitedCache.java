@@ -7,22 +7,10 @@ import java.util.Map;
 
 public class LimitedCache<K, V> {
 
-	private Map<K, V> map = new HashMap<K, V>();
 	private List<K> keys = new ArrayList<K>();
-	private List<V> values = new ArrayList<V>();
 	private int limit = 1000;
-
-	public boolean containsKey(K key) {
-		return map.containsKey(key);
-	}
-
-	public int getLimit() {
-		return limit;
-	}
-
-	public void setLimit(int limit) {
-		this.limit = limit;
-	}
+	private Map<K, V> map = new HashMap<K, V>();
+	private List<V> values = new ArrayList<V>();
 
 	public void cache(K key, V value) {
 		while (values.size() > limit) {
@@ -39,8 +27,20 @@ public class LimitedCache<K, V> {
 		map.put(key, value);
 	}
 
+	public boolean containsKey(K key) {
+		return map.containsKey(key);
+	}
+
 	public V get(K key) {
 		return map.get(key);
+	}
+
+	public int getLimit() {
+		return limit;
+	}
+
+	public void setLimit(int limit) {
+		this.limit = limit;
 	}
 
 }

@@ -25,8 +25,12 @@ import com.google.code.gtkjfilechooser.FreeDesktopUtil.WellKnownDir;
  */
 public class BasicPath implements Path {
 
-	static public final BasicPath HOME = new BasicPath(System.getProperty("user.name"), System.getProperty("user.home"), "places/user-home");
 	static public BasicPath DESKTOP;
+	static public final BasicPath HOME = new BasicPath(System.getProperty("user.name"), System.getProperty("user.home"), "places/user-home");
+	static public final BasicPath ROOT = new BasicPath(i18n("File System"), "/", "gtk-harddisk");
+
+	private static final long serialVersionUID = 1L; 
+
 	static {
 		File desktopPath = FreeDesktopUtil.getWellKnownDirPath(WellKnownDir.DESKTOP);
 		if (desktopPath != null) {
@@ -34,13 +38,9 @@ public class BasicPath implements Path {
 		}		
 	}
 
-	static public final BasicPath ROOT = new BasicPath(i18n("File System"), "/", "gtk-harddisk"); 
-
-	private static final long serialVersionUID = 1L;
-
+	protected String iconName;
 	protected String location;
 	protected String name;
-	protected String iconName;
 
 	public BasicPath() {
 		super();
@@ -54,6 +54,11 @@ public class BasicPath implements Path {
 	}
 
 	@Override
+	public String getIconName() {
+		return iconName;
+	}
+
+	@Override
 	public String getLocation() {
 		return location;
 	}
@@ -61,11 +66,6 @@ public class BasicPath implements Path {
 	@Override
 	public String getName() {
 		return name;
-	}
-
-	@Override
-	public String getIconName() {
-		return iconName;
 	}
 
 }

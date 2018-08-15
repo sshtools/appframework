@@ -16,6 +16,42 @@ import javax.swing.text.Position;
 
 public class TableFindAction extends FindAction {
 	
+	public int getNextMatch(JTable table, String prefix, int startIndex,
+			Position.Bias bias) {
+		int column = table.getSelectedColumn();
+		if (column == -1) {
+			column = 0;
+		}
+		int max = table.getRowCount();
+		if (prefix == null) {
+			throw new IllegalArgumentException();
+		}
+		if (startIndex < 0 || startIndex >= max) {
+			throw new IllegalArgumentException();
+		}
+
+		prefix = prefix.toUpperCase();
+
+		// start search from the next element after the selected element
+		int increment = (bias == null || bias == Position.Bias.Forward) ? 1 : -1;
+		int index = startIndex;
+		do {
+			Object item = table.getValueAt(index, column);
+
+			if (item != null) {
+				String text = item.toString();
+
+				text = text.toUpperCase();
+
+				if (text != null && text.startsWith(prefix)) {
+					return index;
+				}
+			}
+			index = (index + increment + max) % max;
+		} while (index != startIndex);
+		return -1;
+	}
+
 	@Override
 	protected boolean changed(JComponent comp, String searchString, Position.Bias bias) {
 		JTable table = (JTable) comp;
@@ -57,41 +93,5 @@ public class TableFindAction extends FindAction {
 			column = 0;
 		}
 		table.scrollRectToVisible(table.getCellRect(index, column, true));
-	}
-
-	public int getNextMatch(JTable table, String prefix, int startIndex,
-			Position.Bias bias) {
-		int column = table.getSelectedColumn();
-		if (column == -1) {
-			column = 0;
-		}
-		int max = table.getRowCount();
-		if (prefix == null) {
-			throw new IllegalArgumentException();
-		}
-		if (startIndex < 0 || startIndex >= max) {
-			throw new IllegalArgumentException();
-		}
-
-		prefix = prefix.toUpperCase();
-
-		// start search from the next element after the selected element
-		int increment = (bias == null || bias == Position.Bias.Forward) ? 1 : -1;
-		int index = startIndex;
-		do {
-			Object item = table.getValueAt(index, column);
-
-			if (item != null) {
-				String text = item.toString();
-
-				text = text.toUpperCase();
-
-				if (text != null && text.startsWith(prefix)) {
-					return index;
-				}
-			}
-			index = (index + increment + max) % max;
-		} while (index != startIndex);
-		return -1;
 	}
 }

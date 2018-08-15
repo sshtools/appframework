@@ -1,74 +1,25 @@
 /* HEADER */
-
 package com.sshtools.appframework.api.ui;
 
 import com.sshtools.appframework.api.SshToolsApplicationException;
 import com.sshtools.appframework.ui.SshToolsApplication;
 
-/**
- * @author $Author: brett $
- */
-
 public interface SshToolsApplicationContainer {
+	boolean canCloseContainer();
 
-	/**
-	 * @param application
-	 * @param panel
-	 * 
-	 * @throws SshToolsApplicationException
-	 */
+	boolean closeContainer();
 
-	public void init(SshToolsApplication application,
-			SshToolsApplicationPanel panel) throws SshToolsApplicationException;
+	SshToolsApplicationPanel getApplicationPanel();
 
-	/**
-	 * @return
-	 */
+	void init(SshToolsApplication application, SshToolsApplicationPanel panel) throws SshToolsApplicationException;
 
-	public SshToolsApplicationPanel getApplicationPanel();
+	boolean isContainerVisible();
 
-	/**
-   *
-   */
+	void packContainer() throws SshToolsApplicationException;
 
-	public boolean closeContainer();
+	void setContainerTitle(String title);
 
-	/**
-   *
-   */
+	void setContainerVisible(boolean visible);
 
-	public boolean canCloseContainer();
-
-	/**
-	 * @param visible
-	 */
-
-	public void setContainerVisible(boolean visible);
-
-	/**
-	 * @param title
-	 */
-
-	public void setContainerTitle(String title);
-
-	/**
-	 * @return
-	 */
-
-	public boolean isContainerVisible();
-
-	/**
-   *
-   */
-
-	public void packContainer()
-
-	throws SshToolsApplicationException;
-
-	/**
-   *
-   */
-
-	public void updateUI();
-
+	void updateUI();
 }

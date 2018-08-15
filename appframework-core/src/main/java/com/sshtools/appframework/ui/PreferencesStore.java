@@ -18,7 +18,6 @@
  *  License document supplied with your distribution for more details.
  *
  */
-
 package com.sshtools.appframework.ui;
 
 import java.awt.Rectangle;
@@ -38,365 +37,202 @@ import javax.swing.JTable;
  *
  * @author $author$
  */
-
 public class PreferencesStore {
+	//
+	private static File file;
+	private static Properties preferences;
+	private static boolean storeAvailable;
+	// Intialise the preferences
+	static {
+		preferences = new Properties();
+	}
 
-  //
+	public static String get(String name, String def) {
+		return preferences.getProperty(name, def);
+	}
 
-  private static File file;
+	public static boolean getBoolean(String name, boolean def) {
+		return get(name, String.valueOf(def)).equals("true");
+	}
 
-  private static boolean storeAvailable;
+	public static double getDouble(String name, double def) {
+		String s = preferences.getProperty(name);
+		if ((s != null) && !s.equals("")) {
+			try {
+				return Double.parseDouble(s);
+			} catch (NumberFormatException nfe) {
+				System.err.println("Preference is " + name + " is badly formatted");
+				nfe.printStackTrace();
+			}
+		}
+		return def;
+	}
 
-  private static Properties preferences;
+	public static int getInt(String name, int def) {
+		String s = preferences.getProperty(name);
+		if ((s != null) && !s.equals("")) {
+			try {
+				return Integer.parseInt(s);
+			} catch (NumberFormatException nfe) {
+				System.err.println("Preference is " + name + " is badly formatted");
+				nfe.printStackTrace();
+			}
+		}
+		return def;
+	}
 
-  //  Intialise the preferences
+	public static Rectangle getRectangle(String name, Rectangle def) {
+		String s = preferences.getProperty(name);
+		if ((s == null) || s.equals("")) {
+			return def;
+		}
+		StringTokenizer st = new StringTokenizer(s, ",");
+		Rectangle r = new Rectangle();
+		try {
+			r.x = Integer.parseInt(st.nextToken());
+			r.y = Integer.parseInt(st.nextToken());
+			r.width = Integer.parseInt(st.nextToken());
+			r.height = Integer.parseInt(st.nextToken());
+		} catch (NumberFormatException nfe) {
+		}
+		return r;
+	}
 
-  static {
-    preferences = new Properties();
+	public static void init(File file) {
+		PreferencesStore.file = file;
+		// Make sure the preferences directory exists, creating it if it doesn't
+		File dir = file.getParentFile();
+		if (!dir.exists()) {
+			if (!dir.mkdirs()) {
+				System.err.println("Preferences directory " + dir.getAbsolutePath() + " could not be created. "
+						+ "Preferences will not be stored");
+			}
+		}
+		storeAvailable = dir.exists();
+		// If the preferences file exists, then load it
+		if (storeAvailable) {
+			if (file.exists()) {
+				InputStream in = null;
+				try {
+					in = new FileInputStream(file);
+					preferences.load(in);
+					storeAvailable = true;
+				} catch (IOException ioe) {
+					ioe.printStackTrace();
+				} finally {
+					if (in != null) {
+						try {
+							in.close();
+						} catch (IOException ioe) {
+						}
+					}
+				}
+			}
+			// Otherwise create it
+			else {
+				savePreferences();
+			}
+		} else {
+			System.err.println("WARNING! Preferences store not available.");
+		}
+	}
 
-  }
+	public static boolean isStoreAvailable() {
+		return storeAvailable;
+	}
 
-  /**
-   *
-   *
-   * @param table
-   * @param pref
-   */
+	public static boolean preferenceExists(String name) {
+		return preferences.containsKey(name);
+	}
 
-  public static void saveTableMetrics(JTable table, String pref) {
-    for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
-      int w = table.getColumnModel().getColumn(i).getWidth();
-      put(pref + ".column." + i + ".width", String.valueOf(w));
-      put(pref + ".column." + i + ".position",
-          String.valueOf(table.convertColumnIndexToModel(i)));
-    }
+	public static void put(String name, String val) {
+		preferences.put(name, val);
+	}
 
-  }
+	public static void putBoolean(String name, boolean val) {
+		preferences.put(name, String.valueOf(val));
+	}
 
-  /**
-   *
-   *
-   * @param table
-   * @param pref
-   * @param defaultWidths
-   *
-   * @throws IllegalArgumentException
-   */
+	public static void putDouble(String name, double val) {
+		preferences.put(name, String.valueOf(val));
+	}
 
-  public static void restoreTableMetrics(JTable table, String pref,
-                                         int[] defaultWidths) {
-    //  Check the table columns may be resized correctly
-    if (table.getAutoResizeMode() != JTable.AUTO_RESIZE_OFF) {
-      throw new IllegalArgumentException(
-          "Table AutoResizeMode must be JTable.AUTO_RESIZE_OFF");
-    }
-    //  Restore the table column widths and positions
-    for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
-      try {
-        table.moveColumn(table.convertColumnIndexToView(getInt(pref
-            + ".column." + i + ".position", i)), i);
-        table.getColumnModel().getColumn(i).setMinWidth(10);
-        table.getColumnModel().getColumn(i).setPreferredWidth(getInt(pref
-            + ".column." + i + ".width",
-            (defaultWidths == null || defaultWidths[i] == -1)
-            ? table.getColumnModel().getColumn(i).getPreferredWidth()
-            : defaultWidths[i]));
-      }
-      catch (NumberFormatException nfe) {
-      }
-    }
+	public static void putInt(String name, int val) {
+		preferences.put(name, String.valueOf(val));
+	}
 
-  }
+	public static void putRectangle(String name, Rectangle val) {
+		preferences.put(name, (val == null) ? "" : (val.x + "," + val.y + "," + val.width + "," + val.height));
+	}
 
-  /**
-   *
-   *
-   * @return
-   */
+	public static boolean removePreference(String name) {
+		boolean exists = preferenceExists(name);
+		preferences.remove(name);
+		return exists;
+	}
 
-  public static boolean isStoreAvailable() {
-    return storeAvailable;
+	/**
+	 *
+	 *
+	 * @param table
+	 * @param pref
+	 * @param defaultWidths
+	 *
+	 * @throws IllegalArgumentException
+	 */
+	public static void restoreTableMetrics(JTable table, String pref, int[] defaultWidths) {
+		// Check the table columns may be resized correctly
+		if (table.getAutoResizeMode() != JTable.AUTO_RESIZE_OFF) {
+			throw new IllegalArgumentException("Table AutoResizeMode must be JTable.AUTO_RESIZE_OFF");
+		}
+		// Restore the table column widths and positions
+		for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
+			try {
+				table.moveColumn(table.convertColumnIndexToView(getInt(pref + ".column." + i + ".position", i)), i);
+				table.getColumnModel().getColumn(i).setMinWidth(10);
+				table.getColumnModel().getColumn(i)
+						.setPreferredWidth(getInt(pref + ".column." + i + ".width",
+								(defaultWidths == null || defaultWidths[i] == -1)
+										? table.getColumnModel().getColumn(i).getPreferredWidth()
+										: defaultWidths[i]));
+			} catch (NumberFormatException nfe) {
+			}
+		}
+	}
 
-  }
+	public static void savePreferences() {
+		if (file == null) {
+			System.err.println("Preferences not saved as PreferencesStore has not been initialise.");
+		} else {
+			OutputStream out = null;
+			try {
+				out = new FileOutputStream(file);
+				preferences.store(out, "SSHTerm preferences");
+				storeAvailable = true;
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+			} finally {
+				if (out != null) {
+					try {
+						out.close();
+					} catch (IOException ioe) {
+					}
+				}
+			}
+		}
+	}
 
-  /**
-   *
-   *
-   * @param file
-   */
-
-  public static void init(File file) {
-    PreferencesStore.file = file;
-    //  Make sure the preferences directory exists, creating it if it doesn't
-    File dir = file.getParentFile();
-    if (!dir.exists()) {
-      if (!dir.mkdirs()) {
-        System.err.println("Preferences directory " + dir.getAbsolutePath()
-                           + " could not be created. "
-                           + "Preferences will not be stored");
-      }
-    }
-    storeAvailable = dir.exists();
-    //  If the preferences file exists, then load it
-    if (storeAvailable) {
-      if (file.exists()) {
-        InputStream in = null;
-        try {
-          in = new FileInputStream(file);
-          preferences.load(in);
-          storeAvailable = true;
-        }
-        catch (IOException ioe) {
-          ioe.printStackTrace();
-        }
-        finally {
-          if (in != null) {
-            try {
-              in.close();
-            }
-            catch (IOException ioe) {
-            }
-          }
-        }
-      }
-      //  Otherwise create it
-      else {
-        savePreferences();
-      }
-    }
-    else {
-      System.err.println("WARNING! Preferences store not available.");
-    }
-
-  }
-
-  /**
-   *
-   */
-
-  public static void savePreferences() {
-    if (file == null) {
-      System.err.println(
-          "Preferences not saved as PreferencesStore has not been initialise.");
-    }
-    else {
-      OutputStream out = null;
-      try {
-        out = new FileOutputStream(file);
-        preferences.store(out, "SSHTerm preferences");
-        storeAvailable = true;
-      }
-      catch (IOException ioe) {
-        ioe.printStackTrace();
-      }
-      finally {
-        if (out != null) {
-          try {
-            out.close();
-          }
-          catch (IOException ioe) {
-          }
-        }
-      }
-    }
-
-  }
-
-  /**
-   *
-   *
-   * @param name
-   * @param def
-   *
-   * @return
-   */
-
-  public static String get(String name, String def) {
-    return preferences.getProperty(name, def);
-
-  }
-
-  /**
-   *
-   *
-   * @param name
-   * @param val
-   */
-
-  public static void put(String name, String val) {
-    preferences.put(name, val);
-
-  }
-
-  /**
-   *
-   *
-   * @param name
-   * @param def
-   *
-   * @return
-   */
-
-  public static Rectangle getRectangle(String name, Rectangle def) {
-    String s = preferences.getProperty(name);
-    if ( (s == null) || s.equals("")) {
-      return def;
-    }
-	StringTokenizer st = new StringTokenizer(s, ",");
-      Rectangle r = new Rectangle();
-      try {
-        r.x = Integer.parseInt(st.nextToken());
-        r.y = Integer.parseInt(st.nextToken());
-        r.width = Integer.parseInt(st.nextToken());
-        r.height = Integer.parseInt(st.nextToken());
-      }
-      catch (NumberFormatException nfe) {
-      }
-      return r;
-
-  }
-
-  /**
-   *
-   *
-   * @param name
-   * @param val
-   */
-
-  public static void putRectangle(String name, Rectangle val) {
-    preferences.put(name,
-                    (val == null) ? ""
-                    : (val.x + "," + val.y + "," + val.width + ","
-                       + val.height));
-
-  }
-
-  /**
-   *
-   *
-   * @param name
-   * @param def
-   *
-   * @return
-   */
-
-  public static int getInt(String name, int def) {
-    String s = preferences.getProperty(name);
-    if ( (s != null) && !s.equals("")) {
-      try {
-        return Integer.parseInt(s);
-      }
-      catch (NumberFormatException nfe) {
-        System.err.println("Preference is " + name +
-                                      " is badly formatted");
-        nfe.printStackTrace();
-      }
-    }
-    return def;
-
-  }
-
-  /**
-   *
-   *
-   * @param name
-   * @param def
-   *
-   * @return
-   */
-
-  public static double getDouble(String name, double def) {
-    String s = preferences.getProperty(name);
-    if ( (s != null) && !s.equals("")) {
-      try {
-        return Double.parseDouble(s);
-      }
-      catch (NumberFormatException nfe) {
-        System.err.println("Preference is " + name +
-                                      " is badly formatted");
-        nfe.printStackTrace();
-      }
-    }
-    return def;
-
-  }
-
-  /**
-   *
-   *
-   * @param name
-   * @param val
-   */
-
-  public static void putInt(String name, int val) {
-    preferences.put(name, String.valueOf(val));
-
-  }
-
-  /**
-   *
-   *
-   * @param name
-   * @param val
-   */
-
-  public static void putDouble(String name, double val) {
-    preferences.put(name, String.valueOf(val));
-
-  }
-
-  /**
-   *
-   *
-   * @param name
-   * @param def
-   *
-   * @return
-   */
-
-  public static boolean getBoolean(String name, boolean def) {
-    return get(name, String.valueOf(def)).equals("true");
-
-  }
-
-  /**
-   *
-   *
-   * @param name
-   * @param val
-   */
-
-  public static void putBoolean(String name, boolean val) {
-    preferences.put(name, String.valueOf(val));
-
-  }
-
-  /**
-   *
-   *
-   * @param name
-   *
-   * @return
-   */
-
-  public static boolean preferenceExists(String name) {
-    return preferences.containsKey(name);
-
-  }
-
-  /**
-   *
-   *
-   * @param name
-   *
-   * @return
-   */
-
-  public static boolean removePreference(String name) {
-    boolean exists = preferenceExists(name);
-    preferences.remove(name);
-    return exists;
-
-  }
-
+	/**
+	 *
+	 *
+	 * @param table
+	 * @param pref
+	 */
+	public static void saveTableMetrics(JTable table, String pref) {
+		for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
+			int w = table.getColumnModel().getColumn(i).getWidth();
+			put(pref + ".column." + i + ".width", String.valueOf(w));
+			put(pref + ".column." + i + ".position", String.valueOf(table.convertColumnIndexToModel(i)));
+		}
+	}
 }

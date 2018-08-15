@@ -9,6 +9,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 import com.sshtools.appframework.ui.TextBox;
@@ -78,6 +79,7 @@ public class WizardWelcomePanel extends JPanel {
 		bottom.setOpaque(false);
 		// Side bar
 		JPanel left = new JPanel(new BorderLayout()) {
+			@Override
 			public Dimension getPreferredSize() {
 				return new Dimension(120, super.getPreferredSize().height);
 			}
@@ -88,8 +90,8 @@ public class WizardWelcomePanel extends JPanel {
 		left.setDebugGraphicsOptions(0);
 		JLabel welcomeIcon = new JLabel();
 		welcomeIcon.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-		welcomeIcon.setHorizontalAlignment(JLabel.CENTER);
-		welcomeIcon.setVerticalAlignment(JLabel.TOP);
+		welcomeIcon.setHorizontalAlignment(SwingConstants.CENTER);
+		welcomeIcon.setVerticalAlignment(SwingConstants.TOP);
 		welcomeIcon.setIcon(icon);
 		left.add(welcomeIcon, BorderLayout.NORTH);
 		// Right

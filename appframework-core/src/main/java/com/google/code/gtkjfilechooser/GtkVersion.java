@@ -46,8 +46,8 @@ import java.io.IOException;
  * "libgtk-x11-2.0.so.0.600.7" is GTK+ 2.6.7, "libgtk-x11-2.0.so.0.1600.1" is
  * GTK+ 2.16.1 an so on...
  * </p>
- * <p> See <a href="http://library.gnome.org/devel/gtk/unstable/gtk-Feature-Test-Macros.html"/>
- * and <a href="http://git.gnome.org/cgit/gtk+/tree/gtk/gtkversion.h.in"/> 
+ * <p> See <a href="http://library.gnome.org/devel/gtk/unstable/gtk-Feature-Test-Macros.html">gtk-Feature-Test-Macros.html</a>
+ * and <a href="http://git.gnome.org/cgit/gtk+/tree/gtk/gtkversion.h.in">gtkversion.h.in</a> 
  * 
  * 
  * @author Costantino Cerbo
@@ -55,8 +55,8 @@ import java.io.IOException;
  */
 public class GtkVersion {
 	static int gtkMajorVersion;
-	static int gtkMinorVersion;
 	static int gtkMicroVersion;
+	static int gtkMinorVersion;
 	static {
 		gtkMajorVersion = 2;
 		gtkMinorVersion = Short.MAX_VALUE;

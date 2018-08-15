@@ -50,27 +50,25 @@ import org.apache.commons.cli.Options;
 /**
  * All plugin's must implement this
  * 
+ * @param <T> type of host
+ * 
  */
 public interface Plugin<T extends PluginHostContext> {
 	/**
-	 * Invoked by Plugspud when it starts the plugin
-	 * 
-	 * @param context
-	 *            context
-	 * @throws PluginException
-	 *             on any initialisation error
-	 */
-	void startPlugin(T context) throws PluginException;
-
-	/**
 	 * Invoked by Plugspud when it activates the plugin
 	 * 
-	 * @param context
-	 *            context
-	 * @throws PluginException
-	 *             on any initialisation error
+	 * @param context context
+	 * @throws PluginException on any initialisation error
 	 */
 	void activatePlugin(T context) throws PluginException;
+
+	/**
+	 * Configure the {@link Options} with any command line arguments this plugin
+	 * contributes.
+	 * 
+	 * @param options options
+	 */
+	void buildCLIOptions(Options options);
 
 	/**
 	 * Invoked by Plugspud when it wants to stop the plugin (e.g. when it is
@@ -82,9 +80,17 @@ public interface Plugin<T extends PluginHostContext> {
 	boolean canStopPlugin();
 
 	/**
+	 * Invoked by Plugspud when it starts the plugin
+	 * 
+	 * @param context context
+	 * @throws PluginException on any initialisation error
+	 */
+	void startPlugin(T context) throws PluginException;
+
+	/**
 	 * Stop the plugin.
+	 * 
+	 * @throws PluginException on any plugin error
 	 */
 	void stopPlugin() throws PluginException;
-
-	void buildCLIOptions(Options options);
 }

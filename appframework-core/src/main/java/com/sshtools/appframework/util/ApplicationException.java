@@ -31,16 +31,6 @@ public class ApplicationException
   }
 
   /**
-   * Creates a new ApplicationException. This cause will only
-   * be available in 1.4+ JDKs.
-   *
-   * @param cause underlying cause.
-   */
-  public ApplicationException(Throwable cause) {
-    this(null, cause);
-  }
-
-  /**
    * Creates a new ApplicationException. The cause will only
    * be available in 1.4+ JDKs.
    *
@@ -59,5 +49,15 @@ public class ApplicationException
       catch (Exception e) {
       }
     }
+  }
+
+  /**
+   * Creates a new ApplicationException. This cause will only
+   * be available in 1.4+ JDKs.
+   *
+   * @param cause underlying cause.
+   */
+  public ApplicationException(Throwable cause) {
+    this(null, cause);
   }
 }

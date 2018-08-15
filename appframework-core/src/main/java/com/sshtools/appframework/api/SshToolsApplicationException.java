@@ -56,17 +56,6 @@ public class SshToolsApplicationException
   /**
    * Creates a new SshToolsApplicationException object.
    *
-   * @param cause
-   */
-
-  public SshToolsApplicationException(Throwable cause) {
-    this(null, cause);
-
-  }
-
-  /**
-   * Creates a new SshToolsApplicationException object.
-   *
    * @param msg
    * @param cause
    */
@@ -82,6 +71,17 @@ public class SshToolsApplicationException
       catch (Exception e) {
       }
     }
+
+  }
+
+  /**
+   * Creates a new SshToolsApplicationException object.
+   *
+   * @param cause
+   */
+
+  public SshToolsApplicationException(Throwable cause) {
+    this(null, cause);
 
   }
 

@@ -1,6 +1,7 @@
 /* HEADER */
 package com.sshtools.appframework.actions;
 
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -16,6 +17,8 @@ public abstract class AbstractOpenAction extends AbstractAppAction {
 
 	/**
 	 * Creates a new AbstractOpenAction.
+	 * 
+	 * @param onToolBar action on tool bar
 	 */
 	public AbstractOpenAction(boolean onToolBar) {
 		putValue(NAME, VAL_NAME);
@@ -23,7 +26,7 @@ public abstract class AbstractOpenAction extends AbstractAppAction {
 		putValue(MEDIUM_ICON, loadIcon("document-open", 24));
 		putValue(SHORT_DESCRIPTION, Messages.getString("AbstractOpenAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION, Messages.getString("AbstractOpenAction.LongDesc"));
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.ALT_MASK + KeyEvent.CTRL_MASK));
+		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.ALT_MASK + InputEvent.CTRL_MASK));
 		putValue(MNEMONIC_KEY, new Integer('o'));
 		putValue(ON_MENUBAR, new Boolean(true));
 		putValue(MENU_NAME, "File");

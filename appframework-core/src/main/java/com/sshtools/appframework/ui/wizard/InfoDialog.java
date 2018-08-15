@@ -14,6 +14,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 
 import com.sshtools.ui.swing.ResourceIcon;
 import com.sshtools.ui.swing.UIUtil;
@@ -25,8 +27,18 @@ import com.sshtools.ui.swing.UIUtil;
  */
 public class InfoDialog
     extends JDialog {
-  InfoPanel infopanel = new InfoPanel();
+  /**
+   *
+   *
+   * @param args
+   */
+  public final static void main(String[] args) {
+    InfoDialog dialog = new InfoDialog();
+    dialog.setVisible(true);
+  }
   FlowLayout flowLayout1 = new FlowLayout();
+
+  InfoPanel infopanel = new InfoPanel();
 
   /**
    * Creates a new InfoDialog object.
@@ -39,22 +51,12 @@ public class InfoDialog
       getContentPane().add(infopanel);
       setSize(300, 200);
       //setResizable(false);
-      UIUtil.positionComponent(UIUtil.CENTER, this);
+      UIUtil.positionComponent(SwingConstants.CENTER, this);
       setVisible(true);
     }
     catch (Exception e) {
       e.printStackTrace();
     }
-  }
-
-  /**
-   *
-   *
-   * @param args
-   */
-  public final static void main(String[] args) {
-    InfoDialog dialog = new InfoDialog();
-    dialog.setVisible(true);
   }
 
   private void jbInit() throws Exception {
@@ -64,17 +66,17 @@ public class InfoDialog
 
 class InfoPanel
     extends JPanel {
-  JPanel iconPanel = new JPanel();
-  JLabel iconLabel = new JLabel();
-  JPanel panelButtons = new JPanel();
-  JButton buttonok = new JButton("OK");
-  ResourceIcon resicon = new ResourceIcon(InfoDialog.class,
-                                          "/images/dialog-information.png");
-  JTextPane finishSummary = new JTextPane();
-  JScrollPane summaryScrollPane = new JScrollPane();
   BorderLayout borderLayout1 = new BorderLayout();
   BorderLayout borderLayout2 = new BorderLayout();
   BorderLayout borderLayout3 = new BorderLayout();
+  JButton buttonok = new JButton("OK");
+  JTextPane finishSummary = new JTextPane();
+  JLabel iconLabel = new JLabel();
+  JPanel iconPanel = new JPanel();
+  JPanel panelButtons = new JPanel();
+  ResourceIcon resicon = new ResourceIcon(InfoDialog.class,
+                                          "/images/dialog-information.png");
+  JScrollPane summaryScrollPane = new JScrollPane();
   private int xWidth;
   private int yHeight;
 
@@ -102,7 +104,7 @@ class InfoPanel
     //finishSummary.setLineWrap(true);
     //finishSummary.setWrapStyleWord(true);
     // The scrollpane to which we will add our summary text area
-    summaryScrollPane.setVerticalScrollBarPolicy(JScrollPane.
+    summaryScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.
                                                  VERTICAL_SCROLLBAR_AS_NEEDED);
     JTextArea maintext = new JTextArea();
     JLabel titletext = new JLabel();

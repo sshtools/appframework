@@ -42,13 +42,13 @@ public class SaveDialogPanel extends JPanel implements PropertyChangeListener, A
 
 	static public final String ACTION_SAVE = "Action Save";
 
-	private JTextField nameTextField;
-	private JLabel saveFolderLabel;
-	private JComboBox foldersComboBox;
+	private ActionDispatcher actionDispatcher = new BasicActionDispatcher();
 	private Expander expander;
 	private String externalPath;
+	private JComboBox foldersComboBox;
+	private JTextField nameTextField;
 
-	private ActionDispatcher actionDispatcher = new BasicActionDispatcher();
+	private JLabel saveFolderLabel;
 
 	public SaveDialogPanel(JComponent fileExplorerPanel) {
 		super(new BorderLayout());
@@ -90,14 +90,76 @@ public class SaveDialogPanel extends JPanel implements PropertyChangeListener, A
 		add(expander, BorderLayout.CENTER);
 	}
 
-	private void initFoldersComboBox() {
-		foldersComboBox = new JComboBox();
-		foldersComboBox.setMaximumRowCount(30);
-		foldersComboBox.setRenderer(new FileComboBoxRenderer(foldersComboBox));
+	@Override
+	public void addActionListener(ActionListener l) {
+		actionDispatcher.addActionListener(l);
 
-		List<Path> locations = getLocations();
+	}
 
-		foldersComboBox.setModel(new DefaultComboBoxModel(locations.toArray()));
+	@Override
+	public void fireActionEvent(ActionEvent e) {
+		actionDispatcher.fireActionEvent(e);
+
+	}
+
+	public File getFilename() {
+		String name = nameTextField.getText();
+		if (name == null || name.isEmpty()) {
+			return null;
+		}
+
+		String path = isExpanded() ? externalPath : ((Path) foldersComboBox
+				.getSelectedItem()).getLocation();
+
+		return new File(path + File.separator + name);
+	}
+
+	public boolean isExpanded() {
+		return expander.isExpanded();
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		String property = evt.getPropertyName();
+		if (Expander.EXPANDED_STATUS_CHANGED.equals(property)) {
+			saveFolderLabel.setEnabled(!expander.isExpanded());
+			foldersComboBox.setEnabled(!expander.isExpanded());
+		}
+		firePropertyChange(property, evt.getOldValue(), evt.getNewValue());
+	}
+
+	@Override
+	public void removeActionListener(ActionListener l) {
+		actionDispatcher.removeActionListener(l);
+
+	}
+
+	@Override
+	public void removeAllActionListeners() {
+		actionDispatcher.removeAllActionListeners();		
+	}
+
+	public void setExpanded(boolean expanded) {
+		expander.setExpanded(expanded);
+	}
+
+	/**
+	 * External path typicall set in the file browser panel.
+	 * 
+	 * @param externalPath
+	 */
+	public void setExternalPath(String externalPath) {
+		this.externalPath = externalPath;
+	}
+
+	/**
+	 * Set the content of the text field. This setter does't influence the
+	 * method {@link #getFilename()}.
+	 * 
+	 * @param simplyname
+	 */
+	public void setFilenameText(String simplyname) {
+		nameTextField.setText(simplyname);
 	}
 
 	/**
@@ -114,75 +176,13 @@ public class SaveDialogPanel extends JPanel implements PropertyChangeListener, A
 		return locations;
 	}
 
-	public boolean isExpanded() {
-		return expander.isExpanded();
-	}
+	private void initFoldersComboBox() {
+		foldersComboBox = new JComboBox();
+		foldersComboBox.setMaximumRowCount(30);
+		foldersComboBox.setRenderer(new FileComboBoxRenderer(foldersComboBox));
 
-	public void setExpanded(boolean expanded) {
-		expander.setExpanded(expanded);
-	}
+		List<Path> locations = getLocations();
 
-	/**
-	 * External path typicall set in the file browser panel.
-	 * 
-	 * @param externalPath
-	 */
-	public void setExternalPath(String externalPath) {
-		this.externalPath = externalPath;
-	}
-
-	public File getFilename() {
-		String name = nameTextField.getText();
-		if (name == null || name.isEmpty()) {
-			return null;
-		}
-
-		String path = isExpanded() ? externalPath : ((Path) foldersComboBox
-				.getSelectedItem()).getLocation();
-
-		return new File(path + File.separator + name);
-	}
-
-	/**
-	 * Set the content of the text field. This setter does't influence the
-	 * method {@link #getFilename()}.
-	 * 
-	 * @param simplyname
-	 */
-	public void setFilenameText(String simplyname) {
-		nameTextField.setText(simplyname);
-	}
-
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		String property = evt.getPropertyName();
-		if (Expander.EXPANDED_STATUS_CHANGED.equals(property)) {
-			saveFolderLabel.setEnabled(!expander.isExpanded());
-			foldersComboBox.setEnabled(!expander.isExpanded());
-		}
-		firePropertyChange(property, evt.getOldValue(), evt.getNewValue());
-	}
-
-	@Override
-	public void addActionListener(ActionListener l) {
-		actionDispatcher.addActionListener(l);
-
-	}
-
-	@Override
-	public void fireActionEvent(ActionEvent e) {
-		actionDispatcher.fireActionEvent(e);
-
-	}
-
-	@Override
-	public void removeActionListener(ActionListener l) {
-		actionDispatcher.removeActionListener(l);
-
-	}
-
-	@Override
-	public void removeAllActionListeners() {
-		actionDispatcher.removeAllActionListeners();		
+		foldersComboBox.setModel(new DefaultComboBoxModel(locations.toArray()));
 	}
 }

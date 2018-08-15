@@ -2,6 +2,7 @@
 
 package com.sshtools.appframework.actions;
 
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -30,8 +31,8 @@ public abstract class AbstractPrintAction extends AbstractAppAction {
 		putValue(MNEMONIC_KEY, new Integer('p'));
 		putValue(
 				ACCELERATOR_KEY,
-				KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.ALT_MASK
-						+ KeyEvent.CTRL_MASK));
+				KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.ALT_MASK
+						+ InputEvent.CTRL_MASK));
 		putValue(ON_MENUBAR, true);
 		putValue(MENU_NAME, "File");
 		putValue(MENU_ITEM_GROUP, 80);

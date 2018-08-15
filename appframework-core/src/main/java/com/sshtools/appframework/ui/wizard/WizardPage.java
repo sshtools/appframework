@@ -1,44 +1,18 @@
 /* HEADER */
-
 package com.sshtools.appframework.ui.wizard;
 
 import java.awt.Component;
 
-/**
- * 
- * 
- * @author $author$
- */
 public interface WizardPage {
-	public void show(WizardPanel wizard);
+	void apply();
 
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
-	public Component getPageComponent();
+	Component getPageComponent();
 
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
-	public String getPageTitle();
+	String getPageDescription();
 
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
-	public String getPageDescription();
+	String getPageTitle();
 
-	/**
-	 * 
-	 * 
-	 * @throws ValidationException
-	 */
-	public void validatePage() throws ValidationException;
+	void show(WizardPanel wizardPanel);
 
-	public void apply();
+	void validatePage() throws ValidationException;
 }

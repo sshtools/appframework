@@ -32,31 +32,34 @@ import com.sshtools.ui.swing.ResourceIcon;
 
 public class ImagePanel extends JPanel {
 
-    private Icon icon;
     private boolean alignBottomRight = false;
-
-    public ImagePanel(String imageName) {
-        icon = new ResourceIcon(getClass(), imageName);
-        setOpaque(false);
-    }
+    private Icon icon;
 
     public ImagePanel(Icon icon) {
         this.icon = icon;
         setOpaque(false);
     }
+
+    public ImagePanel(String imageName) {
+        icon = new ResourceIcon(getClass(), imageName);
+        setOpaque(false);
+    }
     
-    public Dimension getPreferredSize() {
+    @Override
+	public Dimension getMinimumSize() {
+        return getPreferredSize();
+
+    }
+    
+    @Override
+	public Dimension getPreferredSize() {
         Insets insets = getInsets();
         return new Dimension(icon.getIconWidth() + insets.left + insets.right, icon.getIconHeight() + insets.top + insets.bottom);
 
     }
-    
-    public Dimension getMinimumSize() {
-        return getPreferredSize();
 
-    }
-
-    public void paintComponent(Graphics g) {
+    @Override
+	public void paintComponent(Graphics g) {
         Insets insets = getInsets();
         if (!alignBottomRight) {
             // Paint the image at the top left hand side of the panel

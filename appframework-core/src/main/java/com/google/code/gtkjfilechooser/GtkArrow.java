@@ -39,13 +39,6 @@ import com.sun.java.swing.plaf.gtk.GTKConstants.ArrowType;
  */
 public class GtkArrow extends JLabel {
 
-	private ArrowType type;
-
-	public GtkArrow(ArrowType type) {
-		super(null, get(type), CENTER);
-		this.type = type;
-	}
-
 	static public Icon get(ArrowType type) {
 		try {
 			Class<?> cls = Class
@@ -60,6 +53,13 @@ public class GtkArrow extends JLabel {
 		} catch (Throwable e) {
 			return null;
 		}
+	}
+
+	private ArrowType type;
+
+	public GtkArrow(ArrowType type) {
+		super(null, get(type), CENTER);
+		this.type = type;
 	}
 
 	@Override

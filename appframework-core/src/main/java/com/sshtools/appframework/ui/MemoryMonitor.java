@@ -16,6 +16,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 
 
 /**
@@ -23,40 +24,14 @@ import javax.swing.SwingUtilities;
  */
 public class MemoryMonitor extends JPanel implements ActionListener {
 
-  private JProgressBar memoryGauge;
   private static JFrame frame;
-
-  public MemoryMonitor() {
-    memoryGauge = new JProgressBar(0, 100) {
-
-      public Dimension getMinimumSize() {
-        return new Dimension(100, 16);
-      }
-
-      public Dimension getSize() {
-        return getMinimumSize();
-      }
-    };
-    memoryGauge.setBorder(BorderFactory.createLineBorder(Color.black));
-    memoryGauge.setBackground(Color.white);
-    memoryGauge.setForeground(Color.red);
-    memoryGauge.setStringPainted(true);
-    memoryGauge.addMouseListener(new MouseAdapter() {
-      public void mouseClicked(MouseEvent evt) {
-        System.gc();
-      }
-    });
-    add(memoryGauge);
-    javax.swing.Timer timer = new javax.swing.Timer(2000, this);
-    timer.start();
-  }
-  
   public static void showMemoryMonitor() {
     if(frame == null) {
       frame = new JFrame("Memory monitor");
-      frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+      frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
       frame.addWindowListener(new WindowAdapter() {
-        public void windowClosing(WindowEvent evt) {
+        @Override
+		public void windowClosing(WindowEvent evt) {
           frame.setVisible(false);
         }
       });
@@ -67,9 +42,41 @@ public class MemoryMonitor extends JPanel implements ActionListener {
     frame.setVisible(true);
   }
 
-  public void actionPerformed(ActionEvent evt) {
+  private JProgressBar memoryGauge;
+  
+  public MemoryMonitor() {
+    memoryGauge = new JProgressBar(0, 100) {
+
+      @Override
+	public Dimension getMinimumSize() {
+        return new Dimension(100, 16);
+      }
+
+      @Override
+	public Dimension getSize() {
+        return getMinimumSize();
+      }
+    };
+    memoryGauge.setBorder(BorderFactory.createLineBorder(Color.black));
+    memoryGauge.setBackground(Color.white);
+    memoryGauge.setForeground(Color.red);
+    memoryGauge.setStringPainted(true);
+    memoryGauge.addMouseListener(new MouseAdapter() {
+      @Override
+	public void mouseClicked(MouseEvent evt) {
+        System.gc();
+      }
+    });
+    add(memoryGauge);
+    javax.swing.Timer timer = new javax.swing.Timer(2000, this);
+    timer.start();
+  }
+
+  @Override
+public void actionPerformed(ActionEvent evt) {
       SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
+          @Override
+		public void run() {
               doUpdate();
           }
       });

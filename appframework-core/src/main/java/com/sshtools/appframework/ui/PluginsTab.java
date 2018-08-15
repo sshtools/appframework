@@ -18,8 +18,8 @@ public class PluginsTab extends JPanel implements OptionsTab {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private PluginManagerPane plugins;
 	private Icon icon, largeIcon;
+	private PluginManagerPane plugins;
 
 	public PluginsTab(PluginManager manager, PluginHostContext context) {
 		setLayout(new BorderLayout());
@@ -30,45 +30,56 @@ public class PluginsTab extends JPanel implements OptionsTab {
 		add(plugins, BorderLayout.CENTER);
 	}
 
-	public void tabSelected() {
-	}
-
-	public Icon getTabIcon() {
-		return icon;
-	}
-
-	public String getTabTitle() {
-		return Messages.getString("SshToolsApplication.Title");
-	}
-
-	public String getTabToolTipText() {
-		return Messages.getString("SshToolsApplication.Tooltip");
-	}
-
-	public int getTabMnemonic() {
-		return 'p';
-	}
-
-	public Component getTabComponent() {
-		return this;
-	}
-
-	public boolean validateTab() {
-		return true;
-	}
-
+	@Override
 	public void applyTab() {
 		plugins.cleanUp();
 	}
 
+	@Override
 	public String getTabCategory() {
 		return "General";
 	}
 
+	@Override
+	public Component getTabComponent() {
+		return this;
+	}
+
+	@Override
+	public Icon getTabIcon() {
+		return icon;
+	}
+
+	@Override
 	public Icon getTabLargeIcon() {
 		return largeIcon;
 	}
 
+	@Override
+	public int getTabMnemonic() {
+		return 'p';
+	}
+
+	@Override
+	public String getTabTitle() {
+		return Messages.getString("SshToolsApplication.Title");
+	}
+
+	@Override
+	public String getTabToolTipText() {
+		return Messages.getString("SshToolsApplication.Tooltip");
+	}
+
+	@Override
 	public void reset() {
+	}
+
+	@Override
+	public void tabSelected() {
+	}
+
+	@Override
+	public boolean validateTab() {
+		return true;
 	}
 }

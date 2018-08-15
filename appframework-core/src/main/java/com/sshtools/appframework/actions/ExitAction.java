@@ -3,6 +3,7 @@
 package com.sshtools.appframework.actions;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.Action;
@@ -34,7 +35,7 @@ public class ExitAction extends AbstractAppAction {
 		this.container = container;
 		putValue(Action.NAME, Messages.getString("ExitAction.Name"));
 		putValue(Action.SHORT_DESCRIPTION, Messages.getString("ExitAction.ShortDesc"));
-		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_X, KeyEvent.ALT_MASK));
+		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.ALT_MASK));
 		putValue(Action.LONG_DESCRIPTION, Messages.getString("ExitAction.LongDesc"));
 		putValue(Action.MNEMONIC_KEY, new Integer('x'));
 		putValue(AppAction.ON_MENUBAR, new Boolean(true));
@@ -46,6 +47,7 @@ public class ExitAction extends AbstractAppAction {
 
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent evt) {
 		application.closeContainer(container);
 	}

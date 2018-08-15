@@ -18,7 +18,6 @@
  * your distribution for more details.
  *
  */
-
 package com.sshtools.appframework.ui;
 
 import java.awt.BorderLayout;
@@ -33,6 +32,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
 
 import com.sshtools.appframework.actions.AboutAction;
 import com.sshtools.appframework.actions.ExitAction;
@@ -48,70 +48,66 @@ import com.sshtools.ui.swing.AppAction;
 /**
  * @author $author$
  */
-
-public class SshToolsApplicationInternalFrame extends JInternalFrame implements
-
-SshToolsApplicationContainer {
-
+public class SshToolsApplicationInternalFrame extends JInternalFrame implements SshToolsApplicationContainer {
 	// Preference names
-
 	/**  */
-
 	public final static String PREF_LAST_FRAME_GEOMETRY = "application.lastFrameGeometry";
-
 	/**  */
-
-	protected AppAction exitAction;
-
-	/**  */
-
 	protected AppAction aboutAction;
-
 	/**  */
-
+	protected AppAction exitAction;
+	protected MessagePanel messagePanel;
+	/**  */
 	protected AppAction newWindowAction;
-
 	/**  */
-
 	protected JSeparator toolSeparator;
-
-	//
-
-	private SshToolsApplicationPanel panel;
-
 	private SshToolsApplication application;
-
+	//
+	private SshToolsApplicationPanel panel;
 	private boolean showAboutBox = true;
-
 	private boolean showExitAction = true;
-
+	private boolean showMenu = true;
 	private boolean showNewWindowAction = true;
 
-	private boolean showMenu = true;
-	protected MessagePanel messagePanel;
-
-	public void showAboutBox(boolean showAboutBox) {
-		this.showAboutBox = showAboutBox;
-
+	@Override
+	public boolean canCloseContainer() {
+		return panel == null || panel.canClose();
 	}
 
-	public void showExitAction(boolean showExitAction) {
-		this.showExitAction = showExitAction;
-
+	@Override
+	public boolean closeContainer() {
+		boolean closedOk = getApplicationPanel().close();
+		if (closedOk) {
+			/*
+			 * If this is the last frame to close, then store its geometry for
+			 * use
+			 */
+			if (application != null && application.getContainerCount() == 1) {
+				PreferencesStore.putRectangle(PREF_LAST_FRAME_GEOMETRY, getBounds());
+			}
+			dispose();
+			getApplicationPanel().deregisterAction(newWindowAction);
+			getApplicationPanel().deregisterAction(exitAction);
+			getApplicationPanel().deregisterAction(aboutAction);
+			getApplicationPanel().rebuildActionComponents();
+		}
+		return closedOk;
 	}
 
-	public void showNewWindowAction(boolean showNewWindowAction) {
-		this.showNewWindowAction = showNewWindowAction;
-
+	public SshToolsApplication getApplication() {
+		return application;
 	}
 
-	/**
-	 * @param application
-	 * @param panel
-	 * 
-	 * @throws SshToolsApplicationException
-	 */
+	@Override
+	public SshToolsApplicationPanel getApplicationPanel() {
+		return panel;
+	}
 
+	public MessagePanel getMessagePanel() {
+		return messagePanel;
+	}
+
+	@Override
 	public void init(final SshToolsApplication application, SshToolsApplicationPanel panel) throws SshToolsApplicationException {
 		this.panel = panel;
 		this.application = application;
@@ -142,33 +138,27 @@ SshToolsApplicationContainer {
 		if (panel.getToolBar() != null) {
 			JPanel t = new JPanel(new BorderLayout());
 			t.add(panel.getToolBar(), BorderLayout.NORTH);
-			t.add(toolSeparator = new JSeparator(JSeparator.HORIZONTAL), BorderLayout.SOUTH);
+			t.add(toolSeparator = new JSeparator(SwingConstants.HORIZONTAL), BorderLayout.SOUTH);
 			toolSeparator.setVisible(panel.getToolBar().isVisible());
 			final SshToolsApplicationPanel pnl = panel;
 			panel.getToolBar().addComponentListener(new ComponentAdapter() {
-
+				@Override
 				public void componentHidden(ComponentEvent evt) {
 					toolSeparator.setVisible(pnl.getToolBar().isVisible());
-
 				}
-
 			});
 			p.add(t, BorderLayout.NORTH);
 		}
 		p.add(panel, BorderLayout.CENTER);
-
 		messagePanel = new MessagePanel(Type.hidden);
 		p.add(messagePanel, BorderLayout.SOUTH);
-
 		getContentPane().setLayout(new GridLayout(1, 1));
 		getContentPane().add(p);
 		// Watch for the frame closing
 		// setDefaultCloseOperation(JInternalFrame.DO_NOTHING_ON_CLOSE);
 		addVetoableChangeListener(new VetoableChangeListener() {
-
-			public void vetoableChange(PropertyChangeEvent evt)
-
-			throws PropertyVetoException {
+			@Override
+			public void vetoableChange(PropertyChangeEvent evt) throws PropertyVetoException {
 				if (application != null) {
 					application.closeContainer(SshToolsApplicationInternalFrame.this);
 				} else {
@@ -176,19 +166,17 @@ SshToolsApplicationContainer {
 						boolean changed = ((Boolean) evt.getNewValue()).booleanValue();
 						if (changed) {
 							int confirm = JOptionPane.showOptionDialog(SshToolsApplicationInternalFrame.this,
-								Messages.getString("SshToolsApplicationInternalFrame.Close") + " " + getTitle() + "?",
-								Messages.getString("SshToolsApplicationInternalFrame.CloseOp"), JOptionPane.YES_NO_OPTION,
-								JOptionPane.QUESTION_MESSAGE, null, null, null);
+									Messages.getString("SshToolsApplicationInternalFrame.Close") + " " + getTitle() + "?",
+									Messages.getString("SshToolsApplicationInternalFrame.CloseOp"), JOptionPane.YES_NO_OPTION,
+									JOptionPane.QUESTION_MESSAGE, null, null, null);
 							if (confirm == 0) {
 								SshToolsApplicationInternalFrame.this.getDesktopPane()
-									.remove(SshToolsApplicationInternalFrame.this);
+										.remove(SshToolsApplicationInternalFrame.this);
 							}
 						}
 					}
 				}
-
 			}
-
 		});
 		/*
 		 * this.addWindowListener(new WindowAdapter() { public void
@@ -213,105 +201,37 @@ SshToolsApplicationContainer {
 		 * UIUtil.positionComponent(SwingConstants.CENTER, this); }
 		 */
 		pack();
-
 	}
 
-	/**
-	 * @param title
-	 */
-
-	public void setContainerTitle(String title) {
-		setTitle(title);
-
-	}
-
-	/**
-	 * @return
-	 */
-
-	public SshToolsApplication getApplication() {
-		return application;
-
-	}
-
-	/**
-	 * @param visible
-	 */
-
-	public void setContainerVisible(boolean visible) {
-		setVisible(visible);
-
-	}
-
-	/**
-	 * @return
-	 */
-
+	@Override
 	public boolean isContainerVisible() {
 		return isVisible();
-
 	}
 
-	/**
-	 * @return
-	 */
-
-	public SshToolsApplicationPanel getApplicationPanel() {
-		return panel;
-
-	}
-
-	/**
-	 * 
-	 */
-
-	public boolean closeContainer() {
-		boolean closedOk = getApplicationPanel().close();
-		if (closedOk) {
-			/*
-			 * If this is the last frame to close, then store its geometry for
-			 * use
-			 */
-			if (application != null && application.getContainerCount() == 1) {
-				PreferencesStore.putRectangle(PREF_LAST_FRAME_GEOMETRY, getBounds());
-			}
-			dispose();
-			getApplicationPanel().deregisterAction(newWindowAction);
-			getApplicationPanel().deregisterAction(exitAction);
-			getApplicationPanel().deregisterAction(aboutAction);
-			getApplicationPanel().rebuildActionComponents();
-		}
-		return closedOk;
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.sshtools.appframework.ui.SshToolsApplicationContainer#packContainer()
-	 */
-
+	@Override
 	public void packContainer() throws SshToolsApplicationException {
 		pack();
-
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.sshtools.appframework.ui.SshToolsApplicationContainer#canCloseContainer
-	 * ()
-	 */
-
-	public boolean canCloseContainer() {
-		return panel == null || panel.canClose();
-
+	@Override
+	public void setContainerTitle(String title) {
+		setTitle(title);
 	}
 
-	public MessagePanel getMessagePanel() {
-		return messagePanel;
+	@Override
+	public void setContainerVisible(boolean visible) {
+		setVisible(visible);
 	}
 
+	public void showAboutBox(boolean showAboutBox) {
+		this.showAboutBox = showAboutBox;
+	}
+
+	public void showExitAction(boolean showExitAction) {
+		this.showExitAction = showExitAction;
+	}
+
+	public void showNewWindowAction(boolean showNewWindowAction) {
+		this.showNewWindowAction = showNewWindowAction;
+	}
 }

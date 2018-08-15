@@ -18,8 +18,35 @@ public class VFSFileSelector implements XFileChooser<FileObject> {
 	}
 
 	@Override
-	public void setMultiSelectionEnabled(boolean multiSelection) {
-		fileChooser.setMultiSelectionEnabled(multiSelection);
+	public FileObject getCurrentDirectory() {
+		return fileChooser.getCurrentDirectoryObject();
+	}
+
+	@Override
+	public FileObject getSelectedFile() {
+		return fileChooser.getSelectedFileObject();
+	}
+
+	@Override
+	public FileObject[] getSelectedFiles() {
+		return fileChooser.getSelectedFileObjects();
+	}
+
+	@Override
+	public void setCurrentDirectory(FileObject file) {
+		fileChooser.setCurrentDirectoryObject(file);
+	}
+
+	@Override
+	public void setDialogType(int openDialog) {
+		switch (openDialog) {
+		case OPEN_DIALOG:
+			fileChooser.setDialogType(DIALOG_TYPE.OPEN);
+			break;
+		case SAVE_DIALOG:
+			fileChooser.setDialogType(DIALOG_TYPE.SAVE);
+			break;
+		}
 	}
 
 	@Override
@@ -38,13 +65,13 @@ public class VFSFileSelector implements XFileChooser<FileObject> {
 	}
 
 	@Override
-	public void setSelectedFile(FileObject file) {
-		fileChooser.setSelectedFileObject(file);
+	public void setMultiSelectionEnabled(boolean multiSelection) {
+		fileChooser.setMultiSelectionEnabled(multiSelection);
 	}
 
 	@Override
-	public void setCurrentDirectory(FileObject file) {
-		fileChooser.setCurrentDirectoryObject(file);
+	public void setSelectedFile(FileObject file) {
+		fileChooser.setSelectedFileObject(file);
 	}
 
 	@Override
@@ -58,33 +85,6 @@ public class VFSFileSelector implements XFileChooser<FileObject> {
 			return APPROVE_OPTION;
 		}
 		return CANCEL_OPTION;
-	}
-
-	@Override
-	public FileObject getSelectedFile() {
-		return fileChooser.getSelectedFileObject();
-	}
-
-	@Override
-	public FileObject getCurrentDirectory() {
-		return fileChooser.getCurrentDirectoryObject();
-	}
-
-	@Override
-	public FileObject[] getSelectedFiles() {
-		return fileChooser.getSelectedFileObjects();
-	}
-
-	@Override
-	public void setDialogType(int openDialog) {
-		switch (openDialog) {
-		case OPEN_DIALOG:
-			fileChooser.setDialogType(DIALOG_TYPE.OPEN);
-			break;
-		case SAVE_DIALOG:
-			fileChooser.setDialogType(DIALOG_TYPE.SAVE);
-			break;
-		}
 	}
 
 }

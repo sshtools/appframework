@@ -13,12 +13,12 @@ public class AbstractAppAction extends AppAction {
 		super();
 	}
 
-	public AbstractAppAction(String name, Icon smallIcon) {
-		super(name, smallIcon);
-	}
-
 	public AbstractAppAction(String name) {
 		super(name);
+	}
+
+	public AbstractAppAction(String name, Icon smallIcon) {
+		super(name, smallIcon);
 	}
 
 	protected Icon loadIcon(String name, int size) {

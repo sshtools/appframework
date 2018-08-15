@@ -16,9 +16,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Parse and format ISO 8601 dates.
+ * Parse and format ISO 8601 dates. See <a href=
+ * "http://www.w3.org/TR/NOTE-datetime">http://www.w3.org/TR/NOTE-datetime</a>.
  * 
- * @see http://www.w3.org/TR/NOTE-datetime
  * @author c.cerbo
  *
  */
@@ -29,12 +29,11 @@ public class ISO8601DateFormat {
 	 * Format a date in ISO 8601 (for example "1994-11-05T08:15:30-05:00" or
 	 * "2009-09-06T16:59:39Z").
 	 * 
-	 * @param date
-	 *            The date to format.
+	 * @param date The date to format.
 	 * @return the ISO 8601 format date.
 	 */
 	public String format(Date date) {
-		String d = fmt.format(date); 
+		String d = fmt.format(date);
 		return d.substring(0, 22) + ":" + d.substring(22);
 	}
 
@@ -42,30 +41,24 @@ public class ISO8601DateFormat {
 	 * Parse a date in ISO 8601 format (for example "1994-11-05T08:15:30-05:00"
 	 * or "2009-09-06T16:59:39Z").
 	 * 
-	 * @param source
-	 *            A <code>String</code> whose beginning should be parsed.
+	 * @param source A <code>String</code> whose beginning should be parsed.
 	 * @return A <code>Date</code> parsed from the string.
-	 * @exception ParseException
-	 *                if the beginning of the specified string cannot be parsed.
+	 * @exception ParseException if the beginning of the specified string cannot
+	 *                be parsed.
 	 */
 	public Date parse(String source) throws ParseException {
 		return fmt.parse(preprocess(source));
 	}
 
 	private String preprocess(String s) throws ParseException {
-
 		if (s.charAt(s.length() - 1) == 'Z') {
-			// handle a date with the special UTC designator ("Z"). 
-
+			// handle a date with the special UTC designator ("Z").
 			// remove the Z and concat +0000
 			s = s.substring(0, s.length() - 1) + "+0000";
 		} else {
 			// handle the case with time zone designator (+hh:mm or -hh:mm)
-
 			s = s.substring(0, s.length() - 3) + s.substring(s.length() - 2);
 		}
-
 		return s;
 	}
-
 }

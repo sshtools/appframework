@@ -19,12 +19,12 @@ import javax.swing.border.AbstractBorder;
 
 public class LowerBorder extends AbstractBorder {
 
-	private static final long serialVersionUID = 1L;
+	static final public Insets INSETS = new Insets(1,5,1,5);
 
-	protected int thickness;
+	private static final long serialVersionUID = 1L;
 	protected Color lineColor;
 
-	static final public Insets INSETS = new Insets(1,5,1,5);
+	protected int thickness;
 
 	/**
 	 * Creates a line border with the specified color and thickness.
@@ -37,10 +37,6 @@ public class LowerBorder extends AbstractBorder {
 	public LowerBorder(Color color, int thickness) {
 		this.lineColor = color;
 		this.thickness = thickness;		
-	}
-
-	protected Insets getBorderInsets() {
-		return INSETS;
 	}
 
 	@Override
@@ -65,6 +61,10 @@ public class LowerBorder extends AbstractBorder {
 
 			g.setColor(oldColor);
 		}
+	}
+
+	protected Insets getBorderInsets() {
+		return INSETS;
 	}
 
 }

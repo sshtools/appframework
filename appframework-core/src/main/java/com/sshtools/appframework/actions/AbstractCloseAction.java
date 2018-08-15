@@ -1,5 +1,6 @@
 package com.sshtools.appframework.actions;
 
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -11,20 +12,19 @@ import com.sshtools.ui.swing.AppAction;
  * connection.
  */
 public abstract class AbstractCloseAction extends AbstractAppAction {
-
-	private static final long serialVersionUID = 1L;
-
 	public final static String VAL_NAME = Messages.getString("AbstractCloseAction.Name");
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Creates a new AbstractCloseAction.
+	 * 
+	 * @param onToolBar action on toolbar
 	 */
-
 	public AbstractCloseAction(boolean onToolBar) {
 		putValue(NAME, Messages.getString("AbstractCloseAction.Name"));
 		putValue(SMALL_ICON, loadIcon("process-stop", 16));
 		putValue(MEDIUM_ICON, loadIcon("process-stop", 24));
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.ALT_MASK | KeyEvent.SHIFT_MASK));
+		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK));
 		putValue(SHORT_DESCRIPTION, Messages.getString("AbstractCloseAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION, Messages.getString("AbstractCloseAction.LongDesc"));
 		putValue(MNEMONIC_KEY, new Integer('c'));
@@ -38,7 +38,5 @@ public abstract class AbstractCloseAction extends AbstractAppAction {
 			putValue(TOOLBAR_WEIGHT, new Integer(10));
 			putValue(TEXT_ON_TOOLBAR, Boolean.TRUE);
 		}
-
 	}
-
 }

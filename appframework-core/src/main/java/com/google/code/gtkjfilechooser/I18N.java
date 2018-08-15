@@ -27,6 +27,42 @@ public class I18N {
 		init(Locale.getDefault());
 	}
 	
+	/**
+	 * Returns the mnemonic associate with this message, or 0 if none.
+	 * 
+	 * @param msgid id
+	 * @return the mnemonic associate with this message, or 0 if none.
+	 */
+	static final public int getMnemonic(String msgid) {
+		String msg = getString(msgid);
+		int indexOf = msg.indexOf('_');
+		if (indexOf >= 0) {
+			return msg.charAt(indexOf + 1);
+		}
+		return 0;
+	}
+
+	/**
+	 * Returns the translated string without mnemonics.
+	 * 
+	 * @param msgid id
+	 * @return the translated string without mnemonics.
+	 */
+	static final public String i18n(String msgid) {
+		// Return a string without mnemonic
+		return getString(msgid).replace("_", "");
+	}
+
+	/**
+	 * @param msgid id
+	 * @param args args
+	 * @return message
+	 * @see String#format(String, Object...)
+	 */
+	static final public String i18n(String msgid, Object args) {
+		return String.format(i18n(msgid), args);
+	}
+
 	static public void init(Locale locale) {
 		if (GettextResource.hasTranslation(locale, "gtk20")) {
 			resources = new GettextResource(locale, "gtk20");
@@ -39,39 +75,6 @@ public class I18N {
 		} else {
 			resourcesNotFound = true;
 		}
-	}
-
-	/**
-	 * Returns the translated string without mnemonics.
-	 * 
-	 * @param msgid
-	 * @return the translated string without mnemonics.
-	 */
-	static final public String i18n(String msgid) {
-		// Return a string without mnemonic
-		return getString(msgid).replace("_", "");
-	}
-
-	/**
-	 * @see String#format(String, Object...)
-	 */
-	static final public String i18n(String msgid, Object args) {
-		return String.format(i18n(msgid), args);
-	}
-
-	/**
-	 * Returns the mnemonic associate with this message, or 0 if none.
-	 * 
-	 * @param msgid
-	 * @return the mnemonic associate with this message, or 0 if none.
-	 */
-	static final public int getMnemonic(String msgid) {
-		String msg = getString(msgid);
-		int indexOf = msg.indexOf('_');
-		if (indexOf >= 0) {
-			return msg.charAt(indexOf + 1);
-		}
-		return 0;
 	}
 
 	/**

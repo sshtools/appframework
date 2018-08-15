@@ -19,17 +19,6 @@ public class GeneralUtil {
 
 	/**
 	 * 
-	 * Return an instance of a secure random number generate.
-	 * 
-	 * @return secure random number generator
-	 * 
-	 */
-	public static SecureRandom getRND() {
-		return rnd;
-	}
-
-	/**
-	 * 
 	 * Get a system property given its name, but make sure the security
 	 * 
 	 * manager will allow read access first. If system properties cannot
@@ -54,6 +43,17 @@ public class GeneralUtil {
 		} catch (AccessControlException ace) {
 			return defaultValue;
 		}
+	}
+
+	/**
+	 * 
+	 * Return an instance of a secure random number generate.
+	 * 
+	 * @return secure random number generator
+	 * 
+	 */
+	public static SecureRandom getRND() {
+		return rnd;
 	}
 
 	/**

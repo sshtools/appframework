@@ -26,17 +26,24 @@ public class RecentlyUsedFileWorker extends SwingWorker<Void, Void> implements P
 
 	private static final int NUMBER_OF_RECENT_FILES = 30;
 
+	private final GtkFileChooserUI fileChooserUI;
+
 	/**
 	 * Manager for the recent used files.
 	 */
 	private RecentlyUsedManager recentManager;
 
-	private final GtkFileChooserUI fileChooserUI;
-
 	public RecentlyUsedFileWorker(GtkFileChooserUI fileChooserUI) {
 		this.fileChooserUI = fileChooserUI;
 		addPropertyChangeListener(this);
 	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		Log.debug(evt);
+
+	}
+
 
 	@Override
 	protected Void doInBackground() throws Exception {
@@ -62,16 +69,9 @@ public class RecentlyUsedFileWorker extends SwingWorker<Void, Void> implements P
 		return null;
 	}
 
-
 	@Override
 	protected void done() {
 		fileChooserUI.getFileChooser().setCursor(Cursor.getDefaultCursor());
-	}
-
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		Log.debug(evt);
-
 	}
 
 }

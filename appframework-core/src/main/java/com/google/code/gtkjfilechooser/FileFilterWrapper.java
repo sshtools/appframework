@@ -31,8 +31,8 @@ public class FileFilterWrapper implements java.io.FileFilter {
 	}
 
 	@Override
-	public String toString() {
-		return filter.getDescription();
+	public boolean equals(Object obj) {
+		return toString().equals(obj.toString());
 	}
 
 	@Override
@@ -41,8 +41,8 @@ public class FileFilterWrapper implements java.io.FileFilter {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		return toString().equals(obj.toString());
+	public String toString() {
+		return filter.getDescription();
 	}
 
 }

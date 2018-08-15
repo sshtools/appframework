@@ -23,9 +23,9 @@ import javax.swing.UIManager;
 
 public class Expander extends JComponent implements PropertyChangeListener {
 	static final public String EXPANDED_STATUS_CHANGED = "expanded_status_changed";
-	private JLabel label;
 	private JComponent component;
 	private boolean expanded = false;
+	private JLabel label;
 
 	public Expander(String text, JComponent aComponent) {
 		this.component = aComponent;
@@ -67,6 +67,10 @@ public class Expander extends JComponent implements PropertyChangeListener {
 
 	}
 
+	public boolean isExpanded() {
+		return expanded;
+	}
+
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		String property = evt.getPropertyName();
@@ -82,10 +86,6 @@ public class Expander extends JComponent implements PropertyChangeListener {
 		this.expanded = expanded;
 
 		firePropertyChange(EXPANDED_STATUS_CHANGED, oldValue, newValue);
-	}
-
-	public boolean isExpanded() {
-		return expanded;
 	}
 
 	private void doStatusChanged() {

@@ -44,6 +44,8 @@ import java.util.ResourceBundle;
  * 
  */
 public class GettextResource extends ResourceBundle {
+	static public final String DEFAULT_LOCALES_DIRECTORY = "/usr/share/locale";
+
 	// enable debugging. Set false in production code.
 	static final boolean DEBUG = false;
 
@@ -52,8 +54,6 @@ public class GettextResource extends ResourceBundle {
 
 	// magic number reversed hex = DE 12 04 95
 	static final int[] MAGIC_REVERSED = new int[] { -34, 18, 4, -107 };
-
-	static public final String DEFAULT_LOCALES_DIRECTORY = "/usr/share/locale";
 
 	/**
 	 * Cache GettextResource instances with .mo file name.
@@ -72,10 +72,167 @@ public class GettextResource extends ResourceBundle {
 	 */
 	static private byte CONTEXT_SPECIFIER = 0x04;
 
-	/**
-	 * This flag becomes true when a byte with value 0x04 is found.
+	static public boolean hasTranslation(Locale loc, String textdomain) {
+		return hasTranslation(loc, DEFAULT_LOCALES_DIRECTORY, textdomain);
+	}
+
+	static public boolean hasTranslation(Locale loc, String localedir, String textdomain) {
+		return findMoFile(loc, localedir, textdomain) != null;
+	}
+
+	static public boolean hasTranslation(String textdomain) {
+		return hasTranslation(Locale.getDefault(), DEFAULT_LOCALES_DIRECTORY, textdomain);
+	}
+
+	/*
+	 * Command line user interface.
+	 * 
+	 * <pre>
+	 * Usage: gettextResource [-k MSGID] FILENAME
+	 * 
+	 * Get the translation for the given MSGID or list all
+	 * MSGID/MGSSTR pairs when no option is given.
+	 * 
+	 * Options:
+	 *   -h, --help            Show this help message and exit
+	 *   -k MSGID              Get the associated msgstr
+	 * 
+	 * 
+	 * Examples:
+	 *   gettextResource -k Search /usr/share/locale/it/LC_MESSAGES/gtk20.mo
+	 *   gettextResource /usr/share/locale/it/LC_MESSAGES/gtk20.mo
+	 * </pre>
 	 */
-	private boolean useContextSpecifier = false;
+	public static void main(String... args) {
+		if (args.length == 0) {
+			printUsage();
+			System.exit(0);
+		}
+
+		try {
+			String msgid = null;
+			String filename = null;
+			boolean showInfo = false;
+			if ("-h".equals(args[0]) || "--help".equals(args[0])) {
+				printUsage();
+				System.exit(0);
+			}
+			if ("-i".equals(args[0]) || "--info".equals(args[0])) {
+				showInfo = true;
+				filename = args[1];
+			} else if ("-k".equals(args[0]) || "-k".equals(args[0])) {
+				msgid = args[1];
+				filename = args[2];
+			} else {
+				filename = args[0];
+			}
+
+			if (filename != null) {
+				if (!new File(filename).isAbsolute()) {
+					filename = System.getProperty("user.dir") + File.separator + filename;
+				}
+			}
+
+			GettextResource r = new GettextResource(new File(filename));
+			if (showInfo) {
+				System.out.println(r.getInfoMessage());
+			} else if (msgid != null) {
+				System.out.println(r.i18n(msgid));
+			} else {
+				Enumeration<String> en = r.getKeys();
+				while (en.hasMoreElements()) {
+					String id = en.nextElement();
+					String msgstr = r.i18n(id);
+					System.out.println("msgid \"" + id + "\"");
+					System.out.println("msgstr \"" + msgstr + "\"");
+					System.out.println();
+				}
+			}
+		} catch (Throwable e) {
+			// System.err.println("Invalid options: " + e.getMessage());
+			e.printStackTrace();
+			printUsage();
+		}
+	}
+	private static String findMoFile(Locale loc, String localedir, String textdomain) {
+		String moFilename = localedir + File.separator + loc.toString() + File.separator
+				+ "LC_MESSAGES" + File.separator + textdomain + ".mo";
+		if (!new File(moFilename).exists()) {
+			moFilename = localedir + File.separator + loc.getLanguage() + File.separator
+					+ "LC_MESSAGES" + File.separator + textdomain + ".mo";
+			if (!new File(moFilename).exists()) {
+				return null;
+			}
+		}
+
+		return moFilename;
+	}
+
+	/**
+	 * Static method for execution as cli tool
+	 */
+
+	private static void printUsage() {
+		System.out.println("Usage: gettextResource [-k MSGID] | [-i] FILENAME");
+		System.out.println();
+		System.out.println("Get the translation for the given MSGID or list all");
+		System.out.println("MSGID/MGSSTR pairs when no option is given.");
+		System.out.println();
+		System.out.println("Options:");
+		System.out.println("  -h, --help            Show this help message and exit");
+		System.out.println("  -i, --info            Show the .mo file info");
+		System.out.println("  -k MSGID              Get the associated msgstr");
+		System.out.println();
+		System.out.println();
+		System.out.println("Examples:");
+		System.out
+				.println("  gettextResource -k Search /usr/share/locale/it/LC_MESSAGES/gtk20.mo");
+		System.out.println("  gettextResource /usr/share/locale/it/LC_MESSAGES/gtk20.mo");
+	}
+
+	private Charset charset = Charset.defaultCharset();
+
+	/**
+	 * Offset of hashing table (position: 24)
+	 */
+	private transient int h;
+
+	/**
+	 * Array of the byte buffers for each msgid. We use byte buffers, because we
+	 * map regions of the file channel into memory.
+	 */
+	private ByteBuffer[] msgidByteBuffers;
+
+	/**
+	 * Array of the byte buffers for each msgstr. We use byte buffers, because
+	 * we map regions of the file channel into memory.
+	 */
+	private ByteBuffer[] msgstrByteBuffers;
+
+	/**
+	 * Number of strings (position: 8)
+	 */
+	private transient int n;
+
+	/**
+	 * Offset of table with original strings (position: 12)
+	 */
+	private transient int o;
+
+	/**
+	 * Index of the currently processed original string (length & offset) [0,
+	 * n-1]
+	 */
+	private transient int oj;
+	/**
+	 * Array of the lengths of the original strings.
+	 */
+	private transient int[] oo_length;
+
+	/**
+	 * Array of the offsets of the original strings.
+	 */
+	private transient int[] oo_offset;
 
 	/**
 	 * Are the byte sequence reversed?
@@ -88,29 +245,11 @@ public class GettextResource extends ResourceBundle {
 	private transient int revision;
 
 	/**
-	 * Number of strings (position: 8)
+	 * Size of hashing table (position: 20)
 	 */
-	private transient int n;
-	/**
-	 * Offset of table with original strings (position: 12)
-	 */
-	private transient int o;
+	private transient int s;
 
-	/**
-	 * Index of the currently processed original string (length & offset) [0,
-	 * n-1]
-	 */
-	private transient int oj;
-
-	/**
-	 * Array of the lengths of the original strings.
-	 */
-	private transient int[] oo_length;
-
-	/**
-	 * Array of the offsets of the original strings.
-	 */
-	private transient int[] oo_offset;
+	private boolean showMissingTranslation = false;
 
 	/**
 	 * Offset of table with translation strings (position: 16)
@@ -134,38 +273,27 @@ public class GettextResource extends ResourceBundle {
 	private transient int[] tt_offset;
 
 	/**
-	 * Size of hashing table (position: 20)
+	 * This flag becomes true when a byte with value 0x04 is found.
 	 */
-	private transient int s;
-	/**
-	 * Offset of hashing table (position: 24)
-	 */
-	private transient int h;
-
-	/**
-	 * Array of the byte buffers for each msgid. We use byte buffers, because we
-	 * map regions of the file channel into memory.
-	 */
-	private ByteBuffer[] msgidByteBuffers;
-
-	/**
-	 * Array of the byte buffers for each msgstr. We use byte buffers, because
-	 * we map regions of the file channel into memory.
-	 */
-	private ByteBuffer[] msgstrByteBuffers;
-
-	private boolean showMissingTranslation = false;
-
-	private Charset charset = Charset.defaultCharset();
+	private boolean useContextSpecifier = false;
 
 	/**
 	 * Load a spefic .mo file
 	 * 
 	 * @param moFile file
-	 * @throws IOException on I/O error
 	 */
 	public GettextResource(File moFile) {
 		init(moFile);
+	}
+
+	/**
+	 * Create a new instance a reuse one already existent in the cache.
+	 * 
+	 * @param loc locale
+	 * @param textdomain text domain
+	 */
+	public GettextResource(Locale loc, String textdomain) {
+		this(loc, DEFAULT_LOCALES_DIRECTORY, textdomain);
 	}
 
 	public GettextResource(Locale loc, String localedir, String textdomain) {
@@ -185,35 +313,86 @@ public class GettextResource extends ResourceBundle {
 	 *            The directory where are the locale files. The should have this
 	 *            stucture: [localedir]/[iso language] or [localedir]/[iso
 	 *            language]_[iso_country]
-	 * @param textdomain
+	 * @param textdomain text domain
 	 */
 	public GettextResource(String localedir, String textdomain) {
 		this(Locale.getDefault(), localedir, textdomain);
 	}
 
-	/**
-	 * Create a new instance a reuse one already existent in the cache.
-	 * 
-	 * @param loc locale
-	 * @param textdomain text domain
-	 * @throws IOException on I/O error
-	 */
-	public GettextResource(Locale loc, String textdomain) {
-		this(loc, DEFAULT_LOCALES_DIRECTORY, textdomain);
+	public Charset getCharset() {
+		return charset;
 	}
 
-	private static String findMoFile(Locale loc, String localedir, String textdomain) {
-		String moFilename = localedir + File.separator + loc.toString() + File.separator
-				+ "LC_MESSAGES" + File.separator + textdomain + ".mo";
-		if (!new File(moFilename).exists()) {
-			moFilename = localedir + File.separator + loc.getLanguage() + File.separator
-					+ "LC_MESSAGES" + File.separator + textdomain + ".mo";
-			if (!new File(moFilename).exists()) {
-				return null;
+	public String getInfoMessage() {
+		return i18n("");
+	}
+
+	@Override
+	public Enumeration<String> getKeys() {
+		Enumeration<String> en = new Enumeration<String>() {
+			private int elementIndex = 0;
+
+			@Override
+			public boolean hasMoreElements() {
+				return elementIndex < msgidByteBuffers.length;
+			}
+
+			@Override
+			public String nextElement() {
+				String nextElement = GettextResource.this
+						.toString(msgidByteBuffers[elementIndex]);
+				elementIndex++;
+				return nextElement;
+			}
+		};
+
+		return en;
+	}
+
+	public String i18n(String msgid) {
+		byte[] array = msgid.getBytes();
+		// replace the pipe char with the separator char (0x04).
+		if (useContextSpecifier) {
+			for (int i = 0; i < array.length; i++) {
+				if (array[i] == '|') {
+					array[i] = CONTEXT_SPECIFIER;
+				}
 			}
 		}
 
-		return moFilename;
+		ByteBuffer msgidByteBuffer = ByteBuffer.wrap(array);
+		int idx = Arrays.binarySearch(msgidByteBuffers, msgidByteBuffer);
+
+		if (idx < 0) {
+			return handleMissingTranslation(msgid);
+		}
+
+		String msgstr = toString(msgstrByteBuffers[idx]);
+		if (msgstr.isEmpty()) {
+			return handleMissingTranslation(msgid);
+		}
+		return msgstr;
+	}
+
+	/**
+	 * Mark missing translation with one star at the beginning and at the end or
+	 * two if also the context lacks (for example: _("Stock label|Missing" --&gt;
+	 * "**Missing**" or _("Missing" --&gt; "*Missing*").
+	 * 
+	 * @param showMissingTranslation  show missing translation
+	 */
+	public void markMissingTranslation(boolean showMissingTranslation) {
+		this.showMissingTranslation = showMissingTranslation;
+	}
+
+	/**
+	 * Note that we don't throw a MissingResourceException when no translation
+	 * is found. In the GNU gettext approach, the gettext function returns the
+	 * (English) message key in that case.
+	 */
+	@Override
+	protected Object handleGetObject(String key) {
+		return i18n(key);
 	}
 
 	/**
@@ -230,132 +409,26 @@ public class GettextResource extends ResourceBundle {
 		this.charset = instance.charset;
 	}
 
-	private void init(File moFile) {
-		try {
-			// look in the cache first
-			String key = moFile.getAbsolutePath();
-			GettextResource instance = cachedGettextResource.get(key);
-			if (instance != null) {
-				copyInstance(instance);
-				return;
-			}
-
-			readOffsetsAndLenghts(moFile);
-
-			logOffsetAndLenghtInfo();
-
-			FileChannel channel = null;
-			try {
-				channel = new RandomAccessFile(moFile, "r").getChannel();
-				for (int i = 0; i < n; i++) {
-					msgidByteBuffers[i] = channel.map(MapMode.READ_ONLY, oo_offset[i],
-							oo_length[i]);
-					msgstrByteBuffers[i] = channel.map(MapMode.READ_ONLY, tt_offset[i],
-							tt_length[i]);
-				}
-			} finally {
-				if (channel != null) {
-					// Despite the fact that the channel has been closed, the
-					// data
-					// in the file continues to be available via the memory map
-					channel.close();
-				}
-			}
-
-			// We've mapped the file into memory, we can now release the
-			// resources not anymore needed.
-			releaseOffsetAndLenghtArrays();
-
-			setCharset();
-
-			// update cache
-			cachedGettextResource.put(key, this);
-
-			logMessages();
-		} catch (IOException e) {
-			throw new IOError(e);
-		}
-	}
-
-	/**
-	 * Usually the info message in a .mo file contais also the charset info, for
-	 * example:
-	 * 
-	 * <pre>
-	 * Project-Id-Version: gtk+ 2.14
-	 * Report-Msgid-Bugs-To: 
-	 * POT-Creation-Date: 2009-08-29 00:06-0400
-	 * PO-Revision-Date: 2009-04-17 22:57+0200
-	 * Last-Translator: Luca Ferretti &lt;elle.uca@libero.it&gt;
-	 * Language-Team: Italian &lt;tp@lists.linux.it&gt;
-	 * MIME-Version: 1.0
-	 * Content-Type: text/plain; charset=UTF-8
-	 * Content-Transfer-Encoding: 8bit
-	 * Plural-Forms: nplurals=2; plural=(n != 1);
-	 * </pre>
-	 */
-	private void setCharset() {
-		String info = getInfoMessage();
-		int chIndexOf = info.indexOf("charset");
-		if (chIndexOf >= 0) {
-			int start = chIndexOf + "charset".length() + 1;
-			int end = -1;
-			for (int i = start; i < info.length(); i++) {
-				if (info.charAt(i) == '\n') {
-					end = i;
-					break;
-				}
-			}
-			if (end > start) {
-				String charsetName = info.substring(start, end);
-				if (Charset.isSupported(charsetName)) {
-					charset = Charset.forName(charsetName);
-				}
-			}
-		}
-	}
-
-	public Charset getCharset() {
-		return charset;
-	}
-
-	/**
-	 * Read the offset and length for each original and translated string. This
-	 * information are stored in the arrays: oo_offset, oo_length, tt_offset and
-	 * tt_length.
-	 * 
-	 * This method read sequentially the first h bytes in the .mo file. Then we
-	 * use access the file random using a {@link FileChannel} and mapping the
-	 * just found positions.
-	 */
-	private void readOffsetsAndLenghts(File file) {
-		try {
-			InputStream is = null;
-			try {
-				is = new FileInputStream(file);
-				byte[] buffer = new byte[4096];
-				int index = 0;
-				for (int n; (n = is.read(buffer)) != -1;) {
-					for (int i = 0; i < n; i++) {
-						try {
-							handleByte(buffer[i], index);
-						} catch (ArrayIndexOutOfBoundsException e) {
-							e.printStackTrace();
-							throw new ArrayIndexOutOfBoundsException("index: " + index);
-						}
-						index++;
-						if (index > 12 && index == h) {
-							break;
+	private void debug(Object... msgs) {
+		if (DEBUG) {
+			for (Object msg : msgs) {
+				if (msg == null) {
+					System.out.print("null");
+				} else if (msg.getClass().isArray()) {
+					System.out.print("[");
+					int len = Array.getLength(msg);
+					for (int i = 0; i < len; i++) {
+						System.out.print(Array.get(msg, i));
+						if (i != (len - 1)) {
+							System.out.print(", ");
 						}
 					}
-				}
-			} finally {
-				if (is != null) {
-					is.close();
+					System.out.print("]");
+				} else {
+					System.out.print(String.valueOf(msg));
 				}
 			}
-		} catch (IOException e) {
-			throw new IOError(e);
+			System.out.println();
 		}
 	}
 
@@ -433,6 +506,191 @@ public class GettextResource extends ResourceBundle {
 		}
 	}
 
+	private String handleMissingTranslation(String msgid) {
+		String tmpMsgid = msgid;
+		String msgstr = tmpMsgid;
+		int indexOf = tmpMsgid.indexOf('|');
+		if (indexOf > 0) {
+			tmpMsgid = tmpMsgid.substring(indexOf + 1);
+
+			// try to search the key without context
+			msgstr = i18n(tmpMsgid);
+		}
+
+		return showMissingTranslation ? "*" + msgstr + "*" : msgstr;
+	}
+
+	private void init(File moFile) {
+		try {
+			// look in the cache first
+			String key = moFile.getAbsolutePath();
+			GettextResource instance = cachedGettextResource.get(key);
+			if (instance != null) {
+				copyInstance(instance);
+				return;
+			}
+
+			readOffsetsAndLenghts(moFile);
+
+			logOffsetAndLenghtInfo();
+
+			FileChannel channel = null;
+			try {
+				channel = new RandomAccessFile(moFile, "r").getChannel();
+				for (int i = 0; i < n; i++) {
+					msgidByteBuffers[i] = channel.map(MapMode.READ_ONLY, oo_offset[i],
+							oo_length[i]);
+					msgstrByteBuffers[i] = channel.map(MapMode.READ_ONLY, tt_offset[i],
+							tt_length[i]);
+				}
+			} finally {
+				if (channel != null) {
+					// Despite the fact that the channel has been closed, the
+					// data
+					// in the file continues to be available via the memory map
+					channel.close();
+				}
+			}
+
+			// We've mapped the file into memory, we can now release the
+			// resources not anymore needed.
+			releaseOffsetAndLenghtArrays();
+
+			setCharset();
+
+			// update cache
+			cachedGettextResource.put(key, this);
+
+			logMessages();
+		} catch (IOException e) {
+			throw new IOError(e);
+		}
+	}
+
+	/**
+	 * Some debugging methods follow...
+	 */
+	private void logInitOffset() {
+		if (DEBUG) {
+			debug("reversed: ", reversed);
+			debug("n = ", n);
+			debug("o = ", o);
+			debug("t = ", t);
+			debug("s = ", s);
+			debug("h = ", h);
+		}
+	}
+
+	/**
+	 * Log msgids and msgstrs.
+	 */
+	private void logMessages() {
+		if (DEBUG) {
+			for (int i = 0; i < msgidByteBuffers.length; i++) {
+				debug("msgid: \"" + toString(msgidByteBuffers[i]) + "\"");
+				debug("msgstr: \"" + toString(msgstrByteBuffers[i]) + "\"");
+				debug("");
+			}
+		}
+	}
+
+	private void logOffsetAndLenghtInfo() {
+		if (DEBUG) {
+			debug("oo_offset = ", oo_offset);
+			debug("oo_length = ", oo_length);
+			debug("tt_offset = ", tt_offset);
+			debug("tt_length = ", tt_length);
+		}
+	}
+
+	/**
+	 * Read the offset and length for each original and translated string. This
+	 * information are stored in the arrays: oo_offset, oo_length, tt_offset and
+	 * tt_length.
+	 * 
+	 * This method read sequentially the first h bytes in the .mo file. Then we
+	 * use access the file random using a {@link FileChannel} and mapping the
+	 * just found positions.
+	 */
+	private void readOffsetsAndLenghts(File file) {
+		try {
+			InputStream is = null;
+			try {
+				is = new FileInputStream(file);
+				byte[] buffer = new byte[4096];
+				int index = 0;
+				for (int n; (n = is.read(buffer)) != -1;) {
+					for (int i = 0; i < n; i++) {
+						try {
+							handleByte(buffer[i], index);
+						} catch (ArrayIndexOutOfBoundsException e) {
+							e.printStackTrace();
+							throw new ArrayIndexOutOfBoundsException("index: " + index);
+						}
+						index++;
+						if (index > 12 && index == h) {
+							break;
+						}
+					}
+				}
+			} finally {
+				if (is != null) {
+					is.close();
+				}
+			}
+		} catch (IOException e) {
+			throw new IOError(e);
+		}
+	}
+
+	/**
+	 * Release the offset and length arrays when they aren't needed anymore.
+	 */
+	private void releaseOffsetAndLenghtArrays() {
+		oo_length = null;
+		oo_offset = null;
+		tt_length = null;
+		tt_offset = null;
+	}
+
+	/**
+	 * Usually the info message in a .mo file contais also the charset info, for
+	 * example:
+	 * 
+	 * <pre>
+	 * Project-Id-Version: gtk+ 2.14
+	 * Report-Msgid-Bugs-To: 
+	 * POT-Creation-Date: 2009-08-29 00:06-0400
+	 * PO-Revision-Date: 2009-04-17 22:57+0200
+	 * Last-Translator: Luca Ferretti &lt;elle.uca@libero.it&gt;
+	 * Language-Team: Italian &lt;tp@lists.linux.it&gt;
+	 * MIME-Version: 1.0
+	 * Content-Type: text/plain; charset=UTF-8
+	 * Content-Transfer-Encoding: 8bit
+	 * Plural-Forms: nplurals=2; plural=(n != 1);
+	 * </pre>
+	 */
+	private void setCharset() {
+		String info = getInfoMessage();
+		int chIndexOf = info.indexOf("charset");
+		if (chIndexOf >= 0) {
+			int start = chIndexOf + "charset".length() + 1;
+			int end = -1;
+			for (int i = start; i < info.length(); i++) {
+				if (info.charAt(i) == '\n') {
+					end = i;
+					break;
+				}
+			}
+			if (end > start) {
+				String charsetName = info.substring(start, end);
+				if (Charset.isSupported(charsetName)) {
+					charset = Charset.forName(charsetName);
+				}
+			}
+		}
+	}
+
 	/**
 	 * Incremental swap
 	 * 
@@ -446,102 +704,6 @@ public class GettextResource extends ResourceBundle {
 			n = n | b & 0xff;
 		}
 		return n;
-	}
-
-	/**
-	 * Release the offset and length arrays when they aren't needed anymore.
-	 */
-	private void releaseOffsetAndLenghtArrays() {
-		oo_length = null;
-		oo_offset = null;
-		tt_length = null;
-		tt_offset = null;
-	}
-
-	@Override
-	public Enumeration<String> getKeys() {
-		Enumeration<String> en = new Enumeration<String>() {
-			private int elementIndex = 0;
-
-			@Override
-			public boolean hasMoreElements() {
-				return elementIndex < msgidByteBuffers.length;
-			}
-
-			@Override
-			public String nextElement() {
-				String nextElement = GettextResource.this
-						.toString(msgidByteBuffers[elementIndex]);
-				elementIndex++;
-				return nextElement;
-			}
-		};
-
-		return en;
-	}
-
-	/**
-	 * Note that we don't throw a MissingResourceException when no translation
-	 * is found. In the GNU gettext approach, the gettext function returns the
-	 * (English) message key in that case.
-	 */
-	@Override
-	protected Object handleGetObject(String key) {
-		return _(key);
-	}
-
-	public String _(String msgid) {
-		byte[] array = msgid.getBytes();
-		// replace the pipe char with the separator char (0x04).
-		if (useContextSpecifier) {
-			for (int i = 0; i < array.length; i++) {
-				if (array[i] == '|') {
-					array[i] = CONTEXT_SPECIFIER;
-				}
-			}
-		}
-
-		ByteBuffer msgidByteBuffer = ByteBuffer.wrap(array);
-		int idx = Arrays.binarySearch(msgidByteBuffers, msgidByteBuffer);
-
-		if (idx < 0) {
-			return handleMissingTranslation(msgid);
-		}
-
-		String msgstr = toString(msgstrByteBuffers[idx]);
-		if (msgstr.isEmpty()) {
-			return handleMissingTranslation(msgid);
-		}
-		return msgstr;
-	}
-
-	private String handleMissingTranslation(String msgid) {
-		String tmpMsgid = msgid;
-		String msgstr = tmpMsgid;
-		int indexOf = tmpMsgid.indexOf('|');
-		if (indexOf > 0) {
-			tmpMsgid = tmpMsgid.substring(indexOf + 1);
-
-			// try to search the key without context
-			msgstr = _(tmpMsgid);
-		}
-
-		return showMissingTranslation ? "*" + msgstr + "*" : msgstr;
-	}
-
-	public String getInfoMessage() {
-		return _("");
-	}
-
-	/**
-	 * Mark missing translation with one star at the beginning and at the end or
-	 * two if also the context lacks (for example: _("Stock label|Missing" --&gt;
-	 * "**Missing**" or _("Missing" --&gt; "*Missing*").
-	 * 
-	 * @param showMissingTranslation  show missing translation
-	 */
-	public void markMissingTranslation(boolean showMissingTranslation) {
-		this.showMissingTranslation = showMissingTranslation;
 	}
 
 	private String toString(ByteBuffer buf) {
@@ -560,169 +722,5 @@ public class GettextResource extends ResourceBundle {
 		}
 
 		return new String(array, Charset.forName("UTF-8"));
-	}
-
-	static public boolean hasTranslation(Locale loc, String localedir, String textdomain) {
-		return findMoFile(loc, localedir, textdomain) != null;
-	}
-
-	static public boolean hasTranslation(Locale loc, String textdomain) {
-		return hasTranslation(loc, DEFAULT_LOCALES_DIRECTORY, textdomain);
-	}
-
-	static public boolean hasTranslation(String textdomain) {
-		return hasTranslation(Locale.getDefault(), DEFAULT_LOCALES_DIRECTORY, textdomain);
-	}
-
-	/**
-	 * Some debugging methods follow...
-	 */
-	private void logInitOffset() {
-		if (DEBUG) {
-			debug("reversed: ", reversed);
-			debug("n = ", n);
-			debug("o = ", o);
-			debug("t = ", t);
-			debug("s = ", s);
-			debug("h = ", h);
-		}
-	}
-
-	private void logOffsetAndLenghtInfo() {
-		if (DEBUG) {
-			debug("oo_offset = ", oo_offset);
-			debug("oo_length = ", oo_length);
-			debug("tt_offset = ", tt_offset);
-			debug("tt_length = ", tt_length);
-		}
-	}
-
-	/**
-	 * Log msgids and msgstrs.
-	 */
-	private void logMessages() {
-		if (DEBUG) {
-			for (int i = 0; i < msgidByteBuffers.length; i++) {
-				debug("msgid: \"" + toString(msgidByteBuffers[i]) + "\"");
-				debug("msgstr: \"" + toString(msgstrByteBuffers[i]) + "\"");
-				debug("");
-			}
-		}
-	}
-
-	private void debug(Object... msgs) {
-		if (DEBUG) {
-			for (Object msg : msgs) {
-				if (msg == null) {
-					System.out.print("null");
-				} else if (msg.getClass().isArray()) {
-					System.out.print("[");
-					int len = Array.getLength(msg);
-					for (int i = 0; i < len; i++) {
-						System.out.print(Array.get(msg, i));
-						if (i != (len - 1)) {
-							System.out.print(", ");
-						}
-					}
-					System.out.print("]");
-				} else {
-					System.out.print(String.valueOf(msg));
-				}
-			}
-			System.out.println();
-		}
-	}
-
-	/**
-	 * Static method for execution as cli tool
-	 */
-
-	private static void printUsage() {
-		System.out.println("Usage: gettextResource [-k MSGID] | [-i] FILENAME");
-		System.out.println();
-		System.out.println("Get the translation for the given MSGID or list all");
-		System.out.println("MSGID/MGSSTR pairs when no option is given.");
-		System.out.println();
-		System.out.println("Options:");
-		System.out.println("  -h, --help            Show this help message and exit");
-		System.out.println("  -i, --info            Show the .mo file info");
-		System.out.println("  -k MSGID              Get the associated msgstr");
-		System.out.println();
-		System.out.println();
-		System.out.println("Examples:");
-		System.out
-				.println("  gettextResource -k Search /usr/share/locale/it/LC_MESSAGES/gtk20.mo");
-		System.out.println("  gettextResource /usr/share/locale/it/LC_MESSAGES/gtk20.mo");
-	}
-
-	/*
-	 * Command line user interface.
-	 * 
-	 * <pre>
-	 * Usage: gettextResource [-k MSGID] FILENAME
-	 * 
-	 * Get the translation for the given MSGID or list all
-	 * MSGID/MGSSTR pairs when no option is given.
-	 * 
-	 * Options:
-	 *   -h, --help            Show this help message and exit
-	 *   -k MSGID              Get the associated msgstr
-	 * 
-	 * 
-	 * Examples:
-	 *   gettextResource -k Search /usr/share/locale/it/LC_MESSAGES/gtk20.mo
-	 *   gettextResource /usr/share/locale/it/LC_MESSAGES/gtk20.mo
-	 * </pre>
-	 */
-	public static void main(String... args) {
-		if (args.length == 0) {
-			printUsage();
-			System.exit(0);
-		}
-
-		try {
-			String msgid = null;
-			String filename = null;
-			boolean showInfo = false;
-			if ("-h".equals(args[0]) || "--help".equals(args[0])) {
-				printUsage();
-				System.exit(0);
-			}
-			if ("-i".equals(args[0]) || "--info".equals(args[0])) {
-				showInfo = true;
-				filename = args[1];
-			} else if ("-k".equals(args[0]) || "-k".equals(args[0])) {
-				msgid = args[1];
-				filename = args[2];
-			} else {
-				filename = args[0];
-			}
-
-			if (filename != null) {
-				if (!new File(filename).isAbsolute()) {
-					filename = System.getProperty("user.dir") + File.separator + filename;
-				}
-			}
-
-			GettextResource r = new GettextResource(new File(filename));
-			if (showInfo) {
-				System.out.println(r.getInfoMessage());
-			} else if (msgid != null) {
-				System.out.println(r._(msgid));
-			} else {
-				Enumeration<String> en = r.getKeys();
-				while (en.hasMoreElements()) {
-					String id = en.nextElement();
-					String msgstr = r._(id);
-					System.out.println("msgid \"" + id + "\"");
-					System.out.println("msgstr \"" + msgstr + "\"");
-					System.out.println();
-				}
-			}
-		} catch (Throwable e) {
-			// System.err.println("Invalid options: " + e.getMessage());
-			e.printStackTrace();
-			printUsage();
-		}
 	}
 }

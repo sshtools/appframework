@@ -23,7 +23,7 @@ import javax.swing.KeyStroke;
 /**
  * Bind key action to a {@link JComponent}. The Key actions dispatch the
  * following signals:
- * <table border="1">
+ * <table border="1" summary="Keys">
  * <tr>
  * <td>Signal name</td>
  * 
@@ -71,18 +71,34 @@ import javax.swing.KeyStroke;
  */
 public class NavigationKeyBinding extends BasicActionDispatcher {
 
-	static final public String LOCATION_POPUP = "location-popup";
-	static final public String UP_FOLDER = "up-folder";
+	static final public String DESKTOP_FOLDER = "desktop-folder";
 	static final public String DOWN_FOLDER = "down-folder";
 	static final public String HOME_FOLDER = "home-folder";
-	static final public String DESKTOP_FOLDER = "desktop-folder";
+	static final public String LOCATION_POPUP = "location-popup";
 	static final public String QUICK_BOOKMARK = "quick-bookmark";
+	static final public String UP_FOLDER = "up-folder";
 
 	private JComponent component;
 
 	public NavigationKeyBinding(JComponent component) {
 		this.component = component;
 		bindKeyAction();
+	}
+
+	private void bind(KeyStroke key, final int id, final String actionName) {
+		if (actionName == null) {
+			throw new IllegalArgumentException("The action must have a name.");
+		}
+
+		this.component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(key, actionName + "_" + id);
+		this.component.getActionMap().put(actionName + "_" + id, new AbstractAction(actionName) {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ActionEvent evt = new ActionEvent(NavigationKeyBinding.this, id,
+						actionName);
+				fireActionEvent(evt);
+			}
+		});
 	}
 
 	private void bindKeyAction() {
@@ -117,21 +133,5 @@ public class NavigationKeyBinding extends BasicActionDispatcher {
 			bind(altDigit, i - VK_NUMPAD0, QUICK_BOOKMARK);
 		}
 
-	}
-
-	private void bind(KeyStroke key, final int id, final String actionName) {
-		if (actionName == null) {
-			throw new IllegalArgumentException("The action must have a name.");
-		}
-
-		this.component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(key, actionName + "_" + id);
-		this.component.getActionMap().put(actionName + "_" + id, new AbstractAction(actionName) {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				ActionEvent evt = new ActionEvent(NavigationKeyBinding.this, id,
-						actionName);
-				fireActionEvent(evt);
-			}
-		});
 	}
 }

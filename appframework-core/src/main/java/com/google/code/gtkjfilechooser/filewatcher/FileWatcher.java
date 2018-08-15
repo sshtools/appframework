@@ -34,7 +34,6 @@
 package com.google.code.gtkjfilechooser.filewatcher;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -58,28 +57,34 @@ import com.google.code.gtkjfilechooser.filewatcher.FileEvent.FileEventType;
  */
 public class FileWatcher {
 
-	private Map<File, Long> timeStamps;
+	private static class SingletonHolder {
+		private static final FileWatcher INSTANCE = new FileWatcher();
+	}
+	public static FileWatcher theFileWatcher() {
+		return SingletonHolder.INSTANCE;
+	}
 	private List<File> filesToWatch;
+
 	private List<FileListener> listeners;
 
 	private Timer timer;
+
+	private Map<File, Long> timeStamps;
 
 	private FileWatcher() {
 		init();
 	}
 
-	private static class SingletonHolder {
-		private static final FileWatcher INSTANCE = new FileWatcher();
+	public void addFileListener(FileListener l) {
+		listeners.add(l);
 	}
 
-	public static FileWatcher theFileWatcher() {
-		return SingletonHolder.INSTANCE;
+	public List<FileListener> getAllFileListeners() {
+		return listeners;
 	}
 
-	private void init() {
-		this.filesToWatch = new ArrayList<File>();
-		this.timeStamps = new HashMap<File, Long>();
-		this.listeners = new ArrayList<FileListener>();
+	public boolean isWatching() {
+		return timer != null;
 	}
 
 	/**
@@ -87,11 +92,45 @@ public class FileWatcher {
 	 * 
 	 * @param file
 	 *            The file to watch
-	 * @throws FileNotFoundException
 	 */
 	public void register(File file) {
 		filesToWatch.add(file);
 		timeStamps.put(file, file.lastModified());
+	}
+
+	public void removeFileListener(FileListener l) {
+		listeners.remove(l);
+	}
+
+	/**
+	 * Start watching the files. This method may be called repeatedly; the
+	 * second and subsequent calls have no effect.
+	 */
+	public void start() {
+		if (timer != null) {
+			stop();
+		}
+
+		timer = new Timer();
+		// repeat the check every second
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				FileWatcher.this.watch();
+			}
+		}, new Date(), 1000);
+	}
+
+	/**
+	 * This method may be called repeatedly; the second and subsequent calls
+	 * have no effect.
+	 */
+	public void stop() {
+		if (timer != null) {
+			timer.cancel();
+			timer = null;
+		}
+
 	}
 
 	/**
@@ -105,22 +144,16 @@ public class FileWatcher {
 		timeStamps.remove(file);
 	}
 
+	private void init() {
+		this.filesToWatch = new ArrayList<File>();
+		this.timeStamps = new HashMap<File, Long>();
+		this.listeners = new ArrayList<FileListener>();
+	}
+
 	private void notifyEvent(FileEvent evt) {
 		for (FileListener l : listeners) {
 			l.fileChanged(evt);
 		}
-	}
-
-	public void addFileListener(FileListener l) {
-		listeners.add(l);
-	}
-
-	public void removeFileListener(FileListener l) {
-		listeners.remove(l);
-	}
-
-	public List<FileListener> getAllFileListeners() {
-		return listeners;
 	}
 
 	private void watch() {
@@ -147,40 +180,5 @@ public class FileWatcher {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Start watching the files. This method may be called repeatedly; the
-	 * second and subsequent calls have no effect.
-	 */
-	public void start() {
-		if (timer != null) {
-			stop();
-		}
-
-		timer = new Timer();
-		// repeat the check every second
-		timer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				FileWatcher.this.watch();
-			}
-		}, new Date(), 1000);
-	}
-
-	public boolean isWatching() {
-		return timer != null;
-	}
-
-	/**
-	 * This method may be called repeatedly; the second and subsequent calls
-	 * have no effect.
-	 */
-	public void stop() {
-		if (timer != null) {
-			timer.cancel();
-			timer = null;
-		}
-
 	}
 }

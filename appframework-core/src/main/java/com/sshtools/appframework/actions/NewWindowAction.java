@@ -3,6 +3,7 @@
 package com.sshtools.appframework.actions;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -36,7 +37,7 @@ public class NewWindowAction extends AbstractAppAction {
 		putValue(SMALL_ICON, loadIcon("window-new", 16));
 		putValue(MEDIUM_ICON, loadIcon("window-new", 24));
 		putValue(SHORT_DESCRIPTION, Messages.getString("NewWindowAction.ShortDesc"));
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_W, KeyEvent.ALT_MASK | KeyEvent.SHIFT_MASK));
+		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK));
 		putValue(LONG_DESCRIPTION, Messages.getString("NewWindowAction.LongDesc"));
 		putValue(MNEMONIC_KEY, new Integer('w'));
 		putValue(MENU_NAME, "File");
@@ -45,6 +46,7 @@ public class NewWindowAction extends AbstractAppAction {
 
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent evt) {
 		try {
 			application.newContainer();

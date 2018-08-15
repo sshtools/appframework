@@ -91,6 +91,7 @@ public abstract class Autocompleter {
 		popup.add(scroll);
 
 		Action showAction = new AbstractAction() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (textComp.isEnabled()) {
 					if (popup.isVisible()) {
@@ -107,9 +108,11 @@ public abstract class Autocompleter {
 
 		documentListener = new DocumentListener() {
 
+			@Override
 			public void changedUpdate(DocumentEvent e) {
 			}
 
+			@Override
 			public void insertUpdate(DocumentEvent e) {
 				// to avoid auto completion when the text is
 				// programmatically set.
@@ -120,6 +123,7 @@ public abstract class Autocompleter {
 				showPopup(true);
 			}
 
+			@Override
 			public void removeUpdate(DocumentEvent e) {
 				// to avoid auto completion when the text is
 				// programmatically set.
@@ -141,6 +145,7 @@ public abstract class Autocompleter {
 
 
 		Action upAction = new AbstractAction() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (textComp.isEnabled() && popup.isVisible()) {
 					selectPreviousPossibleValue();
@@ -152,6 +157,7 @@ public abstract class Autocompleter {
 
 		// When ESC pressed, hide the popup
 		textComp.registerKeyboardAction(new AbstractAction() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (textComp.isEnabled()) {
 					popup.setVisible(false);
@@ -160,22 +166,21 @@ public abstract class Autocompleter {
 		}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_FOCUSED);
 
 		popup.addPopupMenuListener(new PopupMenuListener() {
+			@Override
 			public void popupMenuCanceled(PopupMenuEvent e) {
 			}
 
+			@Override
 			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
 				textComp.unregisterKeyboardAction(KeyStroke.getKeyStroke(
 						KeyEvent.VK_ENTER, 0));
 			}
 
+			@Override
 			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
 			}
 		});
 		list.setRequestFocusEnabled(false);
-	}
-
-	protected ListCellRenderer getCellRenderer() {
-		return new DefaultListCellRenderer();
 	}
 
 	public void addActionListener(ActionListener l) {
@@ -189,6 +194,41 @@ public abstract class Autocompleter {
 	public void removeActionListener(ActionListener l) {
 		listeners.remove(l);
 	}
+
+	/**
+	 * Returns the string to append for the completion to the already entered
+	 * text.
+	 * 
+	 * @param selected
+	 *            The selected entry.
+	 * @param caretPosition
+	 *            The position of the cursor in the text field.
+	 * @return
+	 */
+	protected String completion(String selected, int caretPosition) {
+		return selected.substring(caretPosition);
+	}
+
+	protected void fireActionEvent(ActionEvent evt) {
+		for (ActionListener l : listeners) {
+			l.actionPerformed(evt);
+		}
+	}
+
+	protected ListCellRenderer getCellRenderer() {
+		return new DefaultListCellRenderer();
+	}
+
+	/**
+	 * Update the list that contains the auto completion suggestions depending
+	 * on the data in text field.
+	 * 
+	 * @param value
+	 *            The current text in the field.
+	 * @return The list of the possible auto completions. Empty list or {@code
+	 *         null} for no suggestion.
+	 */
+	protected abstract List<String> updateSuggestions(String value);
 
 	/**
 	 * Accept the current selected suggestion in the list.
@@ -234,20 +274,6 @@ public abstract class Autocompleter {
 				fireActionEvent(e);
 			}
 		});
-	}
-
-	/**
-	 * Returns the string to append for the completion to the already entered
-	 * text.
-	 * 
-	 * @param selected
-	 *            The selected entry.
-	 * @param caretPosition
-	 *            The position of the cursor in the text field.
-	 * @return
-	 */
-	protected String completion(String selected, int caretPosition) {
-		return selected.substring(caretPosition);
 	}
 
 	private void addListListeners() {
@@ -334,6 +360,7 @@ public abstract class Autocompleter {
 
 			// Register accept action
 			Action acceptAction = new AbstractAction() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					acceptSuggestion();
 				}
@@ -371,22 +398,5 @@ public abstract class Autocompleter {
 		}
 		textComp.requestFocus();
 	}
-
-	protected void fireActionEvent(ActionEvent evt) {
-		for (ActionListener l : listeners) {
-			l.actionPerformed(evt);
-		}
-	}
-
-	/**
-	 * Update the list that contains the auto completion suggestions depending
-	 * on the data in text field.
-	 * 
-	 * @param value
-	 *            The current text in the field.
-	 * @return The list of the possible auto completions. Empty list or {@code
-	 *         null} for no suggestion.
-	 */
-	protected abstract List<String> updateSuggestions(String value);
 
 }

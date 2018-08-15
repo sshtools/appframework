@@ -32,13 +32,13 @@ import com.google.code.gtkjfilechooser.GtkStockIcon.Size;
 
 
 public class ContextMenu extends JPopupMenu implements PropertyChangeListener, ActionDispatcher {
-	static final public String SHOW_SIZE_COLUMN_CHANGED_PROPERTY = "ShowSizeColumnChanged";
-
 	static final public String ACTION_ADD_BOOKMARK = "AddBookmark";
+
+	static final public String ACTION_NEW_FOLDER = "New Folder";
 
 	static final public String ACTION_REFRESH = "refresh";
 
-	static final public String ACTION_NEW_FOLDER = "New Folder";
+	static final public String SHOW_SIZE_COLUMN_CHANGED_PROPERTY = "ShowSizeColumnChanged";
 
 	private ActionDispatcher actionDispatcher = new BasicActionDispatcher();
 
@@ -101,9 +101,17 @@ public class ContextMenu extends JPopupMenu implements PropertyChangeListener, A
 	}
 
 
-	public void setAddToBookmarkMenuItemEnabled(boolean enabled) {
-		// enable if path != null && path.isDirectory()
-		addToBookmarkMenuItem.setEnabled(enabled);
+	@Override
+	public void addActionListener(ActionListener l) {
+		actionDispatcher.addActionListener(l);
+
+	}
+
+
+	@Override
+	public void fireActionEvent(ActionEvent e) {
+		actionDispatcher.fireActionEvent(e);
+
 	}
 
 
@@ -115,19 +123,6 @@ public class ContextMenu extends JPopupMenu implements PropertyChangeListener, A
 		Log.debug(property, " = ", value);		
 	}
 
-
-	@Override
-	public void addActionListener(ActionListener l) {
-		actionDispatcher.addActionListener(l);
-
-	}
-
-	@Override
-	public void fireActionEvent(ActionEvent e) {
-		actionDispatcher.fireActionEvent(e);
-
-	}
-
 	@Override
 	public void removeActionListener(ActionListener l) {
 		actionDispatcher.removeActionListener(l);
@@ -137,6 +132,11 @@ public class ContextMenu extends JPopupMenu implements PropertyChangeListener, A
 	@Override
 	public void removeAllActionListeners() {
 		actionDispatcher.removeAllActionListeners();		
+	}
+
+	public void setAddToBookmarkMenuItemEnabled(boolean enabled) {
+		// enable if path != null && path.isDirectory()
+		addToBookmarkMenuItem.setEnabled(enabled);
 	}
 
 }

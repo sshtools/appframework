@@ -77,64 +77,6 @@ public class IOUtil {
   }
 
   /**
-   * Delete either the supplied file or all <strong>files</strong> within the 
-   * directory supplied or any sub-directories. Directories will <strong>not</strong>
-   * be deleted.  
-   * 
-   * @param file file or directory to delete
-   * @return ok
-   */
-  public static boolean delTree(File file) {
-    if (file.isFile()) {
-      return file.delete();
-    }
-	File[] list = file.listFiles();
-      for (int i = 0; i < list.length; i++) {
-        if (!delTree(list[i])) {
-          return false;
-        }
-      }
-    return true;
-  }
-
-  /**
-   * Delete the specified the directory and <strong>any</strong> of
-   * its children recursively.
-   * 
-   * @param dir directory to delete
-   */
-  public static void recurseDeleteDirectory(File dir) {
-
-    File[] files = dir.listFiles(new FileFilter() {
-      public boolean accept(File file) {
-        return file.isDirectory();
-      }
-    });
-
-    if (files == null) {
-      return; // Directory could not be read
-    }
-
-    for (int i = 0; i < files.length; i++) {
-      recurseDeleteDirectory(files[i]);
-      files[i].delete();
-    }
-
-    files = dir.listFiles(new FileFilter() {
-      public boolean accept(File file) {
-        return!file.isDirectory();
-      }
-    });
-
-    for (int i = 0; i < files.length; i++) {
-      files[i].delete();
-    }
-
-    dir.delete();
-
-  }
-
-  /**
    * Copy either a single file to either a directory or another file, or 
    * copy an entire directory and all of its contents to another directory. 
    * 
@@ -178,6 +120,66 @@ public class IOUtil {
       closeStream(out);
 
     }
+  }
+
+  /**
+   * Delete either the supplied file or all <strong>files</strong> within the 
+   * directory supplied or any sub-directories. Directories will <strong>not</strong>
+   * be deleted.  
+   * 
+   * @param file file or directory to delete
+   * @return ok
+   */
+  public static boolean delTree(File file) {
+    if (file.isFile()) {
+      return file.delete();
+    }
+	File[] list = file.listFiles();
+      for (int i = 0; i < list.length; i++) {
+        if (!delTree(list[i])) {
+          return false;
+        }
+      }
+    return true;
+  }
+
+  /**
+   * Delete the specified the directory and <strong>any</strong> of
+   * its children recursively.
+   * 
+   * @param dir directory to delete
+   */
+  public static void recurseDeleteDirectory(File dir) {
+
+    File[] files = dir.listFiles(new FileFilter() {
+      @Override
+	public boolean accept(File file) {
+        return file.isDirectory();
+      }
+    });
+
+    if (files == null) {
+      return; // Directory could not be read
+    }
+
+    for (int i = 0; i < files.length; i++) {
+      recurseDeleteDirectory(files[i]);
+      files[i].delete();
+    }
+
+    files = dir.listFiles(new FileFilter() {
+      @Override
+	public boolean accept(File file) {
+        return!file.isDirectory();
+      }
+    });
+
+    for (int i = 0; i < files.length; i++) {
+      files[i].delete();
+    }
+
+    dir.delete();
+
   }
 
   /**

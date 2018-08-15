@@ -17,9 +17,21 @@ import org.xml.sax.SAXException;
 @SuppressWarnings("serial")
 public class MRUList extends ArrayList<File> {
 
-	private static final String MRU_LIST_ELEMENT = "MRUList";
+	public class ElementWrapper {
+
+		String element;
+		StringBuffer text;
+
+		ElementWrapper(String element) {
+			this.element = element;
+			text = new StringBuffer();
+		}
+
+	}
 
 	private static final String FILE_ELEMENT = "File";
+
+	private static final String MRU_LIST_ELEMENT = "MRUList";
 
 	public MRUList() {
 		super();
@@ -71,18 +83,6 @@ public class MRUList extends ArrayList<File> {
 		}
 		xml += ("</" + MRU_LIST_ELEMENT + ">");
 		return xml;
-
-	}
-
-	public class ElementWrapper {
-
-		String element;
-		StringBuffer text;
-
-		ElementWrapper(String element) {
-			this.element = element;
-			text = new StringBuffer();
-		}
 
 	}
 

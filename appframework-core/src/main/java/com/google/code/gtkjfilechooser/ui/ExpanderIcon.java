@@ -20,11 +20,13 @@ import javax.swing.Icon;
 
 public class ExpanderIcon implements Icon {
 
-	/**
-	 * Width
-	 */
-	private int w = 18;
+	public enum Orientation {
+		DOWN, RIGHT
+	}
 
+	public boolean filled = false;
+
+	private boolean down = false;
 	/**
 	 * Height
 	 */
@@ -33,21 +35,30 @@ public class ExpanderIcon implements Icon {
 	/**
 	 * Margin
 	 */
-	private int mx = 5;
+	private int mx = 5;;
+
 	private int my = 2;
-
-	public enum Orientation {
-		RIGHT, DOWN
-	};
-
-	private boolean down = false;
-	public boolean filled = false;
+	/**
+	 * Width
+	 */
+	private int w = 18;
 
 	public ExpanderIcon(boolean down, boolean filled) {
 		this.down = down;
 		this.filled = filled;
 	}
 
+	@Override
+	public int getIconHeight() {
+		return down ? w : h;
+	}
+
+	@Override
+	public int getIconWidth() {
+		return down ? h : w;
+	}
+
+	@Override
 	public void paintIcon(Component c, Graphics g, int x, int y) {
 		Graphics2D g2d = (Graphics2D) g.create();
 
@@ -75,14 +86,6 @@ public class ExpanderIcon implements Icon {
 		}
 
 		g2d.dispose();
-	}
-
-	public int getIconWidth() {
-		return down ? h : w;
-	}
-
-	public int getIconHeight() {
-		return down ? w : h;
 	}
 
 }

@@ -40,11 +40,27 @@ import com.google.code.gtkjfilechooser.GtkStockIcon.Size;
  */
 public class SearchPanel extends JPanel {
 
+	private class ThisFileSearchHandler implements FileSearchHandler {
+
+		@Override
+		public void finished(Status status) {
+			setCursor(Cursor.getDefaultCursor());				
+		}
+
+		@Override
+		public void found(File file) {
+			filesPane.addFile(file);			
+		}	
+
+	}
+
 	private static final long serialVersionUID = 1L;
 
-	private FilesListPane filesPane;
+	private FileFilter fileFilter;
 
 	private FileSearch fileSearch;
+
+	private FilesListPane filesPane;
 
 	private JLabel searchLabel;
 
@@ -52,7 +68,6 @@ public class SearchPanel extends JPanel {
 
 	private JButton stopButton;
 
-	private FileFilter fileFilter;
 
 	public SearchPanel(FilesListPane pane) {		
 		this.filesPane = pane;
@@ -100,11 +115,6 @@ public class SearchPanel extends JPanel {
 		add(stopButton);
 	}
 
-
-	public void setFileFilter(FileFilter fileFilter) {
-		this.fileFilter = fileFilter;
-	}
-
 	@Override
 	public boolean requestFocusInWindow(){
 		return searchTextField.requestFocusInWindow();
@@ -116,24 +126,14 @@ public class SearchPanel extends JPanel {
 		filesPane.setCursor(cursor);
 	}
 
+	public void setFileFilter(FileFilter fileFilter) {
+		this.fileFilter = fileFilter;
+	}
+
 	public void stopSearch() {
 		if (fileSearch != null) {
 			fileSearch.stop();
 			fileSearch = null;
 		}
-	}
-
-	private class ThisFileSearchHandler implements FileSearchHandler {
-
-		@Override
-		public void found(File file) {
-			filesPane.addFile(file);			
-		}
-
-		@Override
-		public void finished(Status status) {
-			setCursor(Cursor.getDefaultCursor());				
-		}	
-
 	}
 }

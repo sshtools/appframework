@@ -39,6 +39,7 @@ public class AboutAction extends AbstractAppAction {
 		setEmptyIcons();
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent evt) {
 		application.showAbout(parent);
 	}

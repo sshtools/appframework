@@ -19,6 +19,27 @@ import java.util.Date;
 public class DateUtil {
 
 	/**
+	 * The given date as Julian day number. The Julian day number is the amount
+	 * of day since 1/1/1. Useful to compute days difference.
+	 * 
+	 * @param date
+	 *            The date to convert.
+	 * @return The Julian day number.
+	 */
+	public static long toJulianDayNumber(Date date) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+
+		int Y = cal.get(Calendar.YEAR);
+		int M = cal.get(Calendar.MONTH) + 1; // jan=1, feb=2,...
+		int D = cal.get(Calendar.DAY_OF_MONTH);
+
+		return (1461 * (Y + 4800 + (M - 14) / 12)) / 4
+		+ (367 * (M - 2 - 12 * ((M - 14) / 12))) / 12
+		- (3 * ((Y + 4900 + (M - 14) / 12) / 100)) / 4 + D - 32075;
+	}
+
+	/**
 	 * Format a date in a more human readable way, according the following set
 	 * of rules:
 	 * 
@@ -60,26 +81,5 @@ public class DateUtil {
 
 		// Any other date
 		return DateFormat.getDateInstance(DateFormat.SHORT).format(d);
-	}
-
-	/**
-	 * The given date as Julian day number. The Julian day number is the amount
-	 * of day since 1/1/1. Useful to compute days difference.
-	 * 
-	 * @param date
-	 *            The date to convert.
-	 * @return The Julian day number.
-	 */
-	public static long toJulianDayNumber(Date date) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
-
-		int Y = cal.get(Calendar.YEAR);
-		int M = cal.get(Calendar.MONTH) + 1; // jan=1, feb=2,...
-		int D = cal.get(Calendar.DAY_OF_MONTH);
-
-		return (1461 * (Y + 4800 + (M - 14) / 12)) / 4
-		+ (367 * (M - 2 - 12 * ((M - 14) / 12))) / 12
-		- (3 * ((Y + 4900 + (M - 14) / 12) / 100)) / 4 + D - 32075;
 	}
 }

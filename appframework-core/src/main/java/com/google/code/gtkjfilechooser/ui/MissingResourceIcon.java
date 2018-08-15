@@ -23,11 +23,6 @@ import javax.swing.Icon;
 public class MissingResourceIcon implements Icon {
 
 	/**
-	 * Width
-	 */
-	private int w;
-
-	/**
 	 * Height
 	 */
 	private int h;
@@ -36,21 +31,37 @@ public class MissingResourceIcon implements Icon {
 	 * Margin
 	 */
 	private int mx = 2;
-	private int my = 2;
 
-	public MissingResourceIcon(int w, int h) {
-		this.w = w;
-		this.h = h;
+	private int my = 2;
+	/**
+	 * Width
+	 */
+	private int w;
+
+	public MissingResourceIcon() {
+		this(16, 16);
 	}
 
 	public MissingResourceIcon(int x) {
 		this(x, x);
 	}
 
-	public MissingResourceIcon() {
-		this(16, 16);
+	public MissingResourceIcon(int w, int h) {
+		this.w = w;
+		this.h = h;
 	}
 
+	@Override
+	public int getIconHeight() {
+		return h;
+	}
+
+	@Override
+	public int getIconWidth() {
+		return w;
+	}
+
+	@Override
 	public void paintIcon(Component c, Graphics g, int x, int y) {
 		Graphics2D g2d = (Graphics2D) g.create();
 
@@ -76,14 +87,6 @@ public class MissingResourceIcon implements Icon {
 		g2d.draw(cross);
 
 		g2d.dispose();
-	}
-
-	public int getIconWidth() {
-		return w;
-	}
-
-	public int getIconHeight() {
-		return h;
 	}
 
 }

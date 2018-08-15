@@ -17,9 +17,9 @@ public interface ActionDispatcher {
 
 	public void addActionListener(ActionListener l);
 
-	public void removeActionListener(ActionListener l);
-
 	public void fireActionEvent(ActionEvent e);
+
+	public void removeActionListener(ActionListener l);
 
 	void removeAllActionListeners();
 }

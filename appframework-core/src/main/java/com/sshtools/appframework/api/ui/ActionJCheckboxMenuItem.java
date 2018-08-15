@@ -13,6 +13,7 @@ public class ActionJCheckboxMenuItem extends JCheckBoxMenuItem {
 		super(a);
 		setSelected(Boolean.TRUE.equals(a.getValue(AppAction.IS_SELECTED)));
 		a.addPropertyChangeListener(new PropertyChangeListener() {
+			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 				if (evt.getPropertyName().equals(AppAction.IS_SELECTED)) {
 					setSelected(((Boolean) evt.getNewValue())

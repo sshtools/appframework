@@ -27,10 +27,7 @@ public abstract class MRUAction extends AppAction implements MenuAction {
 		putValue(MenuAction.MENU, menu);
 	}
 
-	protected MRUMenu createMenu(MRUListModel model) {
-		return new MRUMenu(this, model);
-	}
-
+	@Override
 	public void actionPerformed(ActionEvent evt) {
 		if (listeners != null) {
 			Object[] listenerList = listeners.getListenerList();
@@ -39,5 +36,9 @@ public abstract class MRUAction extends AppAction implements MenuAction {
 				((ActionListener) listenerList[i + 1]).actionPerformed(e);
 			}
 		}
+	}
+
+	protected MRUMenu createMenu(MRUListModel model) {
+		return new MRUMenu(this, model);
 	}
 }

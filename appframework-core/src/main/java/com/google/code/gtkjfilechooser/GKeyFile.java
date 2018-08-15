@@ -125,8 +125,6 @@ import java.util.Map.Entry;
  * </ul>
  * </div>
  * <p>
- * </p>
- * <p>
  * Note that in contrast to the
  * <a class="ulink" href="http://freedesktop.org/Standards/desktop-entry-spec"
  * target="_top">Desktop Entry Specification</a>, groups in key files may
@@ -136,14 +134,264 @@ import java.util.Map.Entry;
  * ASCII characters.
  * </p>
  * <p>
- * See <a href="http://library.gnome.org/devel/glib/stable/glib-Key-value-file-parser.html"/>,
- * <a href="http://git.gnome.org/cgit/glib/tree/glib/gkeyfile.c"/> and
- * <a href="http://git.gnome.org/cgit/glib/tree/glib/tests/keyfile.c"/>
+ * See <a href="http://library.gnome.org/devel/glib/stable/glib-Key-value-file-parser.html">glib-Key-value-file-parser.html</a>,
+ * <a href="http://git.gnome.org/cgit/glib/tree/glib/gkeyfile.c">gkeyfile.c</a> and
+ * <a href="http://git.gnome.org/cgit/glib/tree/glib/tests/keyfile.c">keyfile.c</a>
  * 
  * @author c.cerbo
  */
 public class GKeyFile {
+	/**
+	 * Inner Class for Groups of Settings
+	 * 
+	 * @author c.cerbo
+	 * 
+	 */
+	public class Group {
+		private Map<String, String> backingMap;
+		private String name;
+
+		public Group(String name) {
+			this.name = name;
+			this.backingMap = new LinkedHashMap<String, String>();
+		}
+
+		/**
+		 * If no entry is found, it's returned {@code false}.
+		 * 
+		 * @param key key
+		 * @return value
+		 */
+		public Boolean getBoolean(String key) {
+			return valueOf(Boolean.class, backingMap.get(key), key);
+		}
+
+		public Boolean getBoolean(String key, Boolean def) {
+			Boolean value = getBoolean(key);
+			if (value == null) {
+				value = def;
+				setValue(key, value);
+			}
+			return value;
+		}
+
+		public List<Boolean> getBooleanList(String key) {
+			return getListInternal(key, Boolean.class);
+		}
+
+		public List<Boolean> getBooleanList(String key, List<Boolean> def) {
+			List<Boolean> value = getBooleanList(key);
+			if (value == null) {
+				value = def;
+				setValue(key, value);
+			}
+			return value;
+		}
+
+		public Double getDouble(String key) {
+			return valueOf(Double.class, backingMap.get(key), key);
+		}
+
+		public Double getDouble(String key, Double def) {
+			Double value = getDouble(key);
+			if (value == null) {
+				value = def;
+				setValue(key, value);
+			}
+			return value;
+		}
+
+		public List<Double> getDoubleList(String key) {
+			return getListInternal(key, Double.class);
+		}
+
+		public List<Double> getDoubleList(String key, List<Double> def) {
+			List<Double> value = getDoubleList(key);
+			if (value == null) {
+				value = def;
+				setValue(key, value);
+			}
+			return value;
+		}
+
+		public Integer getInteger(String key) {
+			return valueOf(Integer.class, backingMap.get(key), key);
+		}
+
+		public Integer getInteger(String key, Integer def) {
+			Integer value = getInteger(key);
+			if (value == null) {
+				value = def;
+				setValue(key, value);
+			}
+			return value;
+		}
+
+		public List<Integer> getIntegerList(String key) {
+			return getListInternal(key, Integer.class);
+		}
+
+		public List<Integer> getIntegerList(String key, List<Integer> def) {
+			List<Integer> value = getIntegerList(key);
+			if (value == null) {
+				value = def;
+				setValue(key, value);
+			}
+			return value;
+		}
+
+		public String getLocaleString(String key, Locale locale) {
+			return backingMap.get(key + "[" + locale + "]");
+		}
+
+		public String getString(String key) {
+			return backingMap.get(key);
+		}
+
+		/**
+		 * Get a String property value.
+		 * 
+		 * @param key key
+		 * @param def a Default value, if no value is found.
+		 * @return The String property value for the given key.
+		 */
+		public String getString(String key, String def) {
+			String value = getString(key);
+			if (value == null) {
+				value = def;
+				setValue(key, value);
+			}
+			return value;
+		}
+
+		public List<String> getStringList(String key) {
+			return getListInternal(key, String.class);
+		}
+
+		public List<String> getStringList(String key, List<String> def) {
+			List<String> value = getStringList(key);
+			if (value == null) {
+				value = def;
+				setValue(key, value);
+			}
+			return value;
+		}
+
+		@Override
+		public int hashCode() {
+			return name.hashCode();
+		}
+
+		public void removeEntry(String key) {
+			backingMap.remove(key);
+		}
+
+		public void setBoolean(String key, Boolean value) {
+			setValue(key, value);
+		}
+
+		public void setBooleanList(String key, List<Boolean> value) {
+			setValue(key, value);
+		}
+
+		public void setDouble(String key, Double value) {
+			setValue(key, value);
+		}
+
+		public void setDoubleList(String key, List<Double> value) {
+			setValue(key, value);
+		}
+
+		public void setInteger(String key, Integer value) {
+			setValue(key, value);
+		}
+
+		public void setIntegerList(String key, List<Integer> value) {
+			setValue(key, value);
+		}
+
+		public void setString(String key, String value) {
+			setValue(key, value);
+		}
+
+		public void setStringList(String key, List<String> value) {
+			setValue(key, value);
+		}
+
+		@Override
+		public String toString() {
+			return "Group [" + name + "], Entries: " + backingMap.toString();
+		}
+
+		private <T> List<T> getListInternal(String key, Class<T> cls) {
+			List<T> list = new ArrayList<T>();
+			String value = getString(key);
+			int len = value.length();
+			int beginIndex = 0;
+			int endIndex = 0;
+			for (int i = 1; i < len; i++) {
+				if ((value.charAt(i) == ',' || value.charAt(i) == ';') && value.charAt(i - 1) != '\\') {
+					endIndex = i;
+					// The escape sequences \, and \; are supported meaning
+					// comma and semicomma respectively.
+					list.add(valueOf(cls, value.substring(beginIndex, endIndex).replace("\\", "").trim(), key));
+					beginIndex = endIndex + 1;
+				}
+			}
+			// Last entry
+			list.add(valueOf(cls, value.substring(beginIndex, len).replace("\\", "").trim(), key));
+			return list;
+		}
+
+		/**
+		 * Set a value in this group.
+		 * 
+		 * @param key
+		 * @param value It can be a {@link List} or a {@link String},
+		 *            {@link Integer}, {@link Boolean} or {@link Double}.
+		 */
+		private void setValue(String key, Object value) {
+			if (value instanceof List<?>) {
+				List<?> list = (List<?>) value;
+				Iterator<?> iter = list.iterator();
+				StringBuilder sb = new StringBuilder();
+				while (iter.hasNext()) {
+					String str = String.valueOf(iter.next());
+					// in a list, prefix the separator character(; or ,) with a
+					// backslash.
+					str = str.replace(",", "\\,");
+					str = str.replace(";", "\\;");
+					sb.append(str);
+					if (iter.hasNext()) {
+						sb.append(", ");
+					}
+				}
+				backingMap.put(key, sb.toString());
+			} else {
+				backingMap.put(key, String.valueOf(value));
+			}
+		}
+
+		@SuppressWarnings("unchecked")
+		private <T> T valueOf(Class<T> cls, String value, String key) {
+			if (value == null) {
+				return (T) (cls.equals(Boolean.class) ? Boolean.FALSE : null);
+			}
+			if (cls.equals(String.class)) {
+				return (T) value;
+			}
+			try {
+				Method method = cls.getMethod("valueOf", String.class);
+				T ret = (T) method.invoke(null, value);
+				return ret;
+			} catch (Exception e) {
+				throw new IllegalArgumentException(
+						"ValueOf exception for class '" + cls.getName() + "' key '" + key + "' and value <" + value + ">.", e);
+			}
+		}
+	}
 	private File gkeyfile;
+
 	private Map<String, Group> groups;
 
 	public GKeyFile(File gkeyfile) throws IOException {
@@ -160,8 +408,25 @@ public class GKeyFile {
 		load();
 	}
 
+	/**
+	 * Create and return a new group in the current {@link GKeyFile}.
+	 * 
+	 * @param name The name of the new group
+	 * @return The newly created group.
+	 */
+	public Group createGroup(String name) {
+		Group group = new Group(name);
+		groups.put(name, group);
+		return group;
+	}
+
 	public File getGkeyfile() {
 		return gkeyfile;
+	}
+
+	public Group getGroup(String name) {
+		Group group = groups.get(name);
+		return group;
 	}
 
 	public void load() throws IOException {
@@ -294,272 +559,5 @@ public class GKeyFile {
 
 	private boolean isGroupHeader(String line) {
 		return line.charAt(0) == '[' && line.charAt(line.length() - 1) == ']';
-	}
-
-	/**
-	 * Create and return a new group in the current {@link GKeyFile}.
-	 * 
-	 * @param name The name of the new group
-	 * @return The newly created group.
-	 */
-	public Group createGroup(String name) {
-		Group group = new Group(name);
-		groups.put(name, group);
-		return group;
-	}
-
-	public Group getGroup(String name) {
-		Group group = groups.get(name);
-		return group;
-	}
-
-	/**
-	 * Inner Class for Groups of Settings
-	 * 
-	 * @author c.cerbo
-	 * 
-	 */
-	public class Group {
-		private Map<String, String> backingMap;
-		private String name;
-
-		public Group(String name) {
-			this.name = name;
-			this.backingMap = new LinkedHashMap<String, String>();
-		}
-
-		public String getString(String key) {
-			return backingMap.get(key);
-		}
-
-		/**
-		 * Get a String property value.
-		 * 
-		 * @param key
-		 * @param def a Default value, if no value is found.
-		 * @return The String property value for the given key.
-		 */
-		public String getString(String key, String def) {
-			String value = getString(key);
-			if (value == null) {
-				value = def;
-				setValue(key, value);
-			}
-			return value;
-		}
-
-		public Integer getInteger(String key) {
-			return valueOf(Integer.class, backingMap.get(key), key);
-		}
-
-		public Integer getInteger(String key, Integer def) {
-			Integer value = getInteger(key);
-			if (value == null) {
-				value = def;
-				setValue(key, value);
-			}
-			return value;
-		}
-
-		/**
-		 * If no entry is found, it's returned {@code false}.
-		 * 
-		 * @param key
-		 * @return
-		 */
-		public Boolean getBoolean(String key) {
-			return valueOf(Boolean.class, backingMap.get(key), key);
-		}
-
-		public Boolean getBoolean(String key, Boolean def) {
-			Boolean value = getBoolean(key);
-			if (value == null) {
-				value = def;
-				setValue(key, value);
-			}
-			return value;
-		}
-
-		public Double getDouble(String key) {
-			return valueOf(Double.class, backingMap.get(key), key);
-		}
-
-		public Double getDouble(String key, Double def) {
-			Double value = getDouble(key);
-			if (value == null) {
-				value = def;
-				setValue(key, value);
-			}
-			return value;
-		}
-
-		public List<String> getStringList(String key) {
-			return getListInternal(key, String.class);
-		}
-
-		public List<String> getStringList(String key, List<String> def) {
-			List<String> value = getStringList(key);
-			if (value == null) {
-				value = def;
-				setValue(key, value);
-			}
-			return value;
-		}
-
-		public List<Integer> getIntegerList(String key) {
-			return getListInternal(key, Integer.class);
-		}
-
-		public List<Integer> getIntegerList(String key, List<Integer> def) {
-			List<Integer> value = getIntegerList(key);
-			if (value == null) {
-				value = def;
-				setValue(key, value);
-			}
-			return value;
-		}
-
-		public List<Boolean> getBooleanList(String key) {
-			return getListInternal(key, Boolean.class);
-		}
-
-		public List<Boolean> getBooleanList(String key, List<Boolean> def) {
-			List<Boolean> value = getBooleanList(key);
-			if (value == null) {
-				value = def;
-				setValue(key, value);
-			}
-			return value;
-		}
-
-		public List<Double> getDoubleList(String key) {
-			return getListInternal(key, Double.class);
-		}
-
-		public List<Double> getDoubleList(String key, List<Double> def) {
-			List<Double> value = getDoubleList(key);
-			if (value == null) {
-				value = def;
-				setValue(key, value);
-			}
-			return value;
-		}
-
-		private <T> List<T> getListInternal(String key, Class<T> cls) {
-			List<T> list = new ArrayList<T>();
-			String value = getString(key);
-			int len = value.length();
-			int beginIndex = 0;
-			int endIndex = 0;
-			for (int i = 1; i < len; i++) {
-				if ((value.charAt(i) == ',' || value.charAt(i) == ';') && value.charAt(i - 1) != '\\') {
-					endIndex = i;
-					// The escape sequences \, and \; are supported meaning
-					// comma and semicomma respectively.
-					list.add(valueOf(cls, value.substring(beginIndex, endIndex).replace("\\", "").trim(), key));
-					beginIndex = endIndex + 1;
-				}
-			}
-			// Last entry
-			list.add(valueOf(cls, value.substring(beginIndex, len).replace("\\", "").trim(), key));
-			return list;
-		}
-
-		@SuppressWarnings("unchecked")
-		private <T> T valueOf(Class<T> cls, String value, String key) {
-			if (value == null) {
-				return (T) (cls.equals(Boolean.class) ? Boolean.FALSE : null);
-			}
-			if (cls.equals(String.class)) {
-				return (T) value;
-			}
-			try {
-				Method method = cls.getMethod("valueOf", String.class);
-				T ret = (T) method.invoke(null, value);
-				return ret;
-			} catch (Exception e) {
-				throw new IllegalArgumentException(
-						"ValueOf exception for class '" + cls.getName() + "' key '" + key + "' and value <" + value + ">.", e);
-			}
-		}
-
-		public String getLocaleString(String key, Locale locale) {
-			return backingMap.get(key + "[" + locale + "]");
-		}
-
-		/**
-		 * Set a value in this group.
-		 * 
-		 * @param key
-		 * @param value It can be a {@link List} or a {@link String},
-		 *            {@link Integer}, {@link Boolean} or {@link Double}.
-		 */
-		private void setValue(String key, Object value) {
-			if (value instanceof List<?>) {
-				List<?> list = (List<?>) value;
-				Iterator<?> iter = list.iterator();
-				StringBuilder sb = new StringBuilder();
-				while (iter.hasNext()) {
-					String str = String.valueOf(iter.next());
-					// in a list, prefix the separator character(; or ,) with a
-					// backslash.
-					str = str.replace(",", "\\,");
-					str = str.replace(";", "\\;");
-					sb.append(str);
-					if (iter.hasNext()) {
-						sb.append(", ");
-					}
-				}
-				backingMap.put(key, sb.toString());
-			} else {
-				backingMap.put(key, String.valueOf(value));
-			}
-		}
-
-		public void setString(String key, String value) {
-			setValue(key, value);
-		}
-
-		public void setStringList(String key, List<String> value) {
-			setValue(key, value);
-		}
-
-		public void setInteger(String key, Integer value) {
-			setValue(key, value);
-		}
-
-		public void setIntegerList(String key, List<Integer> value) {
-			setValue(key, value);
-		}
-
-		public void setBoolean(String key, Boolean value) {
-			setValue(key, value);
-		}
-
-		public void setBooleanList(String key, List<Boolean> value) {
-			setValue(key, value);
-		}
-
-		public void setDouble(String key, Double value) {
-			setValue(key, value);
-		}
-
-		public void setDoubleList(String key, List<Double> value) {
-			setValue(key, value);
-		}
-
-		public void removeEntry(String key) {
-			backingMap.remove(key);
-		}
-
-		@Override
-		public int hashCode() {
-			return name.hashCode();
-		}
-
-		@Override
-		public String toString() {
-			return "Group [" + name + "], Entries: " + backingMap.toString();
-		}
 	}
 }

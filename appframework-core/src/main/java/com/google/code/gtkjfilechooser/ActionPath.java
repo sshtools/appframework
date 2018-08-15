@@ -21,18 +21,18 @@ import static com.google.code.gtkjfilechooser.I18N.i18n;
  */
 public class ActionPath implements Path {
 
-	private static final long serialVersionUID = 1L;
-
 	static final public int RECENTLY_USED_PANEL_ID = 1001;
-	static final public int SEARCH_PANEL_ID = 1002;
-
-	static public final ActionPath SEARCH = new ActionPath(i18n("Search"), SEARCH_PANEL_ID, "search", "actions/stock_search");
 	static public final ActionPath RECENTLY_USED = new ActionPath(i18n("Recently Used"), RECENTLY_USED_PANEL_ID, "recently_used", "actions/document-open-recent");
 
-	private String name;
-	private int id;
+	static final public int SEARCH_PANEL_ID = 1002;
+	static public final ActionPath SEARCH = new ActionPath(i18n("Search"), SEARCH_PANEL_ID, "search", "actions/stock_search");
+
+	private static final long serialVersionUID = 1L;
+
 	private String action;
 	private String iconName;
+	private int id;
+	private String name;
 
 	public ActionPath(String name, int id, String action, String iconName) {
 		super();
@@ -46,8 +46,13 @@ public class ActionPath implements Path {
 		return action;
 	}
 
-	public void setAction(String action) {
-		this.action = action;
+	@Override
+	public String getIconName() {
+		return iconName;
+	}
+
+	public int getId() {
+		return id;
 	}
 
 	@Override
@@ -60,21 +65,16 @@ public class ActionPath implements Path {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public int getId() {
-		return id;
-	}
-
-	@Override
-	public String getIconName() {
-		return iconName;
+	public void setAction(String action) {
+		this.action = action;
 	}
 
 	public void setIconName(String iconName) {
 		this.iconName = iconName;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }

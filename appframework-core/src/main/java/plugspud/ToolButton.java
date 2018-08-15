@@ -82,6 +82,7 @@ public class ToolButton extends JButton {
 		setFocusPainted(false);
 		setHideText(hideText);
 		addMouseListener(new MouseAdapter() {
+			@Override
 			public void mouseEntered(MouseEvent e) {
 				if (isEnabled()) {
 					setBorderPainted(true);
@@ -89,6 +90,7 @@ public class ToolButton extends JButton {
 				}
 			}
 
+			@Override
 			public void mouseExited(MouseEvent e) {
 				setBorderPainted(false);
 				setContentAreaFilled(false);
@@ -99,10 +101,21 @@ public class ToolButton extends JButton {
 	}
 
 	/**
+	 * Gets the text for the button
+	 *
+	 * @return the button text if not hidden otherwise <tt>null</tt>
+	 */
+	@Override
+	public String getText() {
+		return hideText ? null : super.getText();
+	}
+
+	/**
 	 * Determines if the button can retrieve focus
 	 *
 	 * @return always returns <tt>false</tt>
 	 */
+	@Override
 	public boolean isFocusable() {
 		return false;
 	}
@@ -119,14 +132,5 @@ public class ToolButton extends JButton {
 		}
 		this.hideText = hideText;
 		repaint();
-	}
-
-	/**
-	 * Gets the text for the button
-	 *
-	 * @return the button text if not hidden otherwise <tt>null</tt>
-	 */
-	public String getText() {
-		return hideText ? null : super.getText();
 	}
 }

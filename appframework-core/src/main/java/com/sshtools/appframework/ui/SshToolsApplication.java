@@ -82,36 +82,26 @@ import plugspud.PluginVersion;
  * feel configuration and most recently used menus.
  */
 public abstract class SshToolsApplication implements PluginHostContext {
-	final static Log log = LogFactory.getLog(SshToolsApplication.class);
-
 	public final static String PREF_LAF = "apps.laf";
 	public final static String PREF_SKIN = "apps.skin";
 	public final static String PREF_STAY_RUNNING = "apps.stayRunning";
-	public final static String PREF_TOOLBAR_SMALL_ICONS = "apps.toolBar.smallIcons";
-	public final static String PREF_USE_SYSTEM_ICON_THEME = "apps.toolBar.useSystemIconTheme";
 	public final static String PREF_TOOLBAR_SHOW_SELECTIVE_TEXT = "apps.toolBar.showSelectiveText";
+	public final static String PREF_TOOLBAR_SMALL_ICONS = "apps.toolBar.smallIcons";
 	public static final String PREF_TOOLBAR_WRAP = "apps.toolBar.wrap";
-
-	// Private statics
-
-	private final static List<UIManager.LookAndFeelInfo> LAFS = new ArrayList<UIManager.LookAndFeelInfo>();
-
+	public final static String PREF_USE_SYSTEM_ICON_THEME = "apps.toolBar.useSystemIconTheme";
+	final static Log log = LogFactory.getLog(SshToolsApplication.class);
 	private static List<SshToolsApplicationContainer> containers = new ArrayList<SshToolsApplicationContainer>();
-
-	private static MRUListModel mruModel;
-
-	private static SshToolsApplication instance;
 	private static FileSystemManager fsManager;
-
+	private static SshToolsApplication instance;
+	// Private statics
+	private final static List<UIManager.LookAndFeelInfo> LAFS = new ArrayList<UIManager.LookAndFeelInfo>();
+	private static MRUListModel mruModel;
 	private static FileSystemManager vfs;
-
 	static {
 		// System.setProperty("java.util.prefs.PreferencesFactory",
 		// FilePreferencesFactory.class.getName());
-
 		// Add the LAFS already known to Java
 		addLAF(new UIManager.LookAndFeelInfo("Default", UIManager.getLookAndFeel().getClass().getName()));
-
 		UIManager.LookAndFeelInfo[] i;
 		try {
 			i = UIManager.getInstalledLookAndFeels();
@@ -124,7 +114,6 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		addLAF(new UIManager.LookAndFeelInfo("Metal", "javax.swing.plaf.metal.MetalLookAndFeel"));
 		addLAF(new UIManager.LookAndFeelInfo("Native", UIManager.getSystemLookAndFeelClassName()));
 		addLAF(new UIManager.LookAndFeelInfo("Cross Platform", UIManager.getCrossPlatformLookAndFeelClassName()));
-
 	}
 
 	public static void addLAF(UIManager.LookAndFeelInfo laf) {
@@ -138,17 +127,6 @@ public abstract class SshToolsApplication implements PluginHostContext {
 			}
 		}
 		LAFS.add(laf);
-	}
-	
-	public static FileSystemManager getVFS() throws FileSystemException {
-		if(vfs == null) {
-			vfs = VFS.getManager();
-		}
-		return vfs;
-	}
-	
-	public static void setVFS(FileSystemManager vfs) {
-		SshToolsApplication.vfs = vfs;
 	}
 
 	public static UIManager.LookAndFeelInfo[] getAllLookAndFeelInfo() {
@@ -168,6 +146,13 @@ public abstract class SshToolsApplication implements PluginHostContext {
 			}
 		}
 		return null;
+	}
+
+	public static FileSystemManager getVFS() throws FileSystemException {
+		if (vfs == null) {
+			vfs = VFS.getManager();
+		}
+		return vfs;
 	}
 
 	public static void initLAF(UIManager.LookAndFeelInfo laf) {
@@ -190,27 +175,23 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		}
 	}
 
-	protected Class<? extends SshToolsApplicationPanel> panelClass;
-
-	protected Class<? extends SshToolsApplicationContainer> defaultContainerClass;
+	public static void setVFS(FileSystemManager vfs) {
+		SshToolsApplication.vfs = vfs;
+	}
 
 	protected List<OptionsTab> additionalOptionsTabs;
-
 	protected CommandLine cli;
-
+	protected Class<? extends SshToolsApplicationContainer> defaultContainerClass;
+	protected Class<? extends SshToolsApplicationPanel> panelClass;
 	protected PluginManager pluginManager;
-
-	protected ServerSocket reuseServerSocket;
-
 	protected int reusePort = -1;
+	protected ServerSocket reuseServerSocket;
 
 	public SshToolsApplication(Class<? extends SshToolsApplicationPanel> panelClass,
 			Class<? extends SshToolsApplicationContainer> defaultContainerClass) throws IOException, ParseException {
-
 		this.panelClass = panelClass;
 		this.defaultContainerClass = defaultContainerClass;
 		// this.lic = new LicenseVerification(this);
-
 	}
 
 	public void addAdditionalOptionsTab(OptionsTab tab) {
@@ -224,8 +205,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	 * supplied as an argument. Concrete Applications should overidde this, call
 	 * super.buildCLIOptions() then add any other options they might require.
 	 * 
-	 * @param options
-	 *            Options list to add option too
+	 * @param options Options list to add option too
 	 */
 	public void buildCLIOptions(Options options) {
 		OptionBuilder.withLongOpt("help");
@@ -259,33 +239,6 @@ public abstract class SshToolsApplication implements PluginHostContext {
 			}
 		}
 	}
-	
-	protected void configureChooser() {
-		XFileChooser.Chooser.addChoserImpl(File.class, XFileSelector.class);
-		XFileChooser.Chooser.addChoserImpl(FileObject.class, VFSFileSelector.class);
-	}
-
-	protected void configurePanel(SshToolsApplicationPanel panel, SshToolsApplicationContainer container)
-			throws SshToolsApplicationException {
-		log.debug("Initialising panel " + panelClass.getName());
-		panel.setOptionsActionAvailable(!getCLI().hasOption('e'));
-		panel.init(this);
-		log.debug("Initialised panel " + panelClass.getName());
-		panel.rebuildActionComponents();
-		container.init(this, panel);
-		panel.setApplicationContainer(container);
-		containers.add(container);
-		if (!container.isContainerVisible()) {
-			final SshToolsApplicationContainer c = container;
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					log.debug("Making container visible");
-					c.setContainerVisible(true);
-				}
-			});
-		}
-
-	}
 
 	public SshToolsApplicationContainer convertContainer(SshToolsApplicationContainer container,
 			Class<SshToolsApplicationContainer> newContainerClass) throws SshToolsApplicationException {
@@ -303,6 +256,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 				if (!newContainer.isContainerVisible()) {
 					final SshToolsApplicationContainer c = newContainer;
 					SwingUtilities.invokeLater(new Runnable() {
+						@Override
 						public void run() {
 							c.setContainerVisible(true);
 						}
@@ -316,10 +270,6 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		} catch (Throwable t) {
 			throw new SshToolsApplicationException(t);
 		}
-	}
-
-	protected LookAndFeel createLookAndFeel(Class<LookAndFeel> clazz) throws Exception {
-		return clazz.newInstance();
 	}
 
 	public void exit() {
@@ -344,9 +294,6 @@ public abstract class SshToolsApplication implements PluginHostContext {
 
 	public abstract BigInteger getApplicationExponent();
 
-	/**
-	 * @return
-	 */
 	public abstract Icon getApplicationLargeIcon();
 
 	public abstract BigInteger getApplicationModulus();
@@ -373,6 +320,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		return cli;
 	}
 
+	@Override
 	public CommandLine getCommandLine() {
 		return cli;
 	}
@@ -394,8 +342,6 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		return null;
 	}
 
-	protected abstract int getDefaultReusePort();
-
 	public String getExpiryInfo() {
 		return "";
 	}
@@ -414,14 +360,17 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		return null;
 	}
 
+	@Override
 	public File getPluginDirectory() {
 		return new File(getApplicationPreferencesDirectory(), "plugins");
 	}
 
+	@Override
 	public String getPluginHostName() {
 		return getApplicationName();
 	}
 
+	@Override
 	public PluginVersion getPluginHostVersion() {
 		return new PluginVersion(GeneralUtil.getVersionString(getApplicationName(), getClass()));
 	}
@@ -430,6 +379,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		return pluginManager;
 	}
 
+	@Override
 	public URL getPluginUpdatesResource() {
 		try {
 			return new URL("http://3sp.com/plugins/" + getPluginHostName() + "/" + getPluginHostVersion());
@@ -438,10 +388,12 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		}
 	}
 
+	@Override
 	public String getPreference(String name, String defaultValue) {
 		return PreferencesStore.get(name, defaultValue);
 	}
 
+	@Override
 	public URL getStandardPluginsResource() {
 		String spr = GeneralUtil.checkAndGetProperty("sshtools.builtInPlugins", "");
 		if (spr.equals("")) {
@@ -458,42 +410,33 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		}
 	}
 
-	protected abstract String getUnlicensedDescription();
-
 	public void init(String[] args) throws SshToolsApplicationException {
 		instance = this;
-
 		boolean listen = isReuseCapable();
-
 		// Do parse 1 of the command line arguments - see if we need to start
 		// the daemon
 		Options options1 = new Options();
 		SshToolsApplication.this.buildCLIOptions(options1);
-
 		pluginManager = new PluginManager();
 		try {
 			initPluginManager(options1);
 		} catch (PluginException e1) {
 			log(PluginHostContext.LOG_ERROR, "Failed to initialise plugin manager.", e1);
 		}
-
 		CommandLineParser parser1 = new PosixParser();
 		CommandLine commandLine1;
-
 		try {
 			// parse the command line arguments
 			commandLine1 = parser1.parse(options1, args);
 			if (commandLine1.hasOption("d")) {
 				listen = false;
 			}
-
 			if (commandLine1.hasOption('r')) {
 				reusePort = Integer.parseInt(commandLine1.getOptionValue('r'));
 			}
 		} catch (Exception e) {
 			// Don't care at the moment
 		}
-
 		// Try and message the reuse daemon if possible - saves starting another
 		// instance
 		if (listen) {
@@ -537,7 +480,6 @@ public abstract class SshToolsApplication implements PluginHostContext {
 				}
 			}
 		}
-
 		additionalOptionsTabs = new ArrayList<OptionsTab>();
 		log.info("Initialising application");
 		File f = getApplicationPreferencesDirectory();
@@ -546,7 +488,6 @@ public abstract class SshToolsApplication implements PluginHostContext {
 			FilePreferencesFactory.setPreferencesFile(new File(f, "javaprefs.properties"));
 			PreferencesStore.init(new File(f, getApplicationName() + ".properties"));
 		}
-
 		boolean useSysIcons = PreferencesStore.getBoolean(SshToolsApplication.PREF_USE_SYSTEM_ICON_THEME, true);
 		System.setProperty("jfreedesktop.alwaysUseDefaultTheme", String.valueOf(!useSysIcons));
 		IconStore store = IconStore.getInstance();
@@ -559,17 +500,12 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		} catch (ParseException sshe) {
 			throw new SshToolsApplicationException("Failed to setup icons.", sshe);
 		}
-
 		configureChooser();
 		loadMRU();
-
 		setLookAndFeel(getDefaultLAF());
-
 		log.debug("Plugin manager initialised, adding global preferences tabs");
-
 		postInitialization();
 		addAdditionalOptionsTab(new GlobalOptionsTab(this));
-
 		Options options = new Options();
 		buildCLIOptions(options);
 		log.debug("Parsing command line");
@@ -587,7 +523,6 @@ public abstract class SshToolsApplication implements PluginHostContext {
 			System.exit(1);
 		}
 		log.debug("Parsed command line");
-
 		if (listen) {
 			Thread t = new Thread("RemoteCommandLine") {
 				@Override
@@ -613,6 +548,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 							final CommandLine remoteCLI = parser.parse(options, a);
 							pw.println("");
 							SwingUtilities.invokeAndWait(new Runnable() {
+								@Override
 								public void run() {
 									try {
 										reuseRequest(remoteCLI);
@@ -631,7 +567,6 @@ public abstract class SshToolsApplication implements PluginHostContext {
 							try {
 								s.close();
 							} catch (IOException ioe) {
-
 							}
 						}
 					}
@@ -640,16 +575,6 @@ public abstract class SshToolsApplication implements PluginHostContext {
 			t.setDaemon(true);
 			t.start();
 		}
-	}
-
-	protected LookAndFeelInfo getDefaultLAF() {
-		return getLAF(PreferencesStore.get(PREF_LAF, UIManager.getSystemLookAndFeelClassName()));
-	}
-
-	protected void initPluginManager(Options options1) throws PluginException {
-		log.debug("Initialising plugin manager");
-		pluginManager.init(this);
-		pluginManager.buildCLIOptions(options1);
 	}
 
 	/**
@@ -662,6 +587,217 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	 * @return application is capable of re-use
 	 */
 	public abstract boolean isReuseCapable();
+
+	@Override
+	public void log(int level, String message) {
+		log(level, message, null);
+	}
+
+	@Override
+	public void log(int level, String message, Throwable exception) {
+		switch (level) {
+		case PluginHostContext.LOG_DEBUG:
+			log.debug(message, exception);
+			break;
+		case PluginHostContext.LOG_ERROR:
+			log.error(message, exception);
+			break;
+		case PluginHostContext.LOG_INFORMATION:
+			log.info(message);
+			break;
+		case PluginHostContext.LOG_WARNING:
+			log.warn(message, exception);
+			break;
+		default:
+			return;
+		}
+	}
+
+	@Override
+	public void log(int level, Throwable exception) {
+		log(level, null, exception);
+	}
+
+	public SshToolsApplicationContainer newContainer() throws SshToolsApplicationException {
+		SshToolsApplicationContainer container = null;
+		try {
+			container = defaultContainerClass.newInstance();
+			newContainer(container);
+			return container;
+		} catch (Throwable t) {
+			throw new SshToolsApplicationException(t);
+		}
+	}
+
+	public void newContainer(SshToolsApplicationContainer container) throws SshToolsApplicationException {
+		try {
+			log.debug("Creating panel " + panelClass.getName());
+			SshToolsApplicationPanel panel = panelClass.newInstance();
+			configurePanel(panel, container);
+		} catch (Throwable t) {
+			throw new SshToolsApplicationException(t);
+		}
+	}
+
+	@Override
+	public void openURL(URL url) throws IOException {
+		try {
+			Desktop.getDesktop().browse(url.toURI());
+		} catch (URISyntaxException e) {
+			throw new IOException(e);
+		}
+	}
+
+	@Override
+	public void putPreference(String name, String val) {
+		PreferencesStore.put(name, val);
+	}
+
+	public void removeAdditionalOptionsTab(OptionsTab tab) {
+		additionalOptionsTabs.remove(tab);
+	}
+
+	public void removeAdditionalOptionsTab(String title) {
+		OptionsTab t = getOptionsTab(title);
+		if (t != null) {
+			removeAdditionalOptionsTab(t);
+		}
+	}
+
+	/**
+	 * This method handles "re-use" requests received when the main entry point
+	 * is called whilst an instance is already. The second instance will provide
+	 * its command line over a TCP/IP socket to this method and expect the first
+	 * instance to process it (opening another window or whatever).
+	 * 
+	 * @param arguments arguments
+	 * @throws SshToolsApplicationException on any error processing the command
+	 *             line
+	 */
+	public abstract void reuseRequest(CommandLine arguments) throws SshToolsApplicationException;
+
+	public void setLookAndFeel(UIManager.LookAndFeelInfo laf) {
+		if (laf != null) {
+			log.info("Setting Look and Feel to " + laf.getClassName());
+			try {
+				@SuppressWarnings("unchecked")
+				LookAndFeel l = createLookAndFeel((Class<LookAndFeel>) Class.forName(laf.getClassName()));
+				UIManager.setLookAndFeel(l);
+				Icon checkIcon = UIManager.getIcon("CheckBoxMenuItem.checkIcon");
+				Icon radioIcon = UIManager.getIcon("RadioButtonMenuItem.checkIcon");
+				UIManager.put("MenuItem.checkIcon",
+						new EmptyIcon(Math.max(checkIcon.getIconWidth(), radioIcon.getIconWidth()), checkIcon.getIconHeight()));
+				UIManager.put("Menu.checkIcon",
+						new EmptyIcon(Math.max(checkIcon.getIconWidth(), radioIcon.getIconWidth()), checkIcon.getIconHeight()));
+				for (SshToolsApplicationContainer container : containers) {
+					container.updateUI();
+				}
+				for (OptionsTab tab : additionalOptionsTabs) {
+					SwingUtilities.updateComponentTreeUI(tab.getTabComponent());
+				}
+			} catch (Throwable t) {
+				/* DEBUG */t.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * Show an 'About' dialog
+	 * 
+	 * @param parent parent
+	 */
+	public void showAbout(Component parent) {
+		JPanel p = new JPanel(new GridBagLayout());
+		p.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+		GridBagConstraints gBC = new GridBagConstraints();
+		gBC.anchor = GridBagConstraints.CENTER;
+		gBC.fill = GridBagConstraints.HORIZONTAL;
+		gBC.insets = new Insets(1, 1, 1, 1);
+		JLabel a = new JLabel(getApplicationName());
+		a.setFont(a.getFont().deriveFont(24f));
+		UIUtil.jGridBagAdd(p, a, gBC, GridBagConstraints.REMAINDER);
+		JLabel v = new JLabel("Version " + getApplicationVersion());
+		v.setFont(v.getFont().deriveFont(10f));
+		UIUtil.jGridBagAdd(p, v, gBC, GridBagConstraints.REMAINDER);
+		MultilineLabel x = new MultilineLabel(getAboutLicenseDetails());
+		x.setBorder(BorderFactory.createEmptyBorder(8, 0, 8, 0));
+		x.setFont(x.getFont().deriveFont(12f));
+		UIUtil.jGridBagAdd(p, x, gBC, GridBagConstraints.REMAINDER);
+		MultilineLabel c = new MultilineLabel(getExpiryInfo());
+		c.setFont(c.getFont().deriveFont(10f));
+		UIUtil.jGridBagAdd(p, c, gBC, GridBagConstraints.REMAINDER);
+		final JLabel h = new JLabel(getAboutURL());
+		h.setForeground(Color.blue);
+		h.setFont(new Font(h.getFont().getName(), Font.BOLD, 10));
+		h.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		h.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent evt) {
+				try {
+					openURL(new URL(getAboutURL()));
+				} catch (IOException ioe) {
+					ioe.printStackTrace();
+				}
+			}
+		});
+		UIUtil.jGridBagAdd(p, h, gBC, GridBagConstraints.REMAINDER);
+		JOptionPane.showMessageDialog(parent, p, "About", JOptionPane.PLAIN_MESSAGE, getApplicationLargeIcon());
+	}
+
+	protected void configureChooser() {
+		XFileChooser.Chooser.addChoserImpl(File.class, XFileSelector.class);
+		XFileChooser.Chooser.addChoserImpl(FileObject.class, VFSFileSelector.class);
+	}
+
+	protected void configurePanel(SshToolsApplicationPanel panel, SshToolsApplicationContainer container)
+			throws SshToolsApplicationException {
+		log.debug("Initialising panel " + panelClass.getName());
+		panel.setOptionsActionAvailable(!getCLI().hasOption('e'));
+		panel.init(this);
+		log.debug("Initialised panel " + panelClass.getName());
+		panel.rebuildActionComponents();
+		container.init(this, panel);
+		panel.setApplicationContainer(container);
+		containers.add(container);
+		if (!container.isContainerVisible()) {
+			final SshToolsApplicationContainer c = container;
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					log.debug("Making container visible");
+					c.setContainerVisible(true);
+				}
+			});
+		}
+	}
+
+	protected LookAndFeel createLookAndFeel(Class<LookAndFeel> clazz) throws Exception {
+		return clazz.newInstance();
+	}
+
+	protected LookAndFeelInfo getDefaultLAF() {
+		return getLAF(PreferencesStore.get(PREF_LAF, UIManager.getSystemLookAndFeelClassName()));
+	}
+
+	protected abstract int getDefaultReusePort();
+
+	protected abstract String getUnlicensedDescription();
+
+	protected void initPluginManager(Options options1) throws PluginException {
+		log.debug("Initialising plugin manager");
+		pluginManager.init(this);
+		pluginManager.buildCLIOptions(options1);
+	}
+
+	protected void postConfigureIconStore(IconStore store) throws IOException {
+		// Subclasses can override to configure the icon store
+	}
+
+	protected abstract void postInitialization();
+
+	protected void preConfigureIconStore(IconStore store) throws IOException {
+		// Subclasses can override to configure the icon store
+	}
 
 	@SuppressWarnings("serial")
 	private void loadMRU() {
@@ -704,172 +840,8 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		}
 	}
 
-	public void log(int level, String message) {
-		log(level, message, null);
-	}
-
-	public void log(int level, String message, Throwable exception) {
-		switch (level) {
-		case PluginHostContext.LOG_DEBUG:
-			log.debug(message, exception);
-			break;
-		case PluginHostContext.LOG_ERROR:
-			log.error(message, exception);
-			break;
-		case PluginHostContext.LOG_INFORMATION:
-			log.info(message);
-			break;
-		case PluginHostContext.LOG_WARNING:
-			log.warn(message, exception);
-			break;
-		default:
-			return;
-		}
-	}
-
-	public void log(int level, Throwable exception) {
-		log(level, null, exception);
-	}
-
-	public SshToolsApplicationContainer newContainer() throws SshToolsApplicationException {
-		SshToolsApplicationContainer container = null;
-		try {
-			container = defaultContainerClass.newInstance();
-			newContainer(container);
-			return container;
-		} catch (Throwable t) {
-			throw new SshToolsApplicationException(t);
-		}
-	}
-
-	public void newContainer(SshToolsApplicationContainer container) throws SshToolsApplicationException {
-		try {
-			log.debug("Creating panel " + panelClass.getName());
-			SshToolsApplicationPanel panel = panelClass.newInstance();
-			configurePanel(panel, container);
-		} catch (Throwable t) {
-			throw new SshToolsApplicationException(t);
-		}
-	}
-
-	public void openURL(URL url) throws IOException {
-		try {
-			Desktop.getDesktop().browse(url.toURI());
-		} catch (URISyntaxException e) {
-			throw new IOException(e);
-		}
-	}
-
-	protected void postConfigureIconStore(IconStore store) throws IOException {
-		// Subclasses can override to configure the icon store
-	}
-
-	protected abstract void postInitialization();
-
-	protected void preConfigureIconStore(IconStore store) throws IOException {
-		// Subclasses can override to configure the icon store
-	}
-
 	private void printHelp(Options options) {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp(getClass().getName(), options, true);
-	}
-
-	public void putPreference(String name, String val) {
-		PreferencesStore.put(name, val);
-	}
-
-	public void removeAdditionalOptionsTab(OptionsTab tab) {
-		additionalOptionsTabs.remove(tab);
-	}
-
-	public void removeAdditionalOptionsTab(String title) {
-		OptionsTab t = getOptionsTab(title);
-		if (t != null) {
-			removeAdditionalOptionsTab(t);
-		}
-	}
-
-	/**
-	 * This method handles "re-use" requests received when the main entry point
-	 * is called whilst an instance is already. The second instance will provide
-	 * its command line over a TCP/IP socket to this method and expect the first
-	 * instance to process it (opening another window or whatever).
-	 * 
-	 * @param arguments
-	 *            arguments
-	 * @return error message or <code>null</code> if the request was sucessful
-	 * @throws SshToolsApplicationException
-	 *             on any error processing the command line
-	 */
-	public abstract void reuseRequest(CommandLine arguments) throws SshToolsApplicationException;
-
-	public void setLookAndFeel(UIManager.LookAndFeelInfo laf) {
-		if (laf != null) {
-			log.info("Setting Look and Feel to " + laf.getClassName());
-			try {
-				@SuppressWarnings("unchecked")
-				LookAndFeel l = createLookAndFeel((Class<LookAndFeel>) Class.forName(laf.getClassName()));
-				UIManager.setLookAndFeel(l);
-
-				Icon checkIcon = UIManager.getIcon("CheckBoxMenuItem.checkIcon");
-				Icon radioIcon = UIManager.getIcon("RadioButtonMenuItem.checkIcon");
-				UIManager.put("MenuItem.checkIcon", new EmptyIcon(
-						Math.max(checkIcon.getIconWidth(), radioIcon.getIconWidth()), checkIcon.getIconHeight()));
-				UIManager.put("Menu.checkIcon", new EmptyIcon(
-						Math.max(checkIcon.getIconWidth(), radioIcon.getIconWidth()), checkIcon.getIconHeight()));
-
-				for (SshToolsApplicationContainer container : containers) {
-					container.updateUI();
-				}
-				for (OptionsTab tab : additionalOptionsTabs) {
-					SwingUtilities.updateComponentTreeUI(tab.getTabComponent());
-				}
-
-			} catch (Throwable t) {
-				/* DEBUG */t.printStackTrace();
-			}
-		}
-	}
-
-	/**
-	 * Show an 'About' dialog
-	 */
-	public void showAbout(Component parent) {
-		JPanel p = new JPanel(new GridBagLayout());
-		p.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-		GridBagConstraints gBC = new GridBagConstraints();
-		gBC.anchor = GridBagConstraints.CENTER;
-		gBC.fill = GridBagConstraints.HORIZONTAL;
-		gBC.insets = new Insets(1, 1, 1, 1);
-		JLabel a = new JLabel(getApplicationName());
-		a.setFont(a.getFont().deriveFont(24f));
-		UIUtil.jGridBagAdd(p, a, gBC, GridBagConstraints.REMAINDER);
-		JLabel v = new JLabel("Version " + getApplicationVersion());
-		v.setFont(v.getFont().deriveFont(10f));
-		UIUtil.jGridBagAdd(p, v, gBC, GridBagConstraints.REMAINDER);
-		MultilineLabel x = new MultilineLabel(getAboutLicenseDetails());
-		x.setBorder(BorderFactory.createEmptyBorder(8, 0, 8, 0));
-		x.setFont(x.getFont().deriveFont(12f));
-		UIUtil.jGridBagAdd(p, x, gBC, GridBagConstraints.REMAINDER);
-		MultilineLabel c = new MultilineLabel(getExpiryInfo());
-		c.setFont(c.getFont().deriveFont(10f));
-		UIUtil.jGridBagAdd(p, c, gBC, GridBagConstraints.REMAINDER);
-		final JLabel h = new JLabel(getAboutURL());
-		h.setForeground(Color.blue);
-		h.setFont(new Font(h.getFont().getName(), Font.BOLD, 10));
-		h.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		h.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent evt) {
-				try {
-					openURL(new URL(getAboutURL()));
-				} catch (IOException ioe) {
-					ioe.printStackTrace();
-				}
-			}
-		});
-		UIUtil.jGridBagAdd(p, h, gBC, GridBagConstraints.REMAINDER);
-		JOptionPane.showMessageDialog(parent, p, "About", JOptionPane.PLAIN_MESSAGE, getApplicationLargeIcon());
 	}
 }

@@ -18,42 +18,20 @@
  *  License document supplied with your distribution for more details.
  *
  */
-
 package com.sshtools.appframework.util;
 
-/**
- *
- *
- * @author $author$
- */
 public class JVMUtil {
-  /**
-   *
-   *
-   * @return
-   */
-  public static int getMajorVersion() {
-    return 1;
-  }
+	public static int getMajorVersion() {
+		return 1;
+	}
 
-  /**
-   *
-   *
-   * @return
-   */
-  public static int getMinorVersion() {
-    return 4;
-  }
+	public static int getMinorVersion() {
+		return 4;
+	}
 
-  /**
-   *
-   *
-   * @param args
-   */
-  public static void main(String[] args) {
-    System.getProperties().list(System.out);
-    System.out.println("Major=" + getMajorVersion());
-    System.out.println("Minor=" + getMinorVersion());
-  }
+	public static void main(String[] args) {
+		System.getProperties().list(System.out);
+		System.out.println("Major=" + getMajorVersion());
+		System.out.println("Minor=" + getMinorVersion());
+	}
 }
-// end class Base64

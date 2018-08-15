@@ -2,6 +2,7 @@
 
 package com.sshtools.appframework.actions;
 
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -29,7 +30,7 @@ public abstract class AbstractPasteAction extends AbstractAppAction {
 		putValue(LONG_DESCRIPTION,
 				Messages.getString("AbstractPasteAction.LongDesc"));
 		putValue(ACCELERATOR_KEY,
-				KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_MASK));
+				KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK));
 		putValue(MNEMONIC_KEY, new Integer('p'));
 		putValue(MENU_NAME, "Edit");
 		putValue(ON_MENUBAR, true);

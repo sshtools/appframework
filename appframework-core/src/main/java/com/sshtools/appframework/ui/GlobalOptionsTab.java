@@ -1,5 +1,4 @@
 /* HEADER */
-
 package com.sshtools.appframework.ui;
 
 import java.awt.BorderLayout;
@@ -27,29 +26,25 @@ import com.sshtools.ui.swing.UIUtil;
  * 
  * @author $Author: brett $
  */
-
 public class GlobalOptionsTab extends JPanel implements OptionsTab {
-
-	private static final long serialVersionUID = 1L;
-	// Private statics
-
-	private final static Icon LARGE_GLOBAL_ICON = IconStore.getInstance().getIcon("applications-internet", 32);
 	private final static Icon GLOBAL_ICON = IconStore.getInstance().getIcon("applications-internet", 24);
-
+	// Private statics
+	private final static Icon LARGE_GLOBAL_ICON = IconStore.getInstance().getIcon("applications-internet", 32);
+	private static final long serialVersionUID = 1L;
+	private SshToolsApplication application;
 	// Private instance variables.
-
 	private JComboBox lafChooser;
+	private JCheckBox stayRunning = new JCheckBox("Stay running on closing last window");
+	private JCheckBox toolBarShowSelectiveText = new JCheckBox(Messages.getString("GlobalOptionsTab.SelectiveText"));
 	private JCheckBox toolBarSmallIcons = new JCheckBox(Messages.getString("GlobalOptionsTab.SmallIcons"));
 	private JCheckBox useSystemIconTheme = new JCheckBox(Messages.getString("GlobalOptionsTab.UseSystemIconTheme"));
-	private JCheckBox toolBarShowSelectiveText = new JCheckBox(Messages.getString("GlobalOptionsTab.SelectiveText"));
 	private JCheckBox wrapToolBar = new JCheckBox("Wrap tool bar icons");
-	private JCheckBox stayRunning = new JCheckBox("Stay running on closing last window");
-	private SshToolsApplication application;
 
 	/**
 	 * Creates a new GlobalOptionsTab object.
+	 * 
+	 * @param application applicationapplication
 	 */
-
 	public GlobalOptionsTab(SshToolsApplication application) {
 		super();
 		this.application = application;
@@ -62,10 +57,8 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 		gbc1.anchor = GridBagConstraints.WEST;
 		gbc1.fill = GridBagConstraints.HORIZONTAL;
 		gbc1.weightx = 0.0;
-		UIUtil.jGridBagAdd(s, new JLabel(Messages.getString("GlobalOptionsTab.LAF")), gbc1,
-				GridBagConstraints.RELATIVE);
+		UIUtil.jGridBagAdd(s, new JLabel(Messages.getString("GlobalOptionsTab.LAF")), gbc1, GridBagConstraints.RELATIVE);
 		gbc1.weightx = 1.0;
-
 		lafChooser = new JComboBox(new LookAndFeelModel());
 		lafChooser.setRenderer(new DefaultListCellRenderer() {
 			private static final long serialVersionUID = 1L;
@@ -77,9 +70,7 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 				setText(((UIManager.LookAndFeelInfo) value).getName());
 				return this;
 			}
-
 		});
-
 		UIUtil.jGridBagAdd(s, lafChooser, gbc1, GridBagConstraints.REMAINDER);
 		gbc1.weightx = 2.0;
 		UIUtil.jGridBagAdd(s, Box.createVerticalStrut(12), gbc1, GridBagConstraints.REMAINDER);
@@ -90,20 +81,72 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 		UIUtil.jGridBagAdd(s, useSystemIconTheme, gbc1, GridBagConstraints.REMAINDER);
 		toolBarShowSelectiveText.setMnemonic('s');
 		UIUtil.jGridBagAdd(s, toolBarShowSelectiveText, gbc1, GridBagConstraints.REMAINDER);
-
 		wrapToolBar.setMnemonic('w');
 		UIUtil.jGridBagAdd(s, wrapToolBar, gbc1, GridBagConstraints.REMAINDER);
 		stayRunning.setMnemonic('r');
 		UIUtil.jGridBagAdd(s, stayRunning, gbc1, GridBagConstraints.REMAINDER);
-
 		// This tab
 		setLayout(new BorderLayout());
 		add(s, BorderLayout.NORTH);
 		setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 		reset();
-
 	}
 
+	@Override
+	public void applyTab() {
+		UIManager.LookAndFeelInfo laf = (UIManager.LookAndFeelInfo) lafChooser.getSelectedItem();
+		String newLaf = laf == null ? "" : laf.getClassName();
+		boolean changed = false;
+		if (!newLaf.equals(PreferencesStore.get(SshToolsApplication.PREF_LAF, ""))) {
+			PreferencesStore.put(SshToolsApplication.PREF_LAF, newLaf);
+			changed = true;
+		}
+		PreferencesStore.putBoolean(SshToolsApplication.PREF_TOOLBAR_SHOW_SELECTIVE_TEXT, toolBarShowSelectiveText.isSelected());
+		PreferencesStore.putBoolean(SshToolsApplication.PREF_TOOLBAR_SMALL_ICONS, toolBarSmallIcons.isSelected());
+		PreferencesStore.putBoolean(SshToolsApplication.PREF_USE_SYSTEM_ICON_THEME, useSystemIconTheme.isSelected());
+		PreferencesStore.putBoolean(SshToolsApplication.PREF_TOOLBAR_WRAP, wrapToolBar.isSelected());
+		PreferencesStore.putBoolean(SshToolsApplication.PREF_STAY_RUNNING, stayRunning.isSelected());
+		if (changed) {
+			application.setLookAndFeel(laf);
+		}
+	}
+
+	@Override
+	public String getTabCategory() {
+		return "General";
+	}
+
+	@Override
+	public Component getTabComponent() {
+		return this;
+	}
+
+	@Override
+	public Icon getTabIcon() {
+		return GLOBAL_ICON;
+	}
+
+	@Override
+	public Icon getTabLargeIcon() {
+		return LARGE_GLOBAL_ICON;
+	}
+
+	@Override
+	public int getTabMnemonic() {
+		return 'g';
+	}
+
+	@Override
+	public String getTabTitle() {
+		return Messages.getString("GlobalOptionsTab.Title");
+	}
+
+	@Override
+	public String getTabToolTipText() {
+		return Messages.getString("GlobalOptionsTab.Tooltip");
+	}
+
+	@Override
 	public void reset() {
 		LookAndFeelModel model = (LookAndFeelModel) lafChooser.getModel();
 		lafChooser.setSelectedItem(model.getElementForName(
@@ -116,58 +159,12 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 		stayRunning.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_STAY_RUNNING, false));
 	}
 
-	public String getTabCategory() {
-		return "General";
-	}
-
-	public Icon getTabIcon() {
-		return GLOBAL_ICON;
-	}
-
-	public Icon getTabLargeIcon() {
-		return LARGE_GLOBAL_ICON;
-	}
-
-	public String getTabTitle() {
-		return Messages.getString("GlobalOptionsTab.Title");
-	}
-
-	public String getTabToolTipText() {
-		return Messages.getString("GlobalOptionsTab.Tooltip");
-	}
-
-	public int getTabMnemonic() {
-		return 'g';
-	}
-
-	public Component getTabComponent() {
-		return this;
-	}
-
-	public boolean validateTab() {
-		return true;
-	}
-
-	public void applyTab() {
-		UIManager.LookAndFeelInfo laf = (UIManager.LookAndFeelInfo) lafChooser.getSelectedItem();
-		String newLaf = laf == null ? "" : laf.getClassName();
-		boolean changed = false;
-		if (!newLaf.equals(PreferencesStore.get(SshToolsApplication.PREF_LAF, ""))) {
-			PreferencesStore.put(SshToolsApplication.PREF_LAF, newLaf);
-			changed = true;
-		}
-		PreferencesStore.putBoolean(SshToolsApplication.PREF_TOOLBAR_SHOW_SELECTIVE_TEXT,
-				toolBarShowSelectiveText.isSelected());
-		PreferencesStore.putBoolean(SshToolsApplication.PREF_TOOLBAR_SMALL_ICONS, toolBarSmallIcons.isSelected());
-		PreferencesStore.putBoolean(SshToolsApplication.PREF_USE_SYSTEM_ICON_THEME, useSystemIconTheme.isSelected());
-		PreferencesStore.putBoolean(SshToolsApplication.PREF_TOOLBAR_WRAP, wrapToolBar.isSelected());
-		PreferencesStore.putBoolean(SshToolsApplication.PREF_STAY_RUNNING, stayRunning.isSelected());
-		if (changed) {
-			application.setLookAndFeel(laf);
-		}
-	}
-
+	@Override
 	public void tabSelected() {
 	}
 
+	@Override
+	public boolean validateTab() {
+		return true;
+	}
 }

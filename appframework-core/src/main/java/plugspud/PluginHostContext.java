@@ -54,10 +54,10 @@ import org.apache.commons.cli.CommandLine;
  */
 public interface PluginHostContext
 {
+	public final static int LOG_DEBUG = 3;
 	public final static int LOG_ERROR = 0;
 	public final static int LOG_INFORMATION = 1;
 	public final static int LOG_WARNING = 2;
-	public final static int LOG_DEBUG = 3;
 	
 	/**
 	 * Get the parsed command line
@@ -91,17 +91,6 @@ public interface PluginHostContext
 	public PluginVersion getPluginHostVersion();
 	
 	/**
-	 * Return a resource that contains a list of "standard" plugins, i.e.
-	 * plugins whose classes are provided by the same class loader as is used
-	 * by the plugin manager itself. These plugins cannot be removed or updated
-	 * and are not showing by the plugin manager UI. If <code>null</code> is
-	 * returned, then no standard plugins are loaded.
-	 * 
-	 * @return standard plugins resource
-	 */
-	public URL getStandardPluginsResource();
-	
-	/**
 	 * Return a the location where plugin updates and installs may be obtained.
 	 * This is used by the plugin manager UI components(s). If <code>null</code>
 	 * is returned, no plugin updates / installs will be possible.
@@ -111,13 +100,26 @@ public interface PluginHostContext
 	public URL getPluginUpdatesResource();
 	
 	/**
-	 * Open a URL with a browser. 
+	 * Implement to get a preference. This is not required, but is recommended.
+	 * If this host does not want to do this, it should just return the default
+	 * value supplied.
 	 * 
-	 * @param url url to open
-	 * @throws IOException if url can't be opened
+	 * @param key preference name
+	 * @param defaultValue default value
+	 * @return value
 	 */
-	public void openURL(URL url)
-		throws IOException;
+	public String getPreference(String key, String defaultValue);
+	
+	/**
+	 * Return a resource that contains a list of "standard" plugins, i.e.
+	 * plugins whose classes are provided by the same class loader as is used
+	 * by the plugin manager itself. These plugins cannot be removed or updated
+	 * and are not showing by the plugin manager UI. If <code>null</code> is
+	 * returned, then no standard plugins are loaded.
+	 * 
+	 * @return standard plugins resource
+	 */
+	public URL getStandardPluginsResource();
 	
 	/**
 	 * Log. Type may be one of ..<br><br>
@@ -160,22 +162,20 @@ public interface PluginHostContext
 	public void log(int type, Throwable exception);
 	
 	/**
+	 * Open a URL with a browser. 
+	 * 
+	 * @param url url to open
+	 * @throws IOException if url can't be opened
+	 */
+	public void openURL(URL url)
+		throws IOException;
+	
+	/**
 	 * Implement to save a preference. This is not required, but is recommended
 	 * 
 	 * @param key preference name
 	 * @param val value
 	 */
 	public void putPreference(String key, String val);
-	
-	/**
-	 * Implement to get a preference. This is not required, but is recommended.
-	 * If this host does not want to do this, it should just return the default
-	 * value supplied.
-	 * 
-	 * @param key preference name
-	 * @param defaultValue default value
-	 * @return value
-	 */
-	public String getPreference(String key, String defaultValue);
 }
 

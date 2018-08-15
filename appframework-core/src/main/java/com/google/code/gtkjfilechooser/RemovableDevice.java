@@ -12,14 +12,8 @@ package com.google.code.gtkjfilechooser;
 
 public class RemovableDevice extends BasicPath{
 
-	private static final long serialVersionUID = 1L;
-
 	public enum RemovableDeviceType {
-		GNOME_DEV_HARDDISK_USB, GNOME_DEV_REMOVABLE_USB, GNOME_DEV_DISC_DVDROM, GNOME_DEV_MEDIA_SDMMC, GNOME_DEV_REMOVABLE;
-
-		public String toIconName() {
-			return toString().toLowerCase().replace('_', '-');
-		}
+		GNOME_DEV_DISC_DVDROM, GNOME_DEV_HARDDISK_USB, GNOME_DEV_MEDIA_SDMMC, GNOME_DEV_REMOVABLE, GNOME_DEV_REMOVABLE_USB;
 
 		/**
 		 * Returns the RemovableDeviceType.
@@ -32,8 +26,8 @@ public class RemovableDevice extends BasicPath{
 		 * other : drive-removable-media.svg
 		 * </pre>
 		 * 
-		 * @param dev
-		 * @return
+		 * @param dev device
+		 * @return device type
 		 */
 		public static RemovableDeviceType getType(String dev) {
 			if (dev.startsWith("/dev/sdb")) {
@@ -48,30 +42,36 @@ public class RemovableDevice extends BasicPath{
 
 			return GNOME_DEV_REMOVABLE;
 		}
-	};
+
+		public String toIconName() {
+			return toString().toLowerCase().replace('_', '-');
+		}
+	}
+
+	private static final long serialVersionUID = 1L;;
 
 
 	private RemovableDeviceType type;
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public void setLocation(String location) {
-		this.location = location;
+	@Override
+	public String getIconName() {
+		return "devices/" + type.toIconName();
 	}
 
 	public RemovableDeviceType getType() {
 		return type;
 	}
 
-	public void setType(RemovableDeviceType type) {
-		this.type = type;
+	public void setLocation(String location) {
+		this.location = location;
 	}
 
-	@Override
-	public String getIconName() {
-		return "devices/" + type.toIconName();
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setType(RemovableDeviceType type) {
+		this.type = type;
 	}
 
 	@Override

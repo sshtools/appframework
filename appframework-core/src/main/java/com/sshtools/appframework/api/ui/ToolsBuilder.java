@@ -21,10 +21,21 @@ import com.sshtools.ui.swing.ToolBarSeparator;
 
 public class ToolsBuilder<T extends JComponent> {
 
+	class ToolBarActionComparator implements Comparator<AppAction> {
+		@Override
+		public int compare(AppAction o1, AppAction o2) {
+			int i = ((Integer) o1.getValue(AppAction.TOOLBAR_GROUP))
+					.compareTo((Integer) o2.getValue(AppAction.TOOLBAR_GROUP));
+			return (i == 0) ? ((Integer) o1.getValue(AppAction.TOOLBAR_WEIGHT))
+					.compareTo((Integer) o2.getValue(AppAction.TOOLBAR_WEIGHT))
+					: i;
+		}
+	}
+
 	final static Log log = LogFactory.getLog(ToolsBuilder.class);
+	private List<AppAction> actions;
 
 	private T container;
-	private List<AppAction> actions;
 
 	public ToolsBuilder(T container) {
 		this(container, null);
@@ -33,6 +44,14 @@ public class ToolsBuilder<T extends JComponent> {
 	public ToolsBuilder(T container, List<AppAction> actions) {
 		this.container = container;
 		this.actions = actions;
+	}
+
+	public boolean isActionVisible(String name) {
+		return true;
+	}
+
+	public Collection<AppAction> listActions() {
+		return actions;
 	}
 
 	public void rebuildActionComponents() {
@@ -58,11 +77,12 @@ public class ToolsBuilder<T extends JComponent> {
 		log.debug("Rebuilt action components");
 	}
 
-	protected void rebuildForActions(List<AppAction> enabledActions) {
-		// Rebuild components
-		if (container != null) {
-			rebuildContainer(enabledActions);
-		}
+	public void resetActionState() {
+
+	}
+
+	protected T getContainer() {
+		return container;
 	}
 
 	protected void rebuildContainer(Collection<AppAction> enabledActions) {
@@ -105,7 +125,7 @@ public class ToolsBuilder<T extends JComponent> {
 			} else {
 				ActionButton btn = new ActionButton(z,
 						!useSmallIcons ? AppAction.MEDIUM_ICON
-								: AppAction.SMALL_ICON, showSelectiveText);
+								: Action.SMALL_ICON, showSelectiveText);
 				container.add(btn, constraints);
 			}
 			grp = (Integer) z.getValue(AppAction.TOOLBAR_GROUP);
@@ -117,29 +137,10 @@ public class ToolsBuilder<T extends JComponent> {
 		}
 	}
 
-	public void resetActionState() {
-
-	}
-
-	public boolean isActionVisible(String name) {
-		return true;
-	}
-
-	public Collection<AppAction> listActions() {
-		return actions;
-	}
-
-	protected T getContainer() {
-		return container;
-	}
-
-	class ToolBarActionComparator implements Comparator<AppAction> {
-		public int compare(AppAction o1, AppAction o2) {
-			int i = ((Integer) o1.getValue(AppAction.TOOLBAR_GROUP))
-					.compareTo((Integer) o2.getValue(AppAction.TOOLBAR_GROUP));
-			return (i == 0) ? ((Integer) o1.getValue(AppAction.TOOLBAR_WEIGHT))
-					.compareTo((Integer) o2.getValue(AppAction.TOOLBAR_WEIGHT))
-					: i;
+	protected void rebuildForActions(List<AppAction> enabledActions) {
+		// Rebuild components
+		if (container != null) {
+			rebuildContainer(enabledActions);
 		}
 	}
 }

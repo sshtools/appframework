@@ -27,20 +27,20 @@ public class Host {
   }
 
   /**
-   * @param host The host to set.
-   */
-
-  public void setHost(String host) {
-    this.host = host;
-
-  }
-
-  /**
    * @return Returns the keys.
    */
 
   public Map getKeys() {
     return keys;
+
+  }
+
+  /**
+   * @param host The host to set.
+   */
+
+  public void setHost(String host) {
+    this.host = host;
 
   }
 

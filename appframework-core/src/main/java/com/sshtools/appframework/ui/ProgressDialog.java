@@ -32,37 +32,56 @@ import com.sshtools.ui.swing.AppAction;
 import com.sshtools.ui.swing.UIUtil;
 
 public class ProgressDialog extends JDialog {
-    // Private instance variables
-    private JProgressBar progressBar;
-    private JLabel value1;
-    private JLabel label1;
-    private boolean canceled;
-    private String geometryPropertyName;
-    private JPanel progressPanel;
-    private boolean indeterminate1;
-    private Thread updateThread;
-    private boolean stopUpdateThread;
-    private BlockingQueue updates;
-    private BlockingQueue waitQueue;
-    private int progress;
+    class Update {
+        int progress;
+        String text;
 
-    public ProgressDialog(JDialog parent, Icon icon, boolean modal, AppAction action, String label1Text, String title,
-                          String geometryPropertyName, boolean closeEnabled) {
-        super(parent, title, modal);
-        init(icon, action, label1Text, geometryPropertyName, closeEnabled);
+        Update(String text, int progress) {
+            this.text = text;
+            this.progress = progress;
+        }
     }
+    class UpdateThread extends Thread {
+        UpdateThread() {
+            super("ProgressUpdateThread");
+            start();
+            progress = 0;
+        }
 
-    public ProgressDialog(JFrame parent, Icon icon, boolean modal, AppAction action, String label1Text, String title,
-                          String geometryPropertyName, boolean closeEnabled) {
-        super(parent, title, modal);
-        init(icon, action, label1Text, geometryPropertyName, closeEnabled);
+        @Override
+		public void run() {
+            try {
+                while (!stopUpdateThread) {
+                    consume(updates.take());
+                }
+            } catch (Exception e) {
+            }
+            updateThread = null;
+            setVisible(false);
+        }
+
+        void consume(Object o) throws InterruptedException, InvocationTargetException {
+            final Update update = (Update) o;
+            while (progress < update.progress) {
+                progress++;
+                SwingUtilities.invokeAndWait(new Runnable() {
+                    @Override
+					public void run() {
+                        progressBar.setValue(progress);
+                    }
+                });
+            }
+            SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+				public void run() {
+                    setLabelText(update.text);
+                }
+            });
+            if (updates.size() == 0) {
+                waitQueue.put(Boolean.TRUE);
+            }
+        }
     }
-
-    public static ProgressDialog createDialog(Component parent, Icon icon, String geometryPropertyName, String label1Text,
-                    String title, boolean closeEnabled) {
-        return createDialog(parent, icon, geometryPropertyName, null, label1Text, title, true, closeEnabled);
-    }
-
     public static ProgressDialog createDialog(Component parent, Icon icon, String geometryPropertyName, AppAction action,
                     String label1Text, String title, boolean modal, boolean closeEnabled) {
         Window w = (Window) SwingUtilities.getAncestorOfClass(Window.class, parent);
@@ -76,9 +95,168 @@ public class ProgressDialog extends JDialog {
         }
         return progressDialog;
     }
+    public static ProgressDialog createDialog(Component parent, Icon icon, String geometryPropertyName, String label1Text,
+                    String title, boolean closeEnabled) {
+        return createDialog(parent, icon, geometryPropertyName, null, label1Text, title, true, closeEnabled);
+    }
+    private boolean canceled;
+    private String geometryPropertyName;
+    private boolean indeterminate1;
+    private JLabel label1;
+    private int progress;
+    // Private instance variables
+    private JProgressBar progressBar;
+    private JPanel progressPanel;
+    private boolean stopUpdateThread;
+
+    private BlockingQueue updates;
+
+    private Thread updateThread;
+
+    private JLabel value1;
+
+    private BlockingQueue waitQueue;
+
+    public ProgressDialog(JDialog parent, Icon icon, boolean modal, AppAction action, String label1Text, String title,
+                          String geometryPropertyName, boolean closeEnabled) {
+        super(parent, title, modal);
+        init(icon, action, label1Text, geometryPropertyName, closeEnabled);
+    }
+
+    public ProgressDialog(JFrame parent, Icon icon, boolean modal, AppAction action, String label1Text, String title,
+                          String geometryPropertyName, boolean closeEnabled) {
+        super(parent, title, modal);
+        init(icon, action, label1Text, geometryPropertyName, closeEnabled);
+    }
 
     public void cancel() {
         canceled = true;
+    }
+
+    public void completeProgress() {
+        if (updateThread != null) {
+            updateThread.interrupt();
+        }
+    }
+
+    public JComponent getMainComponent() {
+        return progressPanel;
+    }
+
+    public int getProgressMaximum() {
+        return progressBar.getMaximum();
+    }
+
+    public int getProgressValue() {
+        return progressBar.getValue();
+    }
+
+    public boolean isCanceled() {
+        return canceled;
+    }
+
+    public boolean isProgressIndeterminate() {
+        return indeterminate1;
+    }
+
+    public boolean isStringPainted() {
+        return progressBar.isStringPainted();
+    }
+
+    public void packHeight() {
+        Container parent = getParent();
+        if (parent != null && parent.getPeer() == null) {
+            parent.addNotify();
+        }
+        if (getPeer() == null) {
+            addNotify();
+        }
+        setSize(new Dimension(getSize().width, getPreferredSize().height));
+        validate();
+    }
+
+    public void reset() {
+        canceled = false;
+    }
+
+    public void resetProgress() {
+        progress = 0;
+        updates.clear();
+    }
+
+    public void saveGeometry() {
+        PreferencesStore.putRectangle(geometryPropertyName, ProgressDialog.this.getBounds());
+    }
+
+    public void setIndeterminate(boolean indeterminate) {
+        try {
+            progressBar.getClass().getMethod("setIndeterminate", new Class[] {
+                boolean.class
+            }).invoke(progressBar, new Object[] {
+                new Boolean(indeterminate)
+            });
+        } catch (Exception e) {
+            progressBar.setValue(0);
+        }
+        this.indeterminate1 = indeterminate;
+    }
+
+    public void setLabelText(String text) {
+        label1.setText(text);
+    }
+
+    public void setProgressMaximum(int max) {
+        progressBar.setMaximum(max);
+    }
+
+    public void setProgressMinimum(int min) {
+        progressBar.setMinimum(min);
+    }
+
+    public void setString(String text) {
+        progressBar.setString(text);
+    }
+
+    public void setStringPainted(boolean stringPainted) {
+        progressBar.setStringPainted(stringPainted);
+    }
+
+    public void setValueText(String text) {
+        value1.setText(text);
+    }
+
+    public void setValueToolTipText(String text) {
+        value1.setToolTipText(text);
+    }
+
+    @Override
+	public void setVisible(boolean visible) {
+        boolean wasVisible = isVisible();
+        if (wasVisible != visible) {
+            if (isVisible() && !visible) {
+                saveGeometry();
+            }
+            super.setVisible(visible);
+            if (!visible) {
+                // notify anyone waiting on our lock just in case
+                stopUpdateThread = true;
+            }
+        }
+    }
+
+    public void updateProgress(final int progress, final String text, boolean wait) {
+        if (updateThread == null) {
+            stopUpdateThread = false;
+            updateThread = new UpdateThread();
+        }
+        Update update = new Update(text, progress);
+        try {
+            updates.put(update);
+            if (wait) {
+                waitQueue.take();
+            }
+        } catch (InterruptedException e1) {
+        }
     }
 
     private void init(Icon icon, AppAction action, String label1Text, String geometryPropertyName, boolean closeEnabled) {
@@ -128,186 +306,13 @@ public class ProgressDialog extends JDialog {
         }
         if(closeEnabled) {
             addWindowListener(new WindowAdapter() {
-                public void windowClosing(WindowEvent evt) {
+                @Override
+				public void windowClosing(WindowEvent evt) {
                     completeProgress();
                 }
             });
         }
         updates = new ArrayBlockingQueue(100, true);
         waitQueue = new ArrayBlockingQueue(3, true);
-    }
-
-    public void saveGeometry() {
-        PreferencesStore.putRectangle(geometryPropertyName, ProgressDialog.this.getBounds());
-    }
-
-    public void setVisible(boolean visible) {
-        boolean wasVisible = isVisible();
-        if (wasVisible != visible) {
-            if (isVisible() && !visible) {
-                saveGeometry();
-            }
-            super.setVisible(visible);
-            if (!visible) {
-                // notify anyone waiting on our lock just in case
-                stopUpdateThread = true;
-            }
-        }
-    }
-
-    public JComponent getMainComponent() {
-        return progressPanel;
-    }
-
-    public boolean isCanceled() {
-        return canceled;
-    }
-
-    public void setLabelText(String text) {
-        label1.setText(text);
-    }
-
-    public void setIndeterminate(boolean indeterminate) {
-        try {
-            progressBar.getClass().getMethod("setIndeterminate", new Class[] {
-                boolean.class
-            }).invoke(progressBar, new Object[] {
-                new Boolean(indeterminate)
-            });
-        } catch (Exception e) {
-            progressBar.setValue(0);
-        }
-        this.indeterminate1 = indeterminate;
-    }
-
-    public void setString(String text) {
-        progressBar.setString(text);
-    }
-
-    public void setStringPainted(boolean stringPainted) {
-        progressBar.setStringPainted(stringPainted);
-    }
-
-    public boolean isStringPainted() {
-        return progressBar.isStringPainted();
-    }
-
-    public void setValueText(String text) {
-        value1.setText(text);
-    }
-
-    public void setProgressMaximum(int max) {
-        progressBar.setMaximum(max);
-    }
-
-    public void setProgressMinimum(int min) {
-        progressBar.setMinimum(min);
-    }
-
-    public void setValueToolTipText(String text) {
-        value1.setToolTipText(text);
-    }
-
-    public int getProgressMaximum() {
-        return progressBar.getMaximum();
-    }
-
-    public int getProgressValue() {
-        return progressBar.getValue();
-    }
-
-    public boolean isProgressIndeterminate() {
-        return indeterminate1;
-    }
-
-    public void completeProgress() {
-        if (updateThread != null) {
-            updateThread.interrupt();
-        }
-    }
-
-    public void resetProgress() {
-        progress = 0;
-        updates.clear();
-    }
-
-    public void updateProgress(final int progress, final String text, boolean wait) {
-        if (updateThread == null) {
-            stopUpdateThread = false;
-            updateThread = new UpdateThread();
-        }
-        Update update = new Update(text, progress);
-        try {
-            updates.put(update);
-            if (wait) {
-                waitQueue.take();
-            }
-        } catch (InterruptedException e1) {
-        }
-    }
-
-    public void packHeight() {
-        Container parent = getParent();
-        if (parent != null && parent.getPeer() == null) {
-            parent.addNotify();
-        }
-        if (getPeer() == null) {
-            addNotify();
-        }
-        setSize(new Dimension(getSize().width, getPreferredSize().height));
-        validate();
-    }
-
-    public void reset() {
-        canceled = false;
-    }
-
-    class Update {
-        String text;
-        int progress;
-
-        Update(String text, int progress) {
-            this.text = text;
-            this.progress = progress;
-        }
-    }
-
-    class UpdateThread extends Thread {
-        UpdateThread() {
-            super("ProgressUpdateThread");
-            start();
-            progress = 0;
-        }
-
-        public void run() {
-            try {
-                while (!stopUpdateThread) {
-                    consume(updates.take());
-                }
-            } catch (Exception e) {
-            }
-            updateThread = null;
-            setVisible(false);
-        }
-
-        void consume(Object o) throws InterruptedException, InvocationTargetException {
-            final Update update = (Update) o;
-            while (progress < update.progress) {
-                progress++;
-                SwingUtilities.invokeAndWait(new Runnable() {
-                    public void run() {
-                        progressBar.setValue(progress);
-                    }
-                });
-            }
-            SwingUtilities.invokeAndWait(new Runnable() {
-                public void run() {
-                    setLabelText(update.text);
-                }
-            });
-            if (updates.size() == 0) {
-                waitQueue.put(Boolean.TRUE);
-            }
-        }
     }
 }

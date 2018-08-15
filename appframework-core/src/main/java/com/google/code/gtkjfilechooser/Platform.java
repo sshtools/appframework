@@ -44,7 +44,7 @@ import java.util.Properties;
 public class Platform {
 
 	public enum PlatformEnum {
-		REDHAT, SUSE, UBUNTU, SOLARIS, UNKNOWN
+		REDHAT, SOLARIS, SUSE, UBUNTU, UNKNOWN
 	};
 
 	/**
@@ -86,6 +86,14 @@ public class Platform {
 		return false;
 	}
 
+	static public boolean isSolaris() {
+		if (System.getProperty("os.name").indexOf("SunOS") != -1) {
+			return true;
+		}
+
+		return false;
+	}
+
 	static public boolean isSuSE() {
 		if (new File("/etc/SuSE-release").exists()) {
 			return true;
@@ -107,14 +115,6 @@ public class Platform {
 				return true;	
 			}			
 		}
-		return false;
-	}
-
-	static public boolean isSolaris() {
-		if (System.getProperty("os.name").indexOf("SunOS") != -1) {
-			return true;
-		}
-
 		return false;
 	}
 

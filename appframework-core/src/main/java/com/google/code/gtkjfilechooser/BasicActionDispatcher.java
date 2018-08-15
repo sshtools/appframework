@@ -28,20 +28,20 @@ public class BasicActionDispatcher implements ActionDispatcher {
 	}
 
 	@Override
-	public void removeActionListener(ActionListener l) {
-		actionListeners.remove(l);
-	}
-	
-	@Override
-	public void removeAllActionListeners() {
-		actionListeners.clear();
-	}
-
-	@Override
 	public void fireActionEvent(ActionEvent e) {
 		for (ActionListener l : actionListeners) {
 			l.actionPerformed(e);
 		}		
+	}
+	
+	@Override
+	public void removeActionListener(ActionListener l) {
+		actionListeners.remove(l);
+	}
+
+	@Override
+	public void removeAllActionListeners() {
+		actionListeners.clear();
 	}
 
 }

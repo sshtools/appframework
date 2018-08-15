@@ -32,29 +32,14 @@ import com.google.code.gtkjfilechooser.RemovableDevice.RemovableDeviceType;
  * 
  */
 public class FreeDesktopUtil {
-	/**
-	 * Kappabyte: 1024 Bytes
-	 */
-	private static final int KB = 1024;
-
-	/**
-	 * Megabyte: 1024^2 Bytes
-	 */
-	private static final int MB = 1048576;
-
-	/**
-	 * Gigabyte: 1024^3 Bytes
-	 */
-	private static final int GB = 1073741824;
-
 	public enum WellKnownDir {		
 		DESKTOP("~/Desktop"), 
-		DOWNLOAD("~/Download"), 
-		TEMPLATES("~/Templates"), 
-		PUBLICSHARE("~/Public"), 
 		DOCUMENTS("~/Documents"), 
-		MUSIC("~/Music"),
+		DOWNLOAD("~/Download"), 
+		MUSIC("~/Music"), 
 		PICTURES("~/Pictures"), 
+		PUBLICSHARE("~/Public"),
+		TEMPLATES("~/Templates"), 
 		VIDEOS("~/Videos");
 
 		private String defaultPath;
@@ -68,50 +53,24 @@ public class FreeDesktopUtil {
 		}
 	}
 
+	/**
+	 * Gigabyte: 1024^3 Bytes
+	 */
+	private static final int GB = 1073741824;
+
 	static private final String HUMAN_READABLE_FMT = "%.1f %s";
 
-	static private Properties userDirsProps;
+	/**
+	 * Kappabyte: 1024 Bytes
+	 */
+	private static final int KB = 1024;
 
 	/**
-	 * Retrieve the path of "well known" user directories like the desktop
-	 * folder and the music folder. See <a href="http://freedesktop.org/wiki/Software/xdg-user-dirs"/>
-	 * 
-	 * @param type
-	 * @return file
-	 * 
+	 * Megabyte: 1024^2 Bytes
 	 */
-	static public File getWellKnownDirPath(WellKnownDir type) {
-		if (userDirsProps == null) {
-			initUserDirsProps();
-		}
+	private static final int MB = 1048576;
 
-		String pathname = userDirsProps.getProperty("XDG_" + type + "_DIR");
-		String property = expandEnv(pathname != null ? pathname : type.getDefaultPath());
-		File path = new File(property);
-		return path.exists() ? path : null;
-	}
-
-	private static void initUserDirsProps() throws IOError {
-		userDirsProps = new Properties();
-		File userDirsFile = new File(System.getProperty("user.home") + "/.config/user-dirs.dirs");
-
-		// xdg-user-dirs may be not installed.
-		if (userDirsFile.exists()) {
-			try {
-				FileInputStream is = null;
-				try {
-					is = new FileInputStream(userDirsFile);
-					userDirsProps.load(is);
-				} finally {
-					if (is != null){
-						is.close();
-					}
-				}
-			} catch (IOException e) {
-				throw new IOError(e);
-			}
-		} 		
-	}
+	static private Properties userDirsProps;
 
 	/**
 	 * Expand the environment variables contained in a string
@@ -154,6 +113,19 @@ public class FreeDesktopUtil {
 		}
 
 		return sb.toString();
+	}
+
+	static public List<BasicPath> getBasicLocations() {
+		List<BasicPath> basicLocations = new ArrayList<BasicPath>();
+
+		basicLocations.add(BasicPath.HOME);
+		if (BasicPath.DESKTOP != null) {
+			// When the user has deleted the desktop folder.
+			basicLocations.add(BasicPath.DESKTOP);
+		}		
+		basicLocations.add(BasicPath.ROOT);
+
+		return basicLocations;
 	}
 
 	/**
@@ -217,11 +189,22 @@ public class FreeDesktopUtil {
 	}
 
 	/**
-	 * Replace space escape sequences.
+	 * Retrieve the path of "well known" user directories like the desktop
+	 * folder and the music folder. See <a href="http://freedesktop.org/wiki/Software/xdg-user-dirs">xdg-user-dirs</a>
+	 * 
+	 * @param type type
+	 * @return file
+	 * 
 	 */
-	private static String escapes(String name) {
-		name = name.replace("\\040", " ");
-		return name;
+	static public File getWellKnownDirPath(WellKnownDir type) {
+		if (userDirsProps == null) {
+			initUserDirsProps();
+		}
+
+		String pathname = userDirsProps.getProperty("XDG_" + type + "_DIR");
+		String property = expandEnv(pathname != null ? pathname : type.getDefaultPath());
+		File path = new File(property);
+		return path.exists() ? path : null;
 	}
 
 	/**
@@ -259,16 +242,33 @@ public class FreeDesktopUtil {
 		}
 	}
 
-	static public List<BasicPath> getBasicLocations() {
-		List<BasicPath> basicLocations = new ArrayList<BasicPath>();
+	/**
+	 * Replace space escape sequences.
+	 */
+	private static String escapes(String name) {
+		name = name.replace("\\040", " ");
+		return name;
+	}
 
-		basicLocations.add(BasicPath.HOME);
-		if (BasicPath.DESKTOP != null) {
-			// When the user has deleted the desktop folder.
-			basicLocations.add(BasicPath.DESKTOP);
-		}		
-		basicLocations.add(BasicPath.ROOT);
+	private static void initUserDirsProps() throws IOError {
+		userDirsProps = new Properties();
+		File userDirsFile = new File(System.getProperty("user.home") + "/.config/user-dirs.dirs");
 
-		return basicLocations;
+		// xdg-user-dirs may be not installed.
+		if (userDirsFile.exists()) {
+			try {
+				FileInputStream is = null;
+				try {
+					is = new FileInputStream(userDirsFile);
+					userDirsProps.load(is);
+				} finally {
+					if (is != null){
+						is.close();
+					}
+				}
+			} catch (IOException e) {
+				throw new IOError(e);
+			}
+		} 		
 	}
 }

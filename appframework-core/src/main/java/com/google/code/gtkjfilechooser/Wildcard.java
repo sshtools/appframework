@@ -11,8 +11,8 @@
 package com.google.code.gtkjfilechooser;
 
 public class Wildcard {
-	static final public char ZERO_MORE_CHARS_PATTERN = '*';
 	static final public char SINGLE_CHAR_PATTERN = '?';
+	static final public char ZERO_MORE_CHARS_PATTERN = '*';
 	static final private char END_CHAR = '\0';
 
 	/**
@@ -25,6 +25,10 @@ public class Wildcard {
 	 * <li>'*' any zero or more characters</li>
 	 * <li>'?' any one character</li>
 	 * </ul>
+	 * 
+	 * @param pattern pattern
+	 * @param text text
+	 * @return matches
 	 */
 	static public boolean matches(String pattern, String text) {
 		// add sentinel so don't need to worry about *'s at end of pattern

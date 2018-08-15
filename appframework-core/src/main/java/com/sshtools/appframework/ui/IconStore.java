@@ -43,6 +43,8 @@ public class IconStore {
 
 	private static Properties fixes = new Properties();
 
+	private static IconStore iconStore;
+
 	static {
 		try {
 			InputStream in = IconStore.class.getResourceAsStream("/icon-name-map.properties");
@@ -56,16 +58,25 @@ public class IconStore {
 		} catch (Exception e) {
 		}
 	}
-
-	private static IconStore iconStore;
-	private DefaultIconService iconService;
-	private Map<String, Icon> cache = new HashMap<String, Icon>();
+	public static IconStore getInstance() {
+		if (iconStore == null) {
+			try {
+				iconStore = new IconStore();
+			} catch (Exception e) {
+				throw new Error(e);
+			}
+		}
+		return iconStore;
+	}
 	private AliasService aliasService;
-	private MIMEService mimeService;
+	private Map<String, Icon> cache = new HashMap<String, Icon>();
 	private GlobService globService;
+	private DefaultIconService iconService;
+	private DefaultMagicService magicService;
+
 	private LimitedCache<FileObject, MIMEEntry> mimeCache = new LimitedCache<FileObject, MIMEEntry>();
 
-	private DefaultMagicService magicService;
+	private MIMEService mimeService;
 
 	private IconStore() throws IOException, ParseException {
 		aliasService = new DefaultAliasService();
@@ -112,8 +123,67 @@ public class IconStore {
 		setDefaultThemeName("default-tango-theme");
 	}
 
-	public void setDefaultThemeName(String defaultThemeName) {
-		iconService.setDefaultThemeName(defaultThemeName);
+	public void addThemeJar(String themeName) throws IOException {
+		FileObject obj = null;
+		try {
+			obj = VFS.getManager().resolveFile("res:" + themeName + "/index.theme");
+		} catch (Exception e) {
+			URL loc = getClass().getClassLoader().getResource(themeName + "/index.theme");
+			try {
+				String sloc = loc.toURI().toString();
+				if (sloc.startsWith("jar:file:/") || !sloc.startsWith("jar:file://")) {
+					sloc = "jar:jar:/" + System.getProperty("user.dir") + sloc.substring(9);
+					FileObject resolveFile = VFS.getManager().resolveFile(System.getProperty("user.dir"));
+					obj = VFS.getManager().resolveFile(resolveFile, sloc);
+				} else {
+					obj = VFS.getManager().resolveFile(sloc);
+
+				}
+			} catch (URISyntaxException e1) {
+				e1.printStackTrace();
+			}
+		}
+		if (obj != null) {
+			iconService.addBase(obj.getParent().getParent());
+		}
+	}
+
+	public void configure(SshToolsApplication application) throws IOException, ParseException {
+		// Initialise icon service
+		iconService.postInit();
+	}
+
+	public Icon getIcon(String name, int size) {
+		if (iconService == null) {
+			throw new IllegalStateException("configure() not yet called.");
+		}
+
+		String cacheKey = name + "/" + size;
+		if (cache.containsKey(name)) {
+			return cache.get(cacheKey);
+		}
+		Icon icon = null;
+		try {
+			FileObject file = iconService.findIcon(name, 48);
+			if (file != null) {
+
+				icon = get(name, size, cacheKey, file);
+			} else {
+				if (fixes.containsKey(name)) {
+					file = iconService.findIcon(fixes.getProperty(name), 48);
+					if (file != null) {
+
+						icon = get(name, size, cacheKey, file);
+					}
+				}
+				// if(file == null) {
+				// System.err.println("Cannot find icon " + name);
+				// }
+			}
+		} catch (Exception e) {
+			LOG.error("Failed to load icon " + name + " at size " + size + ".", e);
+		}
+		return icon;
 	}
 
 	public Icon getIconForFile(FileObject file) {
@@ -122,28 +192,6 @@ public class IconStore {
 
 	public Icon getIconForFile(FileObject file, int size) {
 		return getIconForFile(file, size, true);
-	}
-
-	public MIMEEntry getMIMEEntryForFile(FileObject file, boolean useMagic) {
-		try {
-			if (file.getType().equals(FileType.FILE) || file.getType().equals(FileType.FOLDER)) {
-				MIMEEntry mime = mimeCache.get(file);
-				if (mime == null) {
-					mime = mimeService.getMimeTypeForFile(file, useMagic);
-				}
-
-				if (mime != null) {
-					mimeCache.cache(file, mime);
-				}
-
-				return mime;
-			} else {
-				return null;
-			}
-		} catch (Exception fse) {
-			LOG.debug("Failed to load MIME.", fse);
-			return null;
-		}
 	}
 
 	public Icon getIconForFile(FileObject file, int size, boolean useMagic) {
@@ -195,33 +243,25 @@ public class IconStore {
 		}
 	}
 
-	public void configure(SshToolsApplication application) throws IOException, ParseException {
-		// Initialise icon service
-		iconService.postInit();
-	}
-
-	public void addThemeJar(String themeName) throws IOException {
-		FileObject obj = null;
+	public MIMEEntry getMIMEEntryForFile(FileObject file, boolean useMagic) {
 		try {
-			obj = VFS.getManager().resolveFile("res:" + themeName + "/index.theme");
-		} catch (Exception e) {
-			URL loc = getClass().getClassLoader().getResource(themeName + "/index.theme");
-			try {
-				String sloc = loc.toURI().toString();
-				if (sloc.startsWith("jar:file:/") || !sloc.startsWith("jar:file://")) {
-					sloc = "jar:jar:/" + System.getProperty("user.dir") + sloc.substring(9);
-					FileObject resolveFile = VFS.getManager().resolveFile(System.getProperty("user.dir"));
-					obj = VFS.getManager().resolveFile(resolveFile, sloc);
-				} else {
-					obj = VFS.getManager().resolveFile(sloc);
-
+			if (file.getType().equals(FileType.FILE) || file.getType().equals(FileType.FOLDER)) {
+				MIMEEntry mime = mimeCache.get(file);
+				if (mime == null) {
+					mime = mimeService.getMimeTypeForFile(file, useMagic);
 				}
-			} catch (URISyntaxException e1) {
-				e1.printStackTrace();
+
+				if (mime != null) {
+					mimeCache.cache(file, mime);
+				}
+
+				return mime;
+			} else {
+				return null;
 			}
-		}
-		if (obj != null) {
-			iconService.addBase(obj.getParent().getParent());
+		} catch (Exception fse) {
+			LOG.debug("Failed to load MIME.", fse);
+			return null;
 		}
 	}
 
@@ -229,37 +269,8 @@ public class IconStore {
 		return iconService;
 	}
 
-	public Icon getIcon(String name, int size) {
-		if (iconService == null) {
-			throw new IllegalStateException("configure() not yet called.");
-		}
-
-		String cacheKey = name + "/" + size;
-		if (cache.containsKey(name)) {
-			return cache.get(cacheKey);
-		}
-		Icon icon = null;
-		try {
-			FileObject file = iconService.findIcon(name, 48);
-			if (file != null) {
-
-				icon = get(name, size, cacheKey, file);
-			} else {
-				if (fixes.containsKey(name)) {
-					file = iconService.findIcon(fixes.getProperty(name), 48);
-					if (file != null) {
-
-						icon = get(name, size, cacheKey, file);
-					}
-				}
-				// if(file == null) {
-				// System.err.println("Cannot find icon " + name);
-				// }
-			}
-		} catch (Exception e) {
-			LOG.error("Failed to load icon " + name + " at size " + size + ".", e);
-		}
-		return icon;
+	public void setDefaultThemeName(String defaultThemeName) {
+		iconService.setDefaultThemeName(defaultThemeName);
 	}
 
 	private Icon get(String name, int size, String cacheKey, FileObject file) throws FileSystemException, IOException {
@@ -288,16 +299,5 @@ public class IconStore {
 		}
 		cache.put(cacheKey, icon);
 		return icon;
-	}
-
-	public static IconStore getInstance() {
-		if (iconStore == null) {
-			try {
-				iconStore = new IconStore();
-			} catch (Exception e) {
-				throw new Error(e);
-			}
-		}
-		return iconStore;
 	}
 }

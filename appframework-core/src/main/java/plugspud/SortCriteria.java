@@ -9,9 +9,9 @@ public class SortCriteria {
     public final static int NO_SORT = 0;
     public final static int SORT_ASCENDING = 1;
     public final static int SORT_DESCENDING = 2;
-    private int sortType;
-    private int sortDirection;
     private boolean foldersFirst = true, caseSensitive = false;
+    private int sortDirection;
+    private int sortType;
 
     public SortCriteria() {
         this(0, SORT_ASCENDING, true, false);
@@ -39,31 +39,18 @@ public class SortCriteria {
       }
     }
 
+    public int getSortDirection() {
+        return sortDirection;
+    }
+
+
     public int getSortType() {
         return sortType;
     }
 
 
-    public void setSortType(int sortType) {
-        this.sortType = sortType;
-    }
-
-
     public boolean isCaseSensitive() {
         return caseSensitive;
-    }
-
-    public int getSortDirection() {
-        return sortDirection;
-    }
-
-    public void setSortDirection(int sortDirection) {
-        this.sortDirection = sortDirection;
-    }
-
-
-    public void setFoldersFirst(boolean foldersFirst) {
-        this.foldersFirst = foldersFirst;
     }
 
     public boolean isFoldersFirst() {
@@ -73,8 +60,22 @@ public class SortCriteria {
     public void setCaseSensitive(boolean caseSensitive) {
         this.caseSensitive = caseSensitive;
     }
+
+
+    public void setFoldersFirst(boolean foldersFirst) {
+        this.foldersFirst = foldersFirst;
+    }
+
+    public void setSortDirection(int sortDirection) {
+        this.sortDirection = sortDirection;
+    }
+
+    public void setSortType(int sortType) {
+        this.sortType = sortType;
+    }
     
-    public String toString() {
+    @Override
+	public String toString() {
       return sortType + "," + sortDirection + "," + foldersFirst + "," + caseSensitive;
     }
 }

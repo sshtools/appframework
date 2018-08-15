@@ -31,6 +31,8 @@ import com.google.code.gtkjfilechooser.GtkStockIcon.Size;
 
 public class FileComboBoxRenderer extends JLabel implements ListCellRenderer, UIResource {
 
+	private static final Border DEFAULT_NO_FOCUS_BORDER = new EmptyBorder(LowerBorder.INSETS);
+	protected static Border noFocusBorder = DEFAULT_NO_FOCUS_BORDER;
 	/**
 	 * An empty <code>Border</code>. This field might not be used. To change the
 	 * <code>Border</code> used by this renderer override the
@@ -38,8 +40,6 @@ public class FileComboBoxRenderer extends JLabel implements ListCellRenderer, UI
 	 * the returned component directly.
 	 */
 	private static final Border SAFE_NO_FOCUS_BORDER = new EmptyBorder(LowerBorder.INSETS);
-	private static final Border DEFAULT_NO_FOCUS_BORDER = new EmptyBorder(LowerBorder.INSETS);
-	protected static Border noFocusBorder = DEFAULT_NO_FOCUS_BORDER;
 
 	private JComboBox comboBox;
 

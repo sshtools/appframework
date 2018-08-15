@@ -1,6 +1,7 @@
 /* HEADER */
 package com.sshtools.appframework.actions;
 
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -27,7 +28,7 @@ public abstract class AbstractConnectionPropertiesAction extends AbstractAppActi
 		putValue(SHORT_DESCRIPTION, Messages.getString("AbstractConnectionPropertiesAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION, Messages.getString("AbstractConnectionPropertiesAction.LongDesc"));
 		putValue(MNEMONIC_KEY, new Integer('t'));
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.ALT_MASK | KeyEvent.CTRL_MASK));
+		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.ALT_MASK | InputEvent.CTRL_MASK));
 		putValue(ON_MENUBAR, new Boolean(true));
 		putValue(MENU_NAME, "Edit");
 		putValue(MENU_ITEM_GROUP, new Integer(80));

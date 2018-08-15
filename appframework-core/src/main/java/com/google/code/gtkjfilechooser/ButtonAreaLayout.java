@@ -31,9 +31,11 @@ public class ButtonAreaLayout implements LayoutManager {
 	
 	private int topMargin = 17;
 
+	@Override
 	public void addLayoutComponent(String string, Component comp) {
 	}
 
+	@Override
 	public void layoutContainer(Container container) {
 		Component[] children = container.getComponents();
 
@@ -64,6 +66,7 @@ public class ButtonAreaLayout implements LayoutManager {
 		}
 	}
 
+	@Override
 	public Dimension minimumLayoutSize(Container c) {
 		if (c != null) {
 			Component[] children = c.getComponents();
@@ -88,10 +91,12 @@ public class ButtonAreaLayout implements LayoutManager {
 		return new Dimension(0, 0);
 	}
 
+	@Override
 	public Dimension preferredLayoutSize(Container c) {
 		return minimumLayoutSize(c);
 	}
 
+	@Override
 	public void removeLayoutComponent(Component c) {
 	}
 }

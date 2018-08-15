@@ -2,6 +2,7 @@
 
 package com.sshtools.appframework.actions;
 
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -27,7 +28,7 @@ public class AbstractRecordAction extends AbstractAppAction {
 		putValue(MEDIUM_ICON, loadIcon("media-record", 24));
 		putValue(SHORT_DESCRIPTION, Messages.getString("AbstractRecordAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION, Messages.getString("AbstractRecordAction.LongDesc"));
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.ALT_MASK));
+		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_MASK));
 		putValue(MNEMONIC_KEY, new Integer('r'));
 		putValue(ON_MENUBAR, new Boolean(true));
 		putValue(MENU_NAME, "Record");

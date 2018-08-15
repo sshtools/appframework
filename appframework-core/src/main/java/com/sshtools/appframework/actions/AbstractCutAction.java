@@ -2,6 +2,7 @@
 
 package com.sshtools.appframework.actions;
 
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -26,7 +27,7 @@ public abstract class AbstractCutAction extends AbstractAppAction {
 		putValue(SMALL_ICON, loadIcon("edit-cut", 16));
 		putValue(MEDIUM_ICON, loadIcon("edit-cut", 24));
 		putValue(ACCELERATOR_KEY,
-				KeyStroke.getKeyStroke(KeyEvent.VK_X, KeyEvent.CTRL_MASK));
+				KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_MASK));
 		putValue(SHORT_DESCRIPTION,
 				Messages.getString("AbstractCutAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION,

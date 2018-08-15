@@ -57,11 +57,6 @@ public class Strftime extends DateFormat {
 	protected static Map<Character, String> translate;
 
 	/**
-	 * The delegate {@link SimpleDateFormat}
-	 */
-	private final SimpleDateFormat simpleDateFormat;
-
-	/**
 	 * Initialize our pattern translation
 	 */
 	static {
@@ -134,8 +129,14 @@ public class Strftime extends DateFormat {
 	}
 
 	/**
+	 * The delegate {@link SimpleDateFormat}
+	 */
+	private final SimpleDateFormat simpleDateFormat;
+
+	/**
 	 * Create an instance of this date formatting class
 	 * 
+	 * @param origFormat original format
 	 * @see #Strftime(String, Locale )
 	 */
 	public Strftime(String origFormat) {
@@ -159,6 +160,17 @@ public class Strftime extends DateFormat {
 		// 'numberFormat' should be initialized in subclasses.
 		setCalendar(simpleDateFormat.getCalendar());
 		setNumberFormat(simpleDateFormat.getNumberFormat());
+	}
+
+	@Override
+	public StringBuffer format(Date date, StringBuffer toAppendTo,
+			FieldPosition fieldPosition) {
+		return simpleDateFormat.format(date, toAppendTo, fieldPosition);
+	}
+
+	@Override
+	public Date parse(String text, ParsePosition pos) {
+		return simpleDateFormat.parse(text, pos);
 	}
 
 	/**
@@ -270,16 +282,5 @@ public class Strftime extends DateFormat {
 			}
 		}
 		return newInside;
-	}
-
-	@Override
-	public StringBuffer format(Date date, StringBuffer toAppendTo,
-			FieldPosition fieldPosition) {
-		return simpleDateFormat.format(date, toAppendTo, fieldPosition);
-	}
-
-	@Override
-	public Date parse(String text, ParsePosition pos) {
-		return simpleDateFormat.parse(text, pos);
 	}
 }

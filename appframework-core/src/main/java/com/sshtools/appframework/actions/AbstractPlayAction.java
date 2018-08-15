@@ -1,6 +1,7 @@
 /* HEADER */
 package com.sshtools.appframework.actions;
 
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -22,7 +23,7 @@ public abstract class AbstractPlayAction extends AbstractAppAction {
 		putValue(SMALL_ICON, loadIcon("media-playback-start", 16));
 		putValue(MEDIUM_ICON, loadIcon("media-playback-start", 24));
 		putValue(SHORT_DESCRIPTION, Messages.getString("AbstractPlayAction.ShortDesc"));
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_H, KeyEvent.ALT_MASK));
+		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_H, InputEvent.ALT_MASK));
 		putValue(LONG_DESCRIPTION, Messages.getString("AbstractPlayAction.LongDesc"));
 		putValue(MNEMONIC_KEY, new Integer('p'));
 		putValue(ON_MENUBAR, new Boolean(true));

@@ -38,94 +38,24 @@ import com.google.code.gtkjfilechooser.UrlUtil;
 
 
 /**
- * Manager for the recently used files.
+ * Manager for the recently used files. See <a href="http://www.freedesktop.org/wiki/Specifications/desktop-bookmark-spec"/>.
  * 
  * @author c.cerbo
- * @see http://www.freedesktop.org/wiki/Specifications/desktop-bookmark-spec
  */
 public class RecentlyUsedManager {
 
-	static final private Logger LOG = Logger.getLogger(RecentlyUsedManager.class
-			.getName());
-
-	private static final String FILE_PROTOCOL = "file://";
-
-	private List<File> recentFiles;
-
-	/**
-	 * Creates a new recent manager object. Recent manager objects are used to
-	 * handle the list of recently used resources. {@link RecentlyUsedManager}
-	 * objects are expensive: be sure to create them only when needed.
-	 * 
-	 * @param n
-	 *            The desired number of bookmarks.
-	 * @throws IOError
-	 */
-	public RecentlyUsedManager(int n) {
-		try {
-			init(n);
-		} catch (Exception e) {
-			throw new IOError(e);
-		} 
-	}
-
-	private void init(int n) throws ParserConfigurationException, SAXException,
-	FileNotFoundException, IOException {
-		BufferedInputStream stream = null;
-		try {
-			// Performance note: SAX is here about 2x faster that JAXB.
-			SAXParserFactory factory = SAXParserFactory.newInstance();
-			SAXParser saxParser = factory.newSAXParser();
-			RecentFilesHandler handler = new RecentFilesHandler();
-			stream = new BufferedInputStream(new FileInputStream(getRecentlyUsedFile()));
-			InputSource is = new InputSource(stream);
-			saxParser.parse(is, handler);
-
-			recentFiles = handler.getAllRecentFiles();
-			Collections.sort(recentFiles, new Comparator<File>() {
-
-				@Override
-				public int compare(File o1, File o2) {
-					long date1 = o1.lastModified();
-					long date2 = o2.lastModified();
-					return (date2 < date1 ? -1 : (date2 == date1 ? 0 : 1));
-				}
-
-			});
-
-			if (n < recentFiles.size()) {
-				recentFiles = recentFiles.subList(0, n);
-			}			
-		} finally {
-			if (stream != null){
-				stream.close();
-			}
-		}
-	}
-
-	/**
-	 * Returns the desired number of bookmarks sorted by modified date.
-	 * 
-	 * 
-	 * @return The desired number of recent file entries sorted by modified
-	 *         date.
-	 */
-	public List<File> getRecentFiles() {
-		return recentFiles;
-	}
-
-	protected File getRecentlyUsedFile() {
-		return new File(System.getProperty("user.home") + File.separator
-				+ ".recently-used.xbel");
-	}
-
 	private class RecentFilesHandler extends DefaultHandler {
-		private final ISO8601DateFormat fmt;
 		private final List<File> allRecentFiles;
+		private final ISO8601DateFormat fmt;
 
 		public RecentFilesHandler() {
 			this.allRecentFiles = new ArrayList<File>();
 			this.fmt = new ISO8601DateFormat();
+		}
+
+		@Override
+		public void fatalError(SAXParseException spe) throws SAXException {
+			throw spe;
 		}
 
 		public List<File> getAllRecentFiles() {
@@ -207,10 +137,79 @@ public class RecentlyUsedManager {
 			LOG.warning(spe.getMessage());
 		}
 
-		@Override
-		public void fatalError(SAXParseException spe) throws SAXException {
-			throw spe;
-		}
+	}
 
+	private static final String FILE_PROTOCOL = "file://";
+
+	static final private Logger LOG = Logger.getLogger(RecentlyUsedManager.class
+			.getName());
+
+	private List<File> recentFiles;
+
+	/**
+	 * Creates a new recent manager object. Recent manager objects are used to
+	 * handle the list of recently used resources. {@link RecentlyUsedManager}
+	 * objects are expensive: be sure to create them only when needed.
+	 * 
+	 * @param n
+	 *            The desired number of bookmarks.
+	 * @throws IOError
+	 */
+	public RecentlyUsedManager(int n) {
+		try {
+			init(n);
+		} catch (Exception e) {
+			throw new IOError(e);
+		} 
+	}
+
+	/**
+	 * Returns the desired number of bookmarks sorted by modified date.
+	 * 
+	 * 
+	 * @return The desired number of recent file entries sorted by modified
+	 *         date.
+	 */
+	public List<File> getRecentFiles() {
+		return recentFiles;
+	}
+
+	protected File getRecentlyUsedFile() {
+		return new File(System.getProperty("user.home") + File.separator
+				+ ".recently-used.xbel");
+	}
+
+	private void init(int n) throws ParserConfigurationException, SAXException,
+	FileNotFoundException, IOException {
+		BufferedInputStream stream = null;
+		try {
+			// Performance note: SAX is here about 2x faster that JAXB.
+			SAXParserFactory factory = SAXParserFactory.newInstance();
+			SAXParser saxParser = factory.newSAXParser();
+			RecentFilesHandler handler = new RecentFilesHandler();
+			stream = new BufferedInputStream(new FileInputStream(getRecentlyUsedFile()));
+			InputSource is = new InputSource(stream);
+			saxParser.parse(is, handler);
+
+			recentFiles = handler.getAllRecentFiles();
+			Collections.sort(recentFiles, new Comparator<File>() {
+
+				@Override
+				public int compare(File o1, File o2) {
+					long date1 = o1.lastModified();
+					long date2 = o2.lastModified();
+					return (date2 < date1 ? -1 : (date2 == date1 ? 0 : 1));
+				}
+
+			});
+
+			if (n < recentFiles.size()) {
+				recentFiles = recentFiles.subList(0, n);
+			}			
+		} finally {
+			if (stream != null){
+				stream.close();
+			}
+		}
 	}
 }

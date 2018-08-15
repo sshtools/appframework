@@ -19,11 +19,11 @@ import javax.swing.UIManager;
 
 public class RenameErrorMessageDialog {
 
-	private final String renameErrorTitleText;
-	private final String renameErrorText;
-	private final String renameErrorFileExistsText;
-
 	private JFileChooser chooser;
+	private final String renameErrorFileExistsText;
+	private final String renameErrorText;
+
+	private final String renameErrorTitleText;
 
 	public RenameErrorMessageDialog(JFileChooser chooser) {
 		this.chooser = chooser;
@@ -37,6 +37,15 @@ public class RenameErrorMessageDialog {
 	}
 
 	/**
+	 * Show generic rename error.
+	 * @param oldFileName
+	 */
+	public void showRenameError(String oldFileName) {
+		JOptionPane.showMessageDialog(chooser, MessageFormat.format(renameErrorText,
+				oldFileName), renameErrorTitleText, JOptionPane.ERROR_MESSAGE);
+	}
+
+	/**
 	 * Show error file already exists.
 	 * @param oldFileName
 	 */
@@ -44,15 +53,6 @@ public class RenameErrorMessageDialog {
 		JOptionPane.showMessageDialog(chooser, MessageFormat.format(
 				renameErrorFileExistsText, oldFileName), renameErrorTitleText,
 				JOptionPane.ERROR_MESSAGE);
-	}
-
-	/**
-	 * Show generic rename error.
-	 * @param oldFileName
-	 */
-	public void showRenameError(String oldFileName) {
-		JOptionPane.showMessageDialog(chooser, MessageFormat.format(renameErrorText,
-				oldFileName), renameErrorTitleText, JOptionPane.ERROR_MESSAGE);
 	}
 
 }

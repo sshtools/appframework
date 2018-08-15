@@ -3,7 +3,6 @@ package com.sshtools.appframework.ui;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -11,9 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Vector;
 
 import javax.swing.Action;
@@ -23,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 import com.sshtools.ui.swing.ActionButton;
@@ -37,186 +35,90 @@ import com.sshtools.ui.swing.TabDraggedListener;
  * @author $Author: brett $
  */
 public class ActionTabbedPane extends DnDTabbedPane {
-	private Vector actions;
-	private JPopupMenu popup;
-	private AppAction closeAction;
-	private boolean dragging;
+	class CloseTabAction extends AppAction {
 
-	public ActionTabbedPane() {
-		this(TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
-	}
+		private TabHeader header;
 
-	public ActionTabbedPane(int tabPlacement, int tabLayout) {
-		super(tabPlacement, tabLayout);
-		init();
-	}
-
-	public void setCloseAction(AppAction closeAction) {
-		this.closeAction = closeAction;
-	}
-
-	@Override
-	public void setTitleAt(int index, String title) {
-		// TODO Auto-generated method stub
-		super.setTitleAt(index, title);
-		getTabHeader(index).label.setText(title);
-	}
-
-	public void setIconAt(int index, Icon icon) {
-		super.setIconAt(index, new CloseTabIcon(icon));
-		getTabHeader(index).label.setIcon(icon);
-	}
-
-	private void init() {
-		actions = new Vector();
-
-		addTabDraggedListener(new TabDraggedListener() {
-
-			public void tabbedMoving(int oldIndex, int newIndex) {
-				dragging = true;
+		public CloseTabAction(TabHeader header) {
+			super();
+			this.header = header;
+			putValue(NAME, "Close Tab");
+			// putValue(SMALL_ICON, new CloseIcon(UIManager
+			// .getFont("ToolTip.font").getSize()));
+			// putValue(SMALL_ICON, new
+			// ImageIcon(getClass().getResource("tab-close.png")));
+			Icon icon = UIManager.getIcon("InternalFrame.closeIcon");
+			if (icon == null
+					|| icon.getClass().getName().endsWith("$EmptyFrameIcon")) {
+				putValue(SMALL_ICON,
+						new ImageIcon(getClass().getResource("tab-close.png")));
+			} else {
+				putValue(SMALL_ICON, icon);
 			}
+			putValue(SHORT_DESCRIPTION, "Close this tab");
+			putValue(LONG_DESCRIPTION, "Close this tab");
+		}
 
-			public void tabbedMoved(int oldIndex, int newIndex) {
-				dragging = false;
-//				TabHeader oh = headers.remove(oldIndex);
-//				if (oldIndex < newIndex) {
-//					headers.add(newIndex - 1, oh);
-//				} else {
-//					headers.add(newIndex, oh);
-//				}
+		@Override
+		public void actionPerformed(ActionEvent evt) {
+			int idx = getTabIndex(header);
+			if (getSelectedIndex() != idx) {
+				setSelectedIndex(idx);
 			}
-
-			public void tabDetached(int index, Point point) {
+			if (closeAction != null && closeAction.isEnabled()) {
+				closeAction.actionPerformed(evt);
 			}
-		});
-	}
-
-	public void removeAllActions() {
-		actions.removeAllElements();
-	}
-
-	public void addAction(Action action) {
-		if (!actions.contains(action)) {
-			actions.add(action);
 		}
 	}
+	class CloseTabIcon implements Icon {
+		private Icon fileIcon;
 
-	public void removeAction(Action action) {
-		actions.remove(action);
-	}
+		private int height;
 
-	public void addTab(String title, Component component) {
-		this.addTab(title, component, null);
-	}
+		private int width;
 
-	public void addTab(String title, Component component, Icon extraIcon) {
-		int idx = getTabCount();
-		super.addTab(title, extraIcon == null ? null : new CloseTabIcon(
-				extraIcon), component);
-		if (!dragging) {
-			TabHeader header = new TabHeader(title, extraIcon);
-			doSetTabComponentAt(idx, header);
+		private int x_pos;
+
+		private int y_pos;
+
+		public CloseTabIcon(Icon fileIcon) {
+			this.fileIcon = fileIcon;
+			width = fileIcon == null ? 16 : fileIcon.getIconWidth();
+			height = fileIcon == null ? 16 : fileIcon.getIconHeight();
 		}
-	}
 
-	@Override
-	public void removeTabAt(int index) {
-		super.removeTabAt(index);
-	}
-
-	public void addTab(String title, Icon extraIcon, Component component,
-			String toolTip) {
-		int idx = getTabCount();
-		super.addTab(title, extraIcon == null ? null : new CloseTabIcon(
-				extraIcon), component, toolTip);
-		if (!dragging) {
-			TabHeader header = new TabHeader(title, extraIcon);
-			doSetTabComponentAt(idx, header);
+		public Rectangle getBounds() {
+			return new Rectangle(x_pos, y_pos, width, height);
 		}
-	}
 
-	public void insertTab(String title, Component component, int idx) {
-		this.insertTab(title, component, null, idx);
-	}
-
-	public void setCanClose(int idx, boolean canClose) {
-		try {
-			Object th = getClass().getMethod("getTabComponentAt", int.class)
-					.invoke(this, idx);
-			if(th != null)
-				th.getClass().getMethod("setCanClose", boolean.class)
-					.invoke(th, canClose);
-		} catch (Exception e) {
-			e.printStackTrace();
+		@Override
+		public int getIconHeight() {
+			return height;
 		}
-	}
 
-    public void insertTab(String title, Icon icon, Component component, String tip, int index) {
-    	super.insertTab(title, icon, component, tip, index);
-		if (!dragging) {
-			TabHeader header = new TabHeader(title, icon);
-			doSetTabComponentAt(index, header);
+		@Override
+		public int getIconWidth() {
+			return width;
 		}
-    }
 
-	public void insertTab(String title, Component component, Icon extraIcon,
-			int idx) {
-		super.insertTab(title, extraIcon == null ? null : new CloseTabIcon(
-				extraIcon), component, null, idx);
-		if (!dragging) {
-			TabHeader header = new TabHeader(title, extraIcon);
-			doSetTabComponentAt(idx, header);
-		}
-	}
-
-	private void doSetTabComponentAt(int idx, TabHeader header) {
-		try {
-			getClass().getMethod("setTabComponentAt", int.class,
-					Component.class).invoke(this, idx, header);
-		} catch (Exception e) {
-		}
-	}
-
-	private void showPopup(Component c) {
-		if (getSelectedIndex() != -1) {
-			if (popup == null) {
-				popup = new JPopupMenu(""); //$NON-NLS-1$
+		@Override
+		public void paintIcon(Component c, Graphics g, int x, int y) {
+			this.x_pos = x;
+			this.y_pos = y;
+			if (fileIcon != null) {
+				fileIcon.paintIcon(c, g, x, y);
 			}
-			popup.setLabel(getTitleAt(getSelectedIndex()));
-			popup.invalidate();
-			popup.removeAll();
-			Action action;
-			for (Enumeration en = actions.elements(); en.hasMoreElements();) {
-				action = (Action) en.nextElement();
-				if (action != null)
-					popup.add(action);
-			}
-			popup.validate();
-			popup.show(c, 10, 10);
 		}
 	}
-
-//	public void mouseEntered(MouseEvent e) {
-//	}
-//
-//	public void mouseExited(MouseEvent e) {
-//	}
-//
-//	public void mousePressed(MouseEvent e) {
-//	}
-//
-//	public void mouseReleased(MouseEvent e) {
-//	}
-
 	class TabHeader extends JPanel {
 
-		private JLabel label;
 		private ActionButton closeTabButton;
+		private JLabel label;
 
 		TabHeader(String text, Icon icon) {
 			super(new BorderLayout(0, 0));
 			setOpaque(false);
-			label = new JLabel(text, icon, JLabel.CENTER);
+			label = new JLabel(text, icon, SwingConstants.CENTER);
 			label.setBorder(null);
 //			label.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
 			label.setFocusable(false);
@@ -260,7 +162,133 @@ public class ActionTabbedPane extends DnDTabbedPane {
 			closeTabButton.setVisible(canClose);
 		}
 	}
-	
+	private Vector actions;
+
+	private AppAction closeAction;
+
+	private boolean dragging;
+
+	private JPopupMenu popup;
+
+	public ActionTabbedPane() {
+		this(TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+	}
+
+	public ActionTabbedPane(int tabPlacement, int tabLayout) {
+		super(tabPlacement, tabLayout);
+		init();
+	}
+
+	public void addAction(Action action) {
+		if (!actions.contains(action)) {
+			actions.add(action);
+		}
+	}
+
+	@Override
+	public void addTab(String title, Component component) {
+		this.addTab(title, component, null);
+	}
+
+	public void addTab(String title, Component component, Icon extraIcon) {
+		int idx = getTabCount();
+		super.addTab(title, extraIcon == null ? null : new CloseTabIcon(
+				extraIcon), component);
+		if (!dragging) {
+			TabHeader header = new TabHeader(title, extraIcon);
+			doSetTabComponentAt(idx, header);
+		}
+	}
+
+	@Override
+	public void addTab(String title, Icon extraIcon, Component component,
+			String toolTip) {
+		int idx = getTabCount();
+		super.addTab(title, extraIcon == null ? null : new CloseTabIcon(
+				extraIcon), component, toolTip);
+		if (!dragging) {
+			TabHeader header = new TabHeader(title, extraIcon);
+			doSetTabComponentAt(idx, header);
+		}
+	}
+
+	public void insertTab(String title, Component component, Icon extraIcon,
+			int idx) {
+		super.insertTab(title, extraIcon == null ? null : new CloseTabIcon(
+				extraIcon), component, null, idx);
+		if (!dragging) {
+			TabHeader header = new TabHeader(title, extraIcon);
+			doSetTabComponentAt(idx, header);
+		}
+	}
+
+	public void insertTab(String title, Component component, int idx) {
+		this.insertTab(title, component, null, idx);
+	}
+
+	@Override
+	public void insertTab(String title, Icon icon, Component component, String tip, int index) {
+    	super.insertTab(title, icon, component, tip, index);
+		if (!dragging) {
+			TabHeader header = new TabHeader(title, icon);
+			doSetTabComponentAt(index, header);
+		}
+    }
+
+	public void removeAction(Action action) {
+		actions.remove(action);
+	}
+
+	public void removeAllActions() {
+		actions.removeAllElements();
+	}
+
+	@Override
+	public void removeTabAt(int index) {
+		super.removeTabAt(index);
+	}
+
+    public void setCanClose(int idx, boolean canClose) {
+		try {
+			Object th = getClass().getMethod("getTabComponentAt", int.class)
+					.invoke(this, idx);
+			if(th != null)
+				th.getClass().getMethod("setCanClose", boolean.class)
+					.invoke(th, canClose);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void setCloseAction(AppAction closeAction) {
+		this.closeAction = closeAction;
+	}
+
+	@Override
+	public void setIconAt(int index, Icon icon) {
+		super.setIconAt(index, new CloseTabIcon(icon));
+		getTabHeader(index).label.setIcon(icon);
+	}
+
+	@Override
+	public void setTitleAt(int index, String title) {
+		// TODO Auto-generated method stub
+		super.setTitleAt(index, title);
+		getTabHeader(index).label.setText(title);
+	}
+
+//	public void mouseEntered(MouseEvent e) {
+//	}
+//
+//	public void mouseExited(MouseEvent e) {
+//	}
+//
+//	public void mousePressed(MouseEvent e) {
+//	}
+//
+//	public void mouseReleased(MouseEvent e) {
+//	}
+
 	TabHeader getTabHeader(int index) {
 		return (TabHeader) getTabComponentAt(index);
 //		for(int i = 0 ; i < getTabCount(); i++) {
@@ -277,77 +305,58 @@ public class ActionTabbedPane extends DnDTabbedPane {
 		}
 		return -1;
 	}
-
-	class CloseTabAction extends AppAction {
-
-		private TabHeader header;
-
-		public CloseTabAction(TabHeader header) {
-			super();
-			this.header = header;
-			putValue(NAME, "Close Tab");
-			// putValue(SMALL_ICON, new CloseIcon(UIManager
-			// .getFont("ToolTip.font").getSize()));
-			// putValue(SMALL_ICON, new
-			// ImageIcon(getClass().getResource("tab-close.png")));
-			Icon icon = UIManager.getIcon("InternalFrame.closeIcon");
-			if (icon == null
-					|| icon.getClass().getName().endsWith("$EmptyFrameIcon")) {
-				putValue(SMALL_ICON,
-						new ImageIcon(getClass().getResource("tab-close.png")));
-			} else {
-				putValue(SMALL_ICON, icon);
-			}
-			putValue(SHORT_DESCRIPTION, "Close this tab");
-			putValue(LONG_DESCRIPTION, "Close this tab");
-		}
-
-		public void actionPerformed(ActionEvent evt) {
-			int idx = getTabIndex(header);
-			if (getSelectedIndex() != idx) {
-				setSelectedIndex(idx);
-			}
-			if (closeAction != null && closeAction.isEnabled()) {
-				closeAction.actionPerformed(evt);
-			}
+	
+	private void doSetTabComponentAt(int idx, TabHeader header) {
+		try {
+			getClass().getMethod("setTabComponentAt", int.class,
+					Component.class).invoke(this, idx, header);
+		} catch (Exception e) {
 		}
 	}
 
-	class CloseTabIcon implements Icon {
-		private int x_pos;
+	private void init() {
+		actions = new Vector();
 
-		private int y_pos;
+		addTabDraggedListener(new TabDraggedListener() {
 
-		private int width;
-
-		private int height;
-
-		private Icon fileIcon;
-
-		public CloseTabIcon(Icon fileIcon) {
-			this.fileIcon = fileIcon;
-			width = fileIcon == null ? 16 : fileIcon.getIconWidth();
-			height = fileIcon == null ? 16 : fileIcon.getIconHeight();
-		}
-
-		public void paintIcon(Component c, Graphics g, int x, int y) {
-			this.x_pos = x;
-			this.y_pos = y;
-			if (fileIcon != null) {
-				fileIcon.paintIcon(c, g, x, y);
+			@Override
+			public void tabbedMoved(int oldIndex, int newIndex) {
+				dragging = false;
+//				TabHeader oh = headers.remove(oldIndex);
+//				if (oldIndex < newIndex) {
+//					headers.add(newIndex - 1, oh);
+//				} else {
+//					headers.add(newIndex, oh);
+//				}
 			}
-		}
 
-		public int getIconWidth() {
-			return width;
-		}
+			@Override
+			public void tabbedMoving(int oldIndex, int newIndex) {
+				dragging = true;
+			}
 
-		public int getIconHeight() {
-			return height;
-		}
+			@Override
+			public void tabDetached(int index, Point point) {
+			}
+		});
+	}
 
-		public Rectangle getBounds() {
-			return new Rectangle(x_pos, y_pos, width, height);
+	private void showPopup(Component c) {
+		if (getSelectedIndex() != -1) {
+			if (popup == null) {
+				popup = new JPopupMenu(""); //$NON-NLS-1$
+			}
+			popup.setLabel(getTitleAt(getSelectedIndex()));
+			popup.invalidate();
+			popup.removeAll();
+			Action action;
+			for (Enumeration en = actions.elements(); en.hasMoreElements();) {
+				action = (Action) en.nextElement();
+				if (action != null)
+					popup.add(action);
+			}
+			popup.validate();
+			popup.show(c, 10, 10);
 		}
 	}
 }

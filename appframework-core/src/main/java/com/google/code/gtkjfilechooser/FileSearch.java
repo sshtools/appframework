@@ -22,28 +22,44 @@ import com.google.code.gtkjfilechooser.FileSearch.FileSearchHandler.Status;
  * 
  */
 public class FileSearch {
-	private String targetdir;
-	private String searchterm;
+	/**
+	 * Inner class FileSearch
+	 * 
+	 */
+	public interface FileSearchHandler {
+		public enum Status {
+			COMPLETED, INTERRUPTED
+		};
+
+		/**
+		 * Method invoked when the search has completed
+		 * ({@link Status#COMPLETED}) or was interrupted
+		 * ({@link Status#INTERRUPTED}).
+		 * 
+		 * @param status status
+		 */
+		public void finished(Status status);
+
+		/**
+		 * Method invoked when a file is found.
+		 * 
+		 * @param file
+		 */
+		public void found(File file);
+	}
 	private FileFilter fileFilter;
 	private FileSearchHandler handler;
-	private boolean searchHidden = false;
-	private boolean stop = false;
 	private boolean interrupted = false;
+	private boolean searchHidden = false;
+	private String searchterm;
+	private boolean stop = false;
+
+	private String targetdir;
 
 	public FileSearch(String targetdir, String searchterm, FileSearchHandler handler) {
 		this.targetdir = targetdir;
 		this.searchterm = searchterm.toLowerCase();
 		this.handler = handler;
-	}
-
-	/**
-	 * Set {@code true} if you want to search hidden files or in hidden folders,
-	 * too.
-	 * 
-	 * @param searchHidden search hidden
-	 */
-	public void setSearchHidden(boolean searchHidden) {
-		this.searchHidden = searchHidden;
 	}
 
 	/**
@@ -57,10 +73,13 @@ public class FileSearch {
 	}
 
 	/**
-	 * Stop the current search.
+	 * Set {@code true} if you want to search hidden files or in hidden folders,
+	 * too.
+	 * 
+	 * @param searchHidden search hidden
 	 */
-	public void stop() {
-		this.stop = true;
+	public void setSearchHidden(boolean searchHidden) {
+		this.searchHidden = searchHidden;
 	}
 
 	/**
@@ -87,6 +106,24 @@ public class FileSearch {
 		scanFilesThread.start();
 	}
 
+	/**
+	 * Stop the current search.
+	 */
+	public void stop() {
+		this.stop = true;
+	}
+
+	/**
+	 * This method resolves a bug in the JDK: the current path (.) is wrongly
+	 * interpreted as an hidden file.
+	 */
+	private boolean isHidden(File file) {
+		if (".".equals(file.getName())) {
+			return false;
+		}
+		return file.isHidden();
+	}
+
 	private void scanFiles(File file) {
 		if (stop) {
 			if (!interrupted) {
@@ -109,42 +146,5 @@ public class FileSearch {
 				}
 			}
 		}
-	}
-
-	/**
-	 * This method resolves a bug in the JDK: the current path (.) is wrongly
-	 * interpreted as an hidden file.
-	 */
-	private boolean isHidden(File file) {
-		if (".".equals(file.getName())) {
-			return false;
-		}
-		return file.isHidden();
-	}
-
-	/**
-	 * Inner class FileSearch
-	 * 
-	 */
-	public interface FileSearchHandler {
-		public enum Status {
-			COMPLETED, INTERRUPTED
-		};
-
-		/**
-		 * Method invoked when a file is found.
-		 * 
-		 * @param file
-		 */
-		public void found(File file);
-
-		/**
-		 * Method invoked when the search has completed
-		 * ({@link Status#COMPLETED}) or was interrupted
-		 * ({@link Status#INTERRUPTED}).
-		 * 
-		 * @param status status
-		 */
-		public void finished(Status status);
 	}
 }

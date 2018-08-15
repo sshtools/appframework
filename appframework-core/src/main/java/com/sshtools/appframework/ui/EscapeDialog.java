@@ -32,6 +32,75 @@ public class EscapeDialog extends JDialog implements ContainerListener, KeyListe
 // 1 - add this Dialog as a ContainerListener to the Container
 // 2 - call this function recursively for every child of the Container.
 
+     //ContainerListener interface
+	/**********************************************************/
+	
+	//This function is called whenever a Component or a Container is added to another Container belonging to this Dialog
+	     @Override
+		public void componentAdded(ContainerEvent e)
+	     {
+	          addKeyAndContainerListenerRecursively(e.getChild());
+	     }
+
+
+//The following function is the same as the function above with the exception that it does exactly the opposite - removes this Dialog
+//from the listener lists of Components.
+
+    //This function is called whenever a Component or a Container is removed from another Container belonging to this Dialog
+     @Override
+	public void componentRemoved(ContainerEvent e)
+     {
+          removeKeyAndContainerListenerRecursively(e.getChild());
+     }
+
+
+//KeyListener interface
+/**********************************************************/
+//This function is called whenever a Component belonging to this Dialog (or the Dialog itself) gets the KEY_PRESSED event
+     @Override
+	public void keyPressed(KeyEvent e)
+     {
+       int code = e.getKeyCode();
+       if (code == KeyEvent.VK_ESCAPE) {
+   //Key pressed is the ESCAPE key. Hide this Dialog.
+         if (canClose())
+           setVisible(false);
+       }
+       else if (code == KeyEvent.VK_ENTER) {
+   //Key pressed is the ENTER key. Redefine performEnterAction() in subclasses to respond to depressing the ENTER key.
+         performEnterAction(e);
+       }
+
+//Insert code to process other keys here
+     }
+
+//We need the following 2 functions to complete imlementation of KeyListener
+     @Override
+	public void keyReleased(KeyEvent e)
+     {
+     }
+
+     @Override
+	public void keyTyped(KeyEvent e)
+     {
+     }
+
+/**********************************************************/
+
+
+// This function must be overriden in any Escape dialog to return true when the subclass allows it to
+ protected boolean canClose() {
+   return true;
+ }
+
+/************************************************************/
+	
+	     void performEnterAction(KeyEvent e)
+	     {
+	//Default response to ENTER key pressed goes here
+	//Redefine this function in subclasses to respond to ENTER key differently
+	     }
+
      private void addKeyAndContainerListenerRecursively(Component c)
      {
 //To be on the safe side, try to remove KeyListener first just in case it has been added before.
@@ -61,87 +130,23 @@ public class EscapeDialog extends JDialog implements ContainerListener, KeyListe
           }
      }
 
+private void removeKeyAndContainerListenerRecursively(Component c)
+{
+      c.removeKeyListener(this);
 
-//The following function is the same as the function above with the exception that it does exactly the opposite - removes this Dialog
-//from the listener lists of Components.
+      if(c instanceof Container){
 
-    private void removeKeyAndContainerListenerRecursively(Component c)
-    {
-          c.removeKeyListener(this);
+           Container cont = (Container)c;
 
-          if(c instanceof Container){
+           cont.removeContainerListener(this);
 
-               Container cont = (Container)c;
+           Component[] children = cont.getComponents();
 
-               cont.removeContainerListener(this);
-
-               Component[] children = cont.getComponents();
-
-               for(int i = 0; i < children.length; i++){
-                    removeKeyAndContainerListenerRecursively(children[i]);
-               }
-          }
-     }
-
-
-//ContainerListener interface
-/**********************************************************/
-
-//This function is called whenever a Component or a Container is added to another Container belonging to this Dialog
-     public void componentAdded(ContainerEvent e)
-     {
-          addKeyAndContainerListenerRecursively(e.getChild());
-     }
-
-//This function is called whenever a Component or a Container is removed from another Container belonging to this Dialog
-     public void componentRemoved(ContainerEvent e)
-     {
-          removeKeyAndContainerListenerRecursively(e.getChild());
-     }
-
-     // This function must be overriden in any Escape dialog to return true when the subclass allows it to
-     protected boolean canClose() {
-       return true;
-     }
-
-/**********************************************************/
-
-
-//KeyListener interface
-/**********************************************************/
-//This function is called whenever a Component belonging to this Dialog (or the Dialog itself) gets the KEY_PRESSED event
-     public void keyPressed(KeyEvent e)
-     {
-       int code = e.getKeyCode();
-       if (code == KeyEvent.VK_ESCAPE) {
-   //Key pressed is the ESCAPE key. Hide this Dialog.
-         if (canClose())
-           setVisible(false);
-       }
-       else if (code == KeyEvent.VK_ENTER) {
-   //Key pressed is the ENTER key. Redefine performEnterAction() in subclasses to respond to depressing the ENTER key.
-         performEnterAction(e);
-       }
-
-//Insert code to process other keys here
-     }
-
-//We need the following 2 functions to complete imlementation of KeyListener
-     public void keyReleased(KeyEvent e)
-     {
-     }
-
-     public void keyTyped(KeyEvent e)
-     {
-     }
-
-/************************************************************/
-
-     void performEnterAction(KeyEvent e)
-     {
-//Default response to ENTER key pressed goes here
-//Redefine this function in subclasses to respond to ENTER key differently
-     }
+           for(int i = 0; i < children.length; i++){
+                removeKeyAndContainerListenerRecursively(children[i]);
+           }
+      }
+ }
 
 }
 

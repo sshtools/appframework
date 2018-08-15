@@ -23,6 +23,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 /**
  * Panel to provide {@link JFileChooser} a preview for images. Simply set it as
@@ -37,15 +38,15 @@ import javax.swing.JPanel;
  * 
  */
 public class ImagePreviewer extends JPanel implements PropertyChangeListener {
-	private static final int SCALED_WIDTH = 180;
 	private static final int OFFSET = 20;
+	private static final int SCALED_WIDTH = 180;
 	ImageIcon thumbnail = null;
 	private JLabel filenameLabel;
 	private JLabel previewLabel;
 
 	public ImagePreviewer(JFileChooser fc) {
-		filenameLabel = new JLabel("", JLabel.CENTER);
-		previewLabel = new JLabel("", JLabel.CENTER);
+		filenameLabel = new JLabel("", SwingConstants.CENTER);
+		previewLabel = new JLabel("", SwingConstants.CENTER);
 
 		setLayout(new BorderLayout());
 		setPreferredSize(new Dimension(SCALED_WIDTH + OFFSET, -1));
@@ -75,6 +76,7 @@ public class ImagePreviewer extends JPanel implements PropertyChangeListener {
 		}
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String property = e.getPropertyName();
 		if (SELECTED_FILE_CHANGED_PROPERTY.equals(property)) {

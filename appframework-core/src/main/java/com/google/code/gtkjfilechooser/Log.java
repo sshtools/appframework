@@ -25,12 +25,20 @@ import com.google.code.gtkjfilechooser.ui.GtkFileChooserUI;
  */
 public class Log {
 
-	static final private Logger LOG = Logger.getLogger(GtkFileChooserUI.class.getName());
-
 	/**
 	 * Set false for production code
 	 */
 	static final private boolean DEBUG = false;
+
+	static final private Logger LOG = Logger.getLogger(GtkFileChooserUI.class.getName());
+
+	static public void debug(Object... msgs) {
+		if (LOG.isLoggable(Level.FINEST)) {
+			StringBuilder sb = new StringBuilder();
+			appendMessages(sb, msgs);
+			LOG.finest(sb.toString());
+		}
+	}
 
 	static public void debug0(Object... msgs) {
 		if (DEBUG) {
@@ -43,14 +51,6 @@ public class Log {
 			appendMessages(sb, msgs);
 
 			System.out.println(sb);
-		}
-	}
-
-	static public void debug(Object... msgs) {
-		if (LOG.isLoggable(Level.FINEST)) {
-			StringBuilder sb = new StringBuilder();
-			appendMessages(sb, msgs);
-			LOG.finest(sb.toString());
 		}
 	}
 
@@ -68,6 +68,16 @@ public class Log {
 			appendMessages(sb, msgs);
 			LOG.log(level, sb.toString(), thrown);
 		}
+	}
+
+	public static void main(String[] args) {
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				Log.debug("ciao");
+			}
+		}).start();
 	}
 
 	private static void appendMessages(StringBuilder sb, Object... msgs) {
@@ -102,16 +112,6 @@ public class Log {
 			}
 		}
 		return location;
-	}
-
-	public static void main(String[] args) {
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				Log.debug("ciao");
-			}
-		}).start();
 	}
 
 }

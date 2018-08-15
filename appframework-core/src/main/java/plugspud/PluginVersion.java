@@ -51,258 +51,242 @@ import java.util.StringTokenizer;
  * numeric element of the version cannot have a value of more than 1000.
  */
 public class PluginVersion implements Comparable {
+	// Private instance variables
+	private int major, minor, micro;
 
-    /**
-     * Construct a new PluginVersion.
-     * 
-     * @param major
-     *            major version
-     */
-    public PluginVersion(int major) throws IllegalArgumentException {
-        this(major, -1, -1, null);
-    }
+	private String other;
 
-    /**
-     * Construct a new PluginVersion.
-     * 
-     * @param major
-     *            major version
-     * @param minor
-     *            minor version
-     */
-    public PluginVersion(int major, int minor) throws IllegalArgumentException {
-        this(major, minor, -1, null);
-    }
+	/**
+	 * Construct a new PluginVersion.
+	 * 
+	 * @param major major version
+	 * @throws IllegalArgumentException on error
+	 */
+	public PluginVersion(int major) throws IllegalArgumentException {
+		this(major, -1, -1, null);
+	}
 
-    /**
-     * Construct a new PluginVersion.
-     * 
-     * @param major
-     *            major version
-     * @param minor
-     *            minor version
-     * @param micro
-     *            micro version
-     */
-    public PluginVersion(int major, int minor, int micro) throws IllegalArgumentException {
-        this(major, minor, micro, null);
-    }
+	/**
+	 * Construct a new PluginVersion.
+	 * 
+	 * @param major major version
+	 * @param minor minor version
+	 * @throws IllegalArgumentException on error
+	 */
+	public PluginVersion(int major, int minor) throws IllegalArgumentException {
+		this(major, minor, -1, null);
+	}
 
-    /**
-     * Construct a new PluginVersion.
-     * 
-     * @param major
-     *            major version
-     * @param minor
-     *            minor version
-     * @param micro
-     *            micro version
-     * @param other
-     *            other version
-     */
-    public PluginVersion(int major, int minor, int micro, String other) throws IllegalArgumentException {
-        this.major = major;
-        this.minor = minor;
-        this.micro = micro;
-        this.other = other;
-        checkVersionNumbers();
-    }
+	/**
+	 * Construct a new PluginVersion.
+	 * 
+	 * @param major major version
+	 * @param minor minor version
+	 * @param micro micro version
+	 * @throws IllegalArgumentException on error
+	 */
+	public PluginVersion(int major, int minor, int micro) throws IllegalArgumentException {
+		this(major, minor, micro, null);
+	}
 
-    /**
-     * Construct a new PluginVersion given a string. The string must be in the
-     * format <b>Version string must be in <code>format major[.minor[.
-     * micro[-other]]]</code></b>.
-     * 
-     * @param versionString version string
-     * @throws IllegalArgumentException
-     *             if version string is in incorrect format
-     */
-    public PluginVersion(String versionString) throws IllegalArgumentException {
-        String s = versionString;
-        int idx = s.lastIndexOf('-');
-        if (idx == -1) {
-            idx = s.lastIndexOf('_');
-        }
-        if (idx != -1) {
-            other = versionString.substring(idx + 1);
-            s = s.substring(0, idx);
-        }
-        StringTokenizer t = new StringTokenizer(s, ".");
-        if (t.countTokens() < 1 || t.countTokens() > 3)
-            throw new IllegalArgumentException("Version string '" + versionString
-                            + "' must be in format <major>[.<minor>[.<micro>[-<other>]]]");
-        try {
-            major = Integer.parseInt(t.nextToken());
-            if (t.hasMoreTokens())
-                minor = Integer.parseInt(t.nextToken());
-            else
-                minor = -1;
-            if (t.hasMoreTokens())
-                micro = Integer.parseInt(t.nextToken());
-            else
-                micro = -1;
-            checkVersionNumbers();
-        } catch (NumberFormatException nfe) {
-            throw new IllegalArgumentException("Version string '" + versionString
-                            + "' must be in format <major>.<minor>[.<micro>[-<other>]]");
-        }
-    }
+	/**
+	 * Construct a new PluginVersion.
+	 * 
+	 * @param major major version
+	 * @param minor minor version
+	 * @param micro micro version
+	 * @param other other version
+	 * @throws IllegalArgumentException on error
+	 */
+	public PluginVersion(int major, int minor, int micro, String other) throws IllegalArgumentException {
+		this.major = major;
+		this.minor = minor;
+		this.micro = micro;
+		this.other = other;
+		checkVersionNumbers();
+	}
 
-    private void checkVersionNumbers() throws IllegalArgumentException {
-        if (major > 1000 || major < -1)
-            throw new IllegalArgumentException("Major version number is out of range.");
-        if (minor > 1000 || minor < -1)
-            throw new IllegalArgumentException("Minor version number is out of range.");
-        if (micro > 1000 || micro < -1)
-            throw new IllegalArgumentException("Micro version number is out of range.");
-    }
+	/**
+	 * Construct a new PluginVersion given a string. The string must be in the
+	 * format <b>Version string must be in <code>format major[.minor[.
+	 * micro[-other]]]</code></b>.
+	 * 
+	 * @param versionString version string
+	 * @throws IllegalArgumentException if version string is in incorrect format
+	 */
+	public PluginVersion(String versionString) throws IllegalArgumentException {
+		String s = versionString;
+		int idx = s.lastIndexOf('-');
+		if (idx == -1) {
+			idx = s.lastIndexOf('_');
+		}
+		if (idx != -1) {
+			other = versionString.substring(idx + 1);
+			s = s.substring(0, idx);
+		}
+		StringTokenizer t = new StringTokenizer(s, ".");
+		if (t.countTokens() < 1 || t.countTokens() > 3)
+			throw new IllegalArgumentException(
+					"Version string '" + versionString + "' must be in format <major>[.<minor>[.<micro>[-<other>]]]");
+		try {
+			major = Integer.parseInt(t.nextToken());
+			if (t.hasMoreTokens())
+				minor = Integer.parseInt(t.nextToken());
+			else
+				minor = -1;
+			if (t.hasMoreTokens())
+				micro = Integer.parseInt(t.nextToken());
+			else
+				micro = -1;
+			checkVersionNumbers();
+		} catch (NumberFormatException nfe) {
+			throw new IllegalArgumentException(
+					"Version string '" + versionString + "' must be in format <major>.<minor>[.<micro>[-<other>]]");
+		}
+	}
 
-    /**
-     * Return the 'other' part of the version. Typically the phase such as
-     * alpha, beta etc
-     * 
-     * @return other version
-     */
-    public String getOther() {
-        return other;
-    }
+	/**
+	 * Compare two version
+	 * 
+	 * @param o version to compare this version against
+	 * @return comparison
+	 * @throws IllegalArgumentException if the two version cannot be compared
+	 */
+	@Override
+	public int compareTo(Object o) {
+		PluginVersion v2 = (PluginVersion) o;
+		if (getElementCount() < 4 && v2.getElementCount() < 4 && getElementCount() != v2.getElementCount())
+			throw new IllegalArgumentException(
+					"Version numbers " + toString() + " and " + o.toString() + " are incompatible and cannot be compared");
+		long l1 = getMajorVersion() * 10000000;
+		if (getMinorVersion() != -1)
+			l1 += getMinorVersion() * 10000;
+		if (getMicroVersion() != -1)
+			l1 += getMicroVersion();
+		long l2 = v2.getMajorVersion() * 10000000;
+		if (v2.getMinorVersion() != -1)
+			l2 += v2.getMinorVersion() * 10000;
+		if (v2.getMicroVersion() != -1)
+			l2 += v2.getMicroVersion();
+		int v = new Long(l1).compareTo(new Long(l2));
+		if (v == 0) {
+			boolean pre1 = getOther() != null && (getOther().startsWith("rc") || getOther().startsWith("beta")
+					|| getOther().startsWith("alpha") || getOther().startsWith("fcs"));
+			boolean pre2 = v2.getOther() != null && (v2.getOther().startsWith("rc") || v2.getOther().startsWith("beta")
+					|| v2.getOther().startsWith("alpha") || v2.getOther().startsWith("fcs"));
+			if (pre1 && !pre2) {
+				v = 1;
+			} else if (!pre1 && pre2) {
+				v = -1;
+			} else if (!pre1 && !pre2) {
+				if (getOther() != null && v2.getOther() == null)
+					v = -1;
+				else if (getOther() == null && v2.getOther() != null)
+					v = 1;
+				else if (getOther() == null && v2.getOther() == null)
+					v = 0;
+				else
+					v = getOther().compareTo(v2.getOther());
+			} else {
+				v = -(getOther().compareTo(v2.getOther()));
+			}
+		}
+		return v;
+	}
 
-    /**
-     * Return the full version string
-     * 
-     * @return version string
-     */
-    public String getVersionString() {
-        StringBuffer buf = new StringBuffer(String.valueOf(getMajorVersion()));
-        if (getMinorVersion() != -1) {
-            buf.append(".");
-            buf.append(String.valueOf(getMinorVersion()));
-        }
-        if (getMicroVersion() != -1) {
-            buf.append(".");
-            buf.append(String.valueOf(getMicroVersion()));
-        }
-        if (getOther() != null) {
-            buf.append("-");
-            buf.append(String.valueOf(getOther()));
-        }
-        return buf.toString();
-    }
+	/**
+	 * Return how many elements of the version string this version has. I.e, if
+	 * there is a major and minor but no micro or other, then this method will
+	 * return two. This metho is used to make sure two version strings are
+	 * compatible and can be compared
+	 * 
+	 * @return elements
+	 */
+	public int getElementCount() {
+		int i = 1;
+		if (getMinorVersion() != -1)
+			i++;
+		if (getMicroVersion() != -1)
+			i++;
+		if (getOther() != null)
+			i++;
+		return i;
+	}
 
-    /**
-     * Return the full version string
-     * 
-     * @return version string
-     */
-    public String toString() {
-        return getVersionString();
-    }
+	/**
+	 * Return the major version number
+	 * 
+	 * @return major version number
+	 */
+	public int getMajorVersion() {
+		return major;
+	}
 
-    /**
-     * Return the major version number
-     * 
-     * @return major version number
-     */
-    public int getMajorVersion() {
-        return major;
-    }
+	/**
+	 * Return the micro version number
+	 * 
+	 * @return micro version
+	 */
+	public int getMicroVersion() {
+		return micro;
+	}
 
-    /**
-     * Return the minor version number
-     * 
-     * @return minor version
-     */
-    public int getMinorVersion() {
-        return minor;
-    }
+	/**
+	 * Return the minor version number
+	 * 
+	 * @return minor version
+	 */
+	public int getMinorVersion() {
+		return minor;
+	}
 
-    /**
-     * Return the micro version number
-     * 
-     * @return micro version
-     */
-    public int getMicroVersion() {
-        return micro;
-    }
+	/**
+	 * Return the 'other' part of the version. Typically the phase such as
+	 * alpha, beta etc
+	 * 
+	 * @return other version
+	 */
+	public String getOther() {
+		return other;
+	}
 
-    /**
-     * Compare two version
-     * 
-     * @param version
-     *            version to compare this version against
-     * @return comparison
-     * @throws IllegalArgumentException
-     *             if the two version cannot be compared
-     */
-    public int compareTo(Object o) {
-        PluginVersion v2 = (PluginVersion) o;
-        if (getElementCount() < 4 && v2.getElementCount() < 4 && getElementCount() != v2.getElementCount())
-            throw new IllegalArgumentException("Version numbers " + toString() + " and " + o.toString()
-                            + " are incompatible and cannot be compared");
-        long l1 = getMajorVersion() * 10000000;
-        if (getMinorVersion() != -1)
-            l1 += getMinorVersion() * 10000;
-        if (getMicroVersion() != -1)
-            l1 += getMicroVersion();
-        long l2 = v2.getMajorVersion() * 10000000;
-        if (v2.getMinorVersion() != -1)
-            l2 += v2.getMinorVersion() * 10000;
-        if (v2.getMicroVersion() != -1)
-            l2 += v2.getMicroVersion();
+	/**
+	 * Return the full version string
+	 * 
+	 * @return version string
+	 */
+	public String getVersionString() {
+		StringBuffer buf = new StringBuffer(String.valueOf(getMajorVersion()));
+		if (getMinorVersion() != -1) {
+			buf.append(".");
+			buf.append(String.valueOf(getMinorVersion()));
+		}
+		if (getMicroVersion() != -1) {
+			buf.append(".");
+			buf.append(String.valueOf(getMicroVersion()));
+		}
+		if (getOther() != null) {
+			buf.append("-");
+			buf.append(String.valueOf(getOther()));
+		}
+		return buf.toString();
+	}
 
-        int v = new Long(l1).compareTo(new Long(l2));
-        if (v == 0) {
-            boolean pre1 = getOther() != null && ( getOther().startsWith("rc") || getOther().startsWith("beta") || getOther().startsWith("alpha")
-                            || getOther().startsWith("fcs") );
-            boolean pre2 = v2.getOther() != null && ( v2.getOther().startsWith("rc") || v2.getOther().startsWith("beta") 
-                            || v2.getOther().startsWith("alpha") || v2.getOther().startsWith("fcs") );
-           
-            if(pre1 && !pre2) {
-                v = 1;
-            }
-            else if(!pre1 && pre2) {
-                v = -1;
-            }
-            else if(!pre1 && !pre2) {
-                if (getOther() != null && v2.getOther() == null)
-                    v = -1;
-                else if (getOther() == null && v2.getOther() != null)
-                    v = 1;
-                else if (getOther() == null && v2.getOther() == null)
-                    v = 0;
-                else 
-                    v = getOther().compareTo(v2.getOther());
-            }
-            else {
-                v =  -(getOther().compareTo(v2.getOther()));
-            }
-        }
-        return v;
-    }
-
-    /**
-     * Return how many elements of the version string this version has. I.e, if
-     * there is a major and minor but no micro or other, then this method will
-     * return two. This metho is used to make sure two version strings are
-     * compatible and can be compared
-     */
-    public int getElementCount() {
-        int i = 1;
-        if (getMinorVersion() != -1)
-            i++;
-        if (getMicroVersion() != -1)
-            i++;
-        if (getOther() != null)
-            i++;
-        return i;
-    }
-
-    public static void main(String[] args) {
-
-    }
-
-    //	Private instance variables
-
-    private int major, minor, micro;
-    private String other;
+	/**
+	 * Return the full version string
+	 * 
+	 * @return version string
+	 */
+	@Override
+	public String toString() {
+		return getVersionString();
+	}
+	private void checkVersionNumbers() throws IllegalArgumentException {
+		if (major > 1000 || major < -1)
+			throw new IllegalArgumentException("Major version number is out of range.");
+		if (minor > 1000 || minor < -1)
+			throw new IllegalArgumentException("Minor version number is out of range.");
+		if (micro > 1000 || micro < -1)
+			throw new IllegalArgumentException("Micro version number is out of range.");
+	}
 }

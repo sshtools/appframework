@@ -15,12 +15,12 @@ import javax.swing.table.TableColumnModel;
 
 public class SortableHeaderRenderer extends JLabel implements TableCellRenderer {
 	private Border border;
-	private boolean showSortIcons;
-	private int[] sorts;
-	private Icon upSortIcon;
 	private Icon downSortIcon;
 	private Dimension lastSize;
 	private TableColumnModel model;
+	private boolean showSortIcons;
+	private int[] sorts;
+	private Icon upSortIcon;
 
 	/**
 	 * Constructor.
@@ -45,21 +45,17 @@ public class SortableHeaderRenderer extends JLabel implements TableCellRenderer 
 		setCriteria(sortCriteria);
 	}
 
-	/**
-	 * Set criteria.
-	 * 
-	 * @param criteria criteria
-	 */
-	public void setCriteria(SortCriteria criteria) {
-		sorts = new int[criteria == null ? 0 : model.getColumnCount()];
-		if (sorts.length > 0) {
-			sorts[criteria.getSortType()] = criteria.getSortDirection();
-		}
+	public void clearSort(int col) {
+		sorts[col] = SortCriteria.NO_SORT;
 	}
 
 	@Override
 	public Dimension getMinimumSize() {
 		return new Dimension(1, 1);
+	}
+
+	public int getSort(int i) {
+		return sorts[i];
 	}
 
 	@Override
@@ -84,21 +80,8 @@ public class SortableHeaderRenderer extends JLabel implements TableCellRenderer 
 		return this;
 	}
 
-	public void setShowSortIcons(boolean showSortIcons) {
-		this.showSortIcons = showSortIcons;
-	}
-
-	public void clearSort(int col) {
-		sorts[col] = SortCriteria.NO_SORT;
-	}
-
 	public boolean isShowSortIcons() {
 		return showSortIcons;
-	}
-
-	public int reverseSort(int col) {
-		return sorts[col] = ((sorts[col] == SortCriteria.SORT_ASCENDING) ? SortCriteria.SORT_DESCENDING
-				: SortCriteria.SORT_ASCENDING);
 	}
 
 	public int nextSort(int col) {
@@ -106,11 +89,28 @@ public class SortableHeaderRenderer extends JLabel implements TableCellRenderer 
 				: ((sorts[col] == SortCriteria.SORT_DESCENDING) ? SortCriteria.NO_SORT : SortCriteria.SORT_ASCENDING));
 	}
 
-	public void setSort(int col, int sortType) {
-		sorts[col] = sortType;
+	public int reverseSort(int col) {
+		return sorts[col] = ((sorts[col] == SortCriteria.SORT_ASCENDING) ? SortCriteria.SORT_DESCENDING
+				: SortCriteria.SORT_ASCENDING);
 	}
 
-	public int getSort(int i) {
-		return sorts[i];
+	/**
+	 * Set criteria.
+	 * 
+	 * @param criteria criteria
+	 */
+	public void setCriteria(SortCriteria criteria) {
+		sorts = new int[criteria == null ? 0 : model.getColumnCount()];
+		if (sorts.length > 0) {
+			sorts[criteria.getSortType()] = criteria.getSortDirection();
+		}
+	}
+
+	public void setShowSortIcons(boolean showSortIcons) {
+		this.showSortIcons = showSortIcons;
+	}
+
+	public void setSort(int col, int sortType) {
+		sorts[col] = sortType;
 	}
 }

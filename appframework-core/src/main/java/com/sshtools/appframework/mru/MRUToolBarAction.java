@@ -8,6 +8,7 @@ import java.awt.event.FocusListener;
 import java.io.File;
 
 import javax.swing.AbstractButton;
+import javax.swing.Action;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
@@ -22,14 +23,14 @@ public abstract class MRUToolBarAction extends AppAction implements
 		FocusListener {
 
 	private MRUPopupMenu menu;
-	private Component oppositeComponent;
 	private MRUListModel model;
+	private Component oppositeComponent;
 
 	public MRUToolBarAction(boolean onToolBar, MRUListModel model) {
 		this.model = model;
-		putValue(AppAction.NAME, Messages.getString("MRUToolBarAction.Name"));
+		putValue(Action.NAME, Messages.getString("MRUToolBarAction.Name"));
 		putValue(
-				AppAction.SMALL_ICON,
+				Action.SMALL_ICON,
 				new ArrowIcon(SwingConstants.SOUTH, UIManager
 						.getColor("controlShadow"), UIManager
 						.getColor("Button.foreground"), UIManager
@@ -40,12 +41,12 @@ public abstract class MRUToolBarAction extends AppAction implements
 						.getColor("controlShadow"), UIManager
 						.getColor("Button.foreground"), UIManager
 						.getColor("controlLtHighlight")));
-		putValue(AppAction.SHORT_DESCRIPTION,
+		putValue(Action.SHORT_DESCRIPTION,
 				Messages.getString("MRUToolBarAction.ShortDesc"));
-		putValue(AppAction.LONG_DESCRIPTION,
+		putValue(Action.LONG_DESCRIPTION,
 				Messages.getString("MRUToolBarAction.LongDesc"));
-		putValue(AppAction.MNEMONIC_KEY, new Integer('r'));
-		putValue(AppAction.ACTION_COMMAND_KEY, "recent");
+		putValue(Action.MNEMONIC_KEY, new Integer('r'));
+		putValue(Action.ACTION_COMMAND_KEY, "recent");
 		putValue(AppAction.ON_MENUBAR, Boolean.FALSE);
 		putValue(AppAction.TEXT_ON_TOOLBAR, Boolean.FALSE);
 		if (onToolBar) {
@@ -56,13 +57,16 @@ public abstract class MRUToolBarAction extends AppAction implements
 		menu = createPopupMenu(model);
 		menu.addPopupMenuListener(new PopupMenuListener() {
 
+			@Override
 			public void popupMenuCanceled(PopupMenuEvent e) {
 			}
 
+			@Override
 			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
 				putValue(AppAction.IS_SELECTED, Boolean.FALSE);
 			}
 
+			@Override
 			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
 			}
 
@@ -72,20 +76,7 @@ public abstract class MRUToolBarAction extends AppAction implements
 		putValue(AppAction.IS_TOGGLE_BUTTON, Boolean.TRUE);
 	}
 
-	protected MRUPopupMenu createPopupMenu(MRUListModel model) {
-		return new MRUPopupMenu(model, new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				mruSelected(new File(evt.getActionCommand()));
-			}
-		});
-	}
-
-	protected MRUMenu createMenu(MRUListModel model) {
-		return new MRUMenu(this, model);
-	}
-
-	public abstract void mruSelected(File file);
-
+	@Override
 	public void actionPerformed(ActionEvent evt) {
 		if (evt.getSource() instanceof AbstractButton) {
 			AbstractButton button = (AbstractButton) evt.getSource();
@@ -100,10 +91,27 @@ public abstract class MRUToolBarAction extends AppAction implements
 		}
 	}
 
+	@Override
 	public void focusGained(FocusEvent e) {
 		oppositeComponent = e.getOppositeComponent();
 	}
 
+	@Override
 	public void focusLost(FocusEvent e) {
+	}
+
+	public abstract void mruSelected(File file);
+
+	protected MRUMenu createMenu(MRUListModel model) {
+		return new MRUMenu(this, model);
+	}
+
+	protected MRUPopupMenu createPopupMenu(MRUListModel model) {
+		return new MRUPopupMenu(model, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent evt) {
+				mruSelected(new File(evt.getActionCommand()));
+			}
+		});
 	}
 }

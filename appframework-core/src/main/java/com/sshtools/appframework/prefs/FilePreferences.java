@@ -23,9 +23,9 @@ public class FilePreferences extends AbstractPreferences {
 	private static final Logger log = Logger.getLogger(FilePreferences.class
 			.getName());
 
-	private Map<String, String> root;
 	private Map<String, FilePreferences> children;
 	private boolean isRemoved = false;
+	private Map<String, String> root;
 
 	public FilePreferences(AbstractPreferences parent, String name) {
 		super(parent, name);
@@ -43,41 +43,12 @@ public class FilePreferences extends AbstractPreferences {
 		}
 	}
 
-	protected void putSpi(String key, String value) {
-		root.put(key, value);
-		try {
-			flush();
-		} catch (BackingStoreException e) {
-			log.log(Level.SEVERE, "Unable to flush after putting " + key, e);
-		}
-	}
-
-	protected String getSpi(String key) {
-		return root.get(key);
-	}
-
-	protected void removeSpi(String key) {
-		root.remove(key);
-		try {
-			flush();
-		} catch (BackingStoreException e) {
-			log.log(Level.SEVERE, "Unable to flush after removing " + key, e);
-		}
-	}
-
-	protected void removeNodeSpi() throws BackingStoreException {
-		isRemoved = true;
-		flush();
-	}
-
-	protected String[] keysSpi() throws BackingStoreException {
-		return root.keySet().toArray(new String[root.keySet().size()]);
-	}
-
+	@Override
 	protected String[] childrenNamesSpi() throws BackingStoreException {
 		return children.keySet().toArray(new String[children.keySet().size()]);
 	}
 
+	@Override
 	protected FilePreferences childSpi(String name) {
 		FilePreferences child = children.get(name);
 		if (child == null || child.isRemoved()) {
@@ -87,50 +58,7 @@ public class FilePreferences extends AbstractPreferences {
 		return child;
 	}
 
-	protected void syncSpi() throws BackingStoreException {
-		if (isRemoved())
-			return;
-
-		final File file = FilePreferencesFactory.getPreferencesFile();
-
-		if (!file.exists())
-			return;
-
-		synchronized (file) {
-			Properties p = new Properties();
-			try {
-				p.load(new FileInputStream(file));
-
-				StringBuilder sb = new StringBuilder();
-				getPath(sb);
-				String path = sb.toString();
-
-				final Enumeration<?> pnen = p.propertyNames();
-				while (pnen.hasMoreElements()) {
-					String propKey = (String) pnen.nextElement();
-					if (propKey.startsWith(path)) {
-						String subKey = propKey.substring(path.length());
-						// Only load immediate descendants
-						if (subKey.indexOf('.') == -1) {
-							root.put(subKey, p.getProperty(propKey));
-						}
-					}
-				}
-			} catch (IOException e) {
-				throw new BackingStoreException(e);
-			}
-		}
-	}
-
-	private void getPath(StringBuilder sb) {
-		final FilePreferences parent = (FilePreferences) parent();
-		if (parent == null)
-			return;
-
-		parent.getPath(sb);
-		sb.append(name()).append('.');
-	}
-
+	@Override
 	protected void flushSpi() throws BackingStoreException {
 		final File file = FilePreferencesFactory.getPreferencesFile();
 
@@ -179,5 +107,86 @@ public class FilePreferences extends AbstractPreferences {
 				throw new BackingStoreException(e);
 			}
 		}
+	}
+
+	@Override
+	protected String getSpi(String key) {
+		return root.get(key);
+	}
+
+	@Override
+	protected String[] keysSpi() throws BackingStoreException {
+		return root.keySet().toArray(new String[root.keySet().size()]);
+	}
+
+	@Override
+	protected void putSpi(String key, String value) {
+		root.put(key, value);
+		try {
+			flush();
+		} catch (BackingStoreException e) {
+			log.log(Level.SEVERE, "Unable to flush after putting " + key, e);
+		}
+	}
+
+	@Override
+	protected void removeNodeSpi() throws BackingStoreException {
+		isRemoved = true;
+		flush();
+	}
+
+	@Override
+	protected void removeSpi(String key) {
+		root.remove(key);
+		try {
+			flush();
+		} catch (BackingStoreException e) {
+			log.log(Level.SEVERE, "Unable to flush after removing " + key, e);
+		}
+	}
+
+	@Override
+	protected void syncSpi() throws BackingStoreException {
+		if (isRemoved())
+			return;
+
+		final File file = FilePreferencesFactory.getPreferencesFile();
+
+		if (!file.exists())
+			return;
+
+		synchronized (file) {
+			Properties p = new Properties();
+			try {
+				p.load(new FileInputStream(file));
+
+				StringBuilder sb = new StringBuilder();
+				getPath(sb);
+				String path = sb.toString();
+
+				final Enumeration<?> pnen = p.propertyNames();
+				while (pnen.hasMoreElements()) {
+					String propKey = (String) pnen.nextElement();
+					if (propKey.startsWith(path)) {
+						String subKey = propKey.substring(path.length());
+						// Only load immediate descendants
+						if (subKey.indexOf('.') == -1) {
+							root.put(subKey, p.getProperty(propKey));
+						}
+					}
+				}
+			} catch (IOException e) {
+				throw new BackingStoreException(e);
+			}
+		}
+	}
+
+	private void getPath(StringBuilder sb) {
+		final FilePreferences parent = (FilePreferences) parent();
+		if (parent == null)
+			return;
+
+		parent.getPath(sb);
+		sb.append(name()).append('.');
 	}
 }

@@ -49,7 +49,7 @@ import java.util.EventObject;
 public class FileEvent extends EventObject {
 
 	public enum FileEventType {
-		CREATED, MODIFIED, DELETED
+		CREATED, DELETED, MODIFIED
 	}
 
 	private File file;
@@ -74,10 +74,6 @@ public class FileEvent extends EventObject {
 		return type;
 	}
 
-	public void setWhen(long aWhen) {
-		when = aWhen;
-	}
-
 	/**
 	 * Returns the timestamp in milliseconds of when this event occurred. By default is the time when the current event was created, but
 	 * you can also change it with {@link #setWhen(long)}.
@@ -86,6 +82,10 @@ public class FileEvent extends EventObject {
 	 */
 	public long getWhen() {
 		return when;
+	}
+
+	public void setWhen(long aWhen) {
+		when = aWhen;
 	}
 
 }

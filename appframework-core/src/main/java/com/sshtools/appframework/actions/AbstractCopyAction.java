@@ -2,6 +2,7 @@
 
 package com.sshtools.appframework.actions;
 
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -18,7 +19,7 @@ public abstract class AbstractCopyAction extends AbstractAppAction {
 		putValue(SMALL_ICON, loadIcon("edit-copy", 16));
 		putValue(MEDIUM_ICON, loadIcon("edit-copy", 24));
 		putValue(ACCELERATOR_KEY,
-				KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_MASK));
+				KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
 		putValue(SHORT_DESCRIPTION,
 				Messages.getString("AbstractCopyAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION,

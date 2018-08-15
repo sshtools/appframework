@@ -20,7 +20,7 @@ public class MRUListModel extends AbstractListModel {
 			mru.add(0, f);
 
 		for (int i = mru.size() - 1; i >= 1; i--) {
-			if (((File) mru.get(i)).equals(f)) {
+			if (mru.get(i).equals(f)) {
 				mru.remove(i);
 			}
 		}
@@ -33,10 +33,16 @@ public class MRUListModel extends AbstractListModel {
 
 	}
 
+	@Override
 	public Object getElementAt(int i) {
 		return mru.get(i);
 	}
 
+	public MRUList getMRUList() {
+		return mru;
+	}
+
+	@Override
 	public int getSize() {
 		return (mru == null) ? 0 : mru.size();
 	}
@@ -44,10 +50,6 @@ public class MRUListModel extends AbstractListModel {
 	public void setMRUList(MRUList mru) {
 		this.mru = mru;
 		fireContentsChanged(this, 0, getSize());
-	}
-
-	public MRUList getMRUList() {
-		return mru;
 	}
 
 }

@@ -11,13 +11,19 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 public class ArrowIcon implements Icon, SwingConstants {
-	private Color shadow;
-
 	private Color darkShadow;
+
+	private int direction;
 
 	private Color highlight;
 
-	private int direction;
+	private Color shadow;
+
+	public ArrowIcon(int direction) {
+		this(direction, UIManager.getColor("controlDkShadow"), UIManager
+				.getColor("controlText"), UIManager
+				.getColor("controlLtHighlight"));
+	}
 
 	public ArrowIcon(int direction, Color shadow, Color darkShadow,
 			Color highlight) {
@@ -27,28 +33,21 @@ public class ArrowIcon implements Icon, SwingConstants {
 		setDirection(direction);
 	}
 
-	public ArrowIcon(int direction) {
-		this(direction, UIManager.getColor("controlDkShadow"), UIManager
-				.getColor("controlText"), UIManager
-				.getColor("controlLtHighlight"));
-	}
-
-	public int getIconHeight() {
-		return 16;
-	}
-
-	public int getIconWidth() {
-		return 16;
-	}
-
 	public int getDirection() {
 		return direction;
 	}
 
-	public void setDirection(int dir) {
-		direction = dir;
+	@Override
+	public int getIconHeight() {
+		return 16;
 	}
 
+	@Override
+	public int getIconWidth() {
+		return 16;
+	}
+
+	@Override
 	public void paintIcon(Component c, Graphics g, int x, int y) {
 		int h = getIconHeight();
 		int w = getIconWidth();
@@ -126,5 +125,9 @@ public class ArrowIcon implements Icon, SwingConstants {
 		}
 		g.translate(-x, -y);
 		g.setColor(oldColor);
+	}
+
+	public void setDirection(int dir) {
+		direction = dir;
 	}
 }

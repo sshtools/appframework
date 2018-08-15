@@ -18,29 +18,11 @@ import java.util.prefs.PreferencesFactory;
  * @version $Id: FilePreferencesFactory.java 282 2009-06-18 17:05:18Z david $
  */
 public class FilePreferencesFactory implements PreferencesFactory {
-	private static final Logger log = Logger
-			.getLogger(FilePreferencesFactory.class.getName());
-
-	Preferences rootPreferences;
 	public static final String SYSTEM_PROPERTY_FILE = "com.sshtools.appframework.prefs.FilePreferencesFactory.file";
 
-	public Preferences systemRoot() {
-		return userRoot();
-	}
-
-	public Preferences userRoot() {
-		if (rootPreferences == null) {
-			log.finer("Instantiating root preferences");
-			rootPreferences = new FilePreferences(null, "");
-		}
-		return rootPreferences;
-	}
-
+	private static final Logger log = Logger
+			.getLogger(FilePreferencesFactory.class.getName());
 	private static File preferencesFile;
-
-	public static void setPreferencesFile(File file) {
-		preferencesFile = file;
-	}
 
 	public static File getPreferencesFile() {
 		if (preferencesFile == null) {
@@ -53,5 +35,25 @@ public class FilePreferencesFactory implements PreferencesFactory {
 			log.finer("Preferences file is " + preferencesFile);
 		}
 		return preferencesFile;
+	}
+
+	public static void setPreferencesFile(File file) {
+		preferencesFile = file;
+	}
+
+	Preferences rootPreferences;
+
+	@Override
+	public Preferences systemRoot() {
+		return userRoot();
+	}
+
+	@Override
+	public Preferences userRoot() {
+		if (rootPreferences == null) {
+			log.finer("Instantiating root preferences");
+			rootPreferences = new FilePreferences(null, "");
+		}
+		return rootPreferences;
 	}
 }

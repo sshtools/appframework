@@ -33,10 +33,10 @@ import javax.swing.ListCellRenderer;
  */
 public class PathAutoCompleter extends Autocompleter {
 
-	private String currentPath;
-	private boolean showHidden = false;
-	private int fileSelectionMode = JFileChooser.FILES_AND_DIRECTORIES;
 	private javax.swing.filechooser.FileFilter currentFilter;
+	private String currentPath;
+	private int fileSelectionMode = JFileChooser.FILES_AND_DIRECTORIES;
+	private boolean showHidden = false;
 
 	public PathAutoCompleter(JTextField comp) {
 		super(comp);
@@ -47,12 +47,20 @@ public class PathAutoCompleter extends Autocompleter {
 		return currentPath;
 	}
 
+	public void setCurrentFilter(javax.swing.filechooser.FileFilter currentFilter) {
+		this.currentFilter = currentFilter;
+	}
+
+	public void setCurrentPath(String currentPath) {
+		this.currentPath = currentPath;
+	}
+
 	/**
 	 * Sets the auto completion to allow the user to justselect files, just
 	 * select directories, or select both files and directories. The default is
 	 * <code>JFileChooser.FILES_ONLY</code>.
 	 * 
-	 * @param mode
+	 * @param fileSelectionMode
 	 *            the type of files to be displayed:
 	 *            <ul>
 	 *            <li>JFileChooser.FILES_ONLY</li>
@@ -70,10 +78,6 @@ public class PathAutoCompleter extends Autocompleter {
 		this.fileSelectionMode = fileSelectionMode;
 	}
 
-	public void setCurrentFilter(javax.swing.filechooser.FileFilter currentFilter) {
-		this.currentFilter = currentFilter;
-	}
-
 	/**
 	 * Show hidden files?
 	 * 
@@ -83,8 +87,23 @@ public class PathAutoCompleter extends Autocompleter {
 		this.showHidden = showHidden;
 	}
 
-	public void setCurrentPath(String currentPath) {
-		this.currentPath = currentPath;
+	@Override
+	protected ListCellRenderer getCellRenderer() {
+		return new DefaultListCellRenderer() {
+			@Override
+			public Component getListCellRendererComponent(JList list, Object value,
+					int index, boolean isSelected, boolean cellHasFocus) {
+				super.getListCellRendererComponent(list, value, index, isSelected,
+						cellHasFocus);
+
+				String suggestion = (String) value;
+				int lastIndexOf = suggestion.lastIndexOf(File.separatorChar);
+				if (lastIndexOf < suggestion.length() - 1) {
+					setText(suggestion.substring(lastIndexOf + 1));
+				}
+				return this;
+			}
+		};
 	}
 
 	@Override
@@ -146,25 +165,6 @@ public class PathAutoCompleter extends Autocompleter {
 
 	private boolean isAbsolute(String value) {
 		return new File(value).isAbsolute();
-	}
-
-	@Override
-	protected ListCellRenderer getCellRenderer() {
-		return new DefaultListCellRenderer() {
-			@Override
-			public Component getListCellRendererComponent(JList list, Object value,
-					int index, boolean isSelected, boolean cellHasFocus) {
-				super.getListCellRendererComponent(list, value, index, isSelected,
-						cellHasFocus);
-
-				String suggestion = (String) value;
-				int lastIndexOf = suggestion.lastIndexOf(File.separatorChar);
-				if (lastIndexOf < suggestion.length() - 1) {
-					setText(suggestion.substring(lastIndexOf + 1));
-				}
-				return this;
-			}
-		};
 	}
 
 }

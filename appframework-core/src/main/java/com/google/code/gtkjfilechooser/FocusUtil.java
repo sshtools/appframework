@@ -46,20 +46,21 @@ import javax.swing.KeyStroke;
  */
 public class FocusUtil {
 
-	static public void setNextFocusable(JComponent component, final JComponent nextFocusable) {
-		component.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), "setNextFocusable");
-		component.getActionMap().put("setNextFocusable", new AbstractAction() {
-			public void actionPerformed(ActionEvent e) {
-				nextFocusable.requestFocusInWindow();
-			}
-		});
-	}
-
 	static public void setFocusOrder(JComponent... components) {
 		for (int i = 0; i < components.length - 1; i++) {
 			setNextFocusable(components[i], components[i+1]);			
 		}
 		setNextFocusable(components[components.length - 1], components[0]);			
+	}
+
+	static public void setNextFocusable(JComponent component, final JComponent nextFocusable) {
+		component.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), "setNextFocusable");
+		component.getActionMap().put("setNextFocusable", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				nextFocusable.requestFocusInWindow();
+			}
+		});
 	}
 
 }

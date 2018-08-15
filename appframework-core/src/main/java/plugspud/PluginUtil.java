@@ -55,12 +55,6 @@ import java.io.OutputStream;
 public class PluginUtil
 {
 	/**
-	 * Prevent instantiation
-	 */
-	private PluginUtil() {
-	}
-
-	/**
 	 * Close an input stream and don't worry about any exceptions, but return
 	 * true or false instead. If <code>null</code> is supplied as they stream
 	 * then it is just ignored
@@ -81,7 +75,7 @@ public class PluginUtil
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Close an output stream and don't worry about any exceptions, but return
 	 * true or false instead. If <code>null</code> is supplied as they stream
@@ -103,6 +97,7 @@ public class PluginUtil
 			return false;
 		}
 	}
+	
 	/**
 	 * Copy the input from one stream to the output of another until EOF. It
 	 * is up to the invoker to close the streams.
@@ -117,7 +112,6 @@ public class PluginUtil
 	{
 		copyStreams(in, out, buf, -1);
 	}
-
 	/**
 	 * Copy the input from one stream to the output of another for a number of
 	 * bytes (-1 means until EOF)
@@ -126,6 +120,7 @@ public class PluginUtil
 	 * @param out output stream
 	 * @param buf buffer size (-1 means don't buffer)
 	 * @param bytes bytes to copy
+	 * @throws IOException on I/O error
 	 */
 	public static void copyStreams(InputStream in, OutputStream out, int buf, long bytes)
 		throws IOException
@@ -151,5 +146,11 @@ public class PluginUtil
 			bout.write(b, 0, a);
 		}
 		bout.flush();
+	}
+
+	/**
+	 * Prevent instantiation
+	 */
+	private PluginUtil() {
 	}
 }
