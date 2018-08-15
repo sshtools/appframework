@@ -20,19 +20,14 @@ import nanoxml.XMLElement;
  * @author $Author: brett $
  */
 public interface SchemeOptions {
-
 	/** Standard connection - just connect directly to the host */
 	public static final int USE_STANDARD_SOCKET = 1;
-
 	/** Connect to the host through a HTTP proxy */
 	public static final int USE_HTTP_PROXY = 2;
-
 	/** Connect to the host using a SOCKS 4 proxy */
 	public static final int USE_SOCKS4_PROXY = 3;
-
 	/** Connect to the host using a SOCKS 5 proxy */
 	public static final int USE_SOCKS5_PROXY = 4;
-
 	/** Connect to the host using an SSL-Explorer proxy **/
 	public static final int USE_SSL_EXPLORER_PROXY = 5;
 
@@ -41,10 +36,8 @@ public interface SchemeOptions {
 	 * a new profile. If <code>null</code> is provided as the element, default
 	 * options will be set.
 	 * 
-	 * @param element
-	 *            SchemeOptions element
-	 * @throws ProfileException
-	 *             if any data provided by the element is invalid
+	 * @param element SchemeOptions element
+	 * @throws ProfileException if any data provided by the element is invalid
 	 */
 	public void init(XMLElement element) throws ProfileException;
 
@@ -68,7 +61,7 @@ public interface SchemeOptions {
 	 * The type of transport to communicate over. This will be one of the proxy
 	 * settings defined on this interface
 	 * 
-	 * @return
+	 * @return transport code
 	 */
 	public int getTransportProvider();
 
@@ -76,6 +69,7 @@ public interface SchemeOptions {
 	 * Clone these scheme options.
 	 * 
 	 * @return cloned scheme options
+	 * @throws CloneNotSupportedException
 	 */
 	public Object clone() throws CloneNotSupportedException;
 

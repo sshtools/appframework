@@ -6,7 +6,6 @@ package com.sshtools.profile;
  * {@link ResourceProfile}.
  */
 public class ProfileException extends Exception {
-
 	private static final long serialVersionUID = 1320347127357230845L;
 
 	/**
@@ -19,8 +18,7 @@ public class ProfileException extends Exception {
 	/**
 	 * Construct a new ProfileException with a message.
 	 *
-	 * @param message
-	 *            message
+	 * @param message message
 	 */
 	public ProfileException(String message) {
 		super(message);
@@ -29,10 +27,8 @@ public class ProfileException extends Exception {
 	/**
 	 * Construct a new ProfileException with a message.
 	 *
-	 * @param message
-	 *            message
-	 * @param cause
-	 *            cause
+	 * @param message message
+	 * @param cause cause
 	 */
 	public ProfileException(String message, Throwable cause) {
 		super(message);
@@ -42,8 +38,7 @@ public class ProfileException extends Exception {
 	/**
 	 * Construct a new ProfileException with an underlying cause.
 	 *
-	 * @param cause
-	 *            cause
+	 * @param cause cause
 	 */
 	public ProfileException(Throwable cause) {
 		super();
@@ -54,6 +49,7 @@ public class ProfileException extends Exception {
 		initCause(cause);
 	}
 
+	@Override
 	public Throwable getCause() {
 		return super.getCause();
 	}

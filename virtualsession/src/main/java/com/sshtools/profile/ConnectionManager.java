@@ -11,9 +11,7 @@ import java.util.List;
  * </p>
  */
 public class ConnectionManager {
-
 	private static ConnectionManager instance;
-
 	// Private instance variables
 	private List<SchemeHandler<? extends ProfileTransport<?>>> handlers;
 
@@ -37,8 +35,7 @@ public class ConnectionManager {
 	/**
 	 * Return the SchemeHandler at the specified index.
 	 * 
-	 * @param idx
-	 *            indenx
+	 * @param idx indenx
 	 * @return SchemeHandler
 	 */
 	public SchemeHandler<? extends ProfileTransport<?>> getSchemeHandler(int idx) {
@@ -48,14 +45,13 @@ public class ConnectionManager {
 	/**
 	 * Register a SchemeHandler.
 	 * 
-	 * @param schemeHandler
-	 *            SchemeHandler
+	 * @param schemeHandler SchemeHandler
 	 */
 	public void registerSchemeHandler(SchemeHandler<? extends ProfileTransport<?>> schemeHandler) {
 		SchemeHandler<? extends ProfileTransport<?>> currentHandler = getSchemeHandler(schemeHandler.getName());
 		if (currentHandler != null) {
-			throw new IllegalArgumentException("Scheme handler for " + schemeHandler.getName()
-					+ " is already regisered (" + currentHandler.getClass() + ")");
+			throw new IllegalArgumentException(
+					"Scheme handler for " + schemeHandler.getName() + " is already regisered (" + currentHandler.getClass() + ")");
 		}
 		handlers.add(schemeHandler);
 	}
@@ -75,8 +71,7 @@ public class ConnectionManager {
 	/**
 	 * Get a SchemeHandler given the scheme name
 	 * 
-	 * @param name
-	 *            scheme name,
+	 * @param name scheme name,
 	 * @return SchemeHandler
 	 */
 	public SchemeHandler<? extends ProfileTransport<?>> getSchemeHandler(String name) {

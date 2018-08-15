@@ -7,15 +7,14 @@ import java.io.IOException;
  * ProfileTransport implementations are responsible for creating and maintaing a
  * connection to a resource. The resource {@link URI} is determined from the
  * {@link ResourceProfile} provided when <code>connect()</code> is called.
+ * 
+ * @param <S>
  */
-
 public interface ProfileTransport<S> {
-
 	/**
 	 * The session this transport will be used with.
 	 *
-	 * @param session
-	 *            the session this transport is attached to
+	 * @param session the session this transport is attached to
 	 */
 	void init(S session);
 
@@ -31,24 +30,20 @@ public interface ProfileTransport<S> {
 	 * {@link ResourceProfile}. The URI will supply such details as host, user
 	 * etc. Any protocol specific authentication will also be performed.
 	 *
-	 * @param profile
-	 *            profile
-	 * @param parentUIComponent
-	 *            TODO
+	 * @param profile profile
+	 * @param parentUIComponent TODO
 	 * @return <code>true</code> if connected OK
-	 * @throws ProfileException
-	 *             on any connection error
-	 * @throws AuthenticationException
-	 *             if authentication fails
+	 * @throws ProfileException on any connection error
+	 * @throws AuthenticationException if authentication fails
 	 */
-	boolean connect(ResourceProfile<? extends ProfileTransport<S>> profile, Object parentUIComponent) throws ProfileException, AuthenticationException;
+	boolean connect(ResourceProfile<? extends ProfileTransport<S>> profile, Object parentUIComponent)
+			throws ProfileException, AuthenticationException;
 
 	/**
 	 * Disconnect from the currently connected resource. If a connection is not
 	 * currently being maintained, an <code>IOException</code> will be thrown.
 	 *
-	 * @throws IOException
-	 *             on any disconnection error
+	 * @throws IOException on any disconnection error
 	 */
 	void disconnect() throws IOException;
 
@@ -72,7 +67,7 @@ public interface ProfileTransport<S> {
 	 * transport, its purpose is to allow additional features such as SFTP to be
 	 * implemented in the terminal.
 	 * 
-	 * @return
+	 * @return provider
 	 */
 	Object getProvider();
 
@@ -135,15 +130,11 @@ public interface ProfileTransport<S> {
 	 * Clone the current session. The current connection should be cloned and a
 	 * new instance of the appropriate transport will be returned.
 	 *
-	 * @param session
-	 *            the session that is going to manage this newly cloned
+	 * @param session the session that is going to manage this newly cloned
 	 *            connection
 	 * @return the cloned connection
-	 * @throws CloneNotSupportedException
-	 *             if cloning cannot take place
-	 * @throws ProfileException
-	 *             on any errors that may occur during cloning.
+	 * @throws CloneNotSupportedException if cloning cannot take place
+	 * @throws ProfileException on any errors that may occur during cloning.
 	 */
 	ProfileTransport<S> cloneTransport(S session) throws CloneNotSupportedException, ProfileException;
-
 }

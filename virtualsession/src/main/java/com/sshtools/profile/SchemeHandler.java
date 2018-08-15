@@ -7,7 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * A scheme handler is responsible from creating {@link SchemeOptions} and
+ * {@link ProfileTransport}s.
  * 
+ * @param <T> the type of transport this handler is for
  */
 public abstract class SchemeHandler<T extends ProfileTransport<?>> {
 	private String name;
@@ -50,7 +53,12 @@ public abstract class SchemeHandler<T extends ProfileTransport<?>> {
 	/**
 	 * Create the {@link ProfileTransport} appropriate for this scheme
 	 * 
+	 * @param profile
+	 * 
 	 * @return profile transport
+	 * @throws ProfileException on profile error
+	 * @throws IOException on I/O error
+	 * @throws AuthenticationException on authentication error
 	 */
 	public abstract T createProfileTransport(ResourceProfile<T> profile)
 			throws ProfileException, IOException, AuthenticationException;

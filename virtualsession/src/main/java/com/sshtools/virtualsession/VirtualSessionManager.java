@@ -10,10 +10,11 @@ import com.sshtools.profile.URI;
  * implemented by a panel with an embedded tab component that displays each
  * session in an individual tab or a panel containing left sided view of all the
  * available sessions in a tree and a right handed view of the selected session.
+ * 
+ * @param <S> type of session
  *
  */
-public interface VirtualSessionManager<S extends VirtualSession<? extends ProfileTransport<?>,? extends VirtualSessionManager<?>>> {
-
+public interface VirtualSessionManager<S extends VirtualSession<? extends ProfileTransport<?>, ? extends VirtualSessionManager<?>>> {
 	/**
 	 * Add a new VirtualSession to this manager.
 	 *

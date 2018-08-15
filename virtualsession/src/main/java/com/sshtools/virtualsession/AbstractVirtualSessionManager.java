@@ -7,12 +7,22 @@ import java.util.List;
 import com.sshtools.profile.ProfileTransport;
 import com.sshtools.profile.URI;
 
-public abstract class AbstractVirtualSessionManager<S extends VirtualSession<? extends ProfileTransport<S>,AbstractVirtualSessionManager<S>>> implements VirtualSessionManager<S> {
+/**
+ * Abstract implementation of a {@link VirtualSessionManager} that provides
+ * basic support for listeners and a list of sessions.
+ *
+ * @param <S> type of virtual session
+ */
+public abstract class AbstractVirtualSessionManager<S extends VirtualSession<? extends ProfileTransport<S>, AbstractVirtualSessionManager<S>>>
+		implements VirtualSessionManager<S> {
 	private S lastSel = null;
 	private List<VirtualSessionManagerListener> listenerList = new ArrayList<VirtualSessionManagerListener>();
 	private VirtualSessionListener terminalListener;
 	protected List<S> virtualSessions = new ArrayList<S>();
 
+	/**
+	 * Constructor.
+	 */
 	public AbstractVirtualSessionManager() {
 		terminalListener = new VirtualSessionAdapter() {
 			@SuppressWarnings("unchecked")

@@ -13,11 +13,10 @@ import com.sshtools.profile.ResourceProfile;
  * {@link VirtualSessionManager} implementation that manages all of the virtual
  * terminals.
  * 
- * @param S
+ * @param <T> type of transport
+ * @param <M> type of session manager
  */
-
-public interface VirtualSession<T extends ProfileTransport<?>, M extends VirtualSessionManager<? extends VirtualSession<?,?>>> {
-
+public interface VirtualSession<T extends ProfileTransport<?>, M extends VirtualSessionManager<? extends VirtualSession<?, ?>>> {
 	/**
 	 * Reset the session back to its initial state (e.g. clear the scree, clear
 	 * the buffer, reset the cursor etc)

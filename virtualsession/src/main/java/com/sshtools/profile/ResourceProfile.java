@@ -48,11 +48,11 @@ import nanoxml.XMLElement;
  * provide long term persistence using XML and they will be provided with an
  * XMLelement when the profile is read from storage.<br>
  * 
+ * @param <T> the type of transport
+ * 
  */
 public class ResourceProfile<T extends ProfileTransport<?>> {
-
 	// Private instance variables
-
 	private URI uri;
 	private String name;
 	private Map<String, String> properties = new HashMap<String, String>();
@@ -62,7 +62,9 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	private List<ResourceProfileListener> listeners = new ArrayList<ResourceProfileListener>();
 
 	/**
-	 * Construct a new empty profile.
+	 * Construct a new profile from an existing one.
+	 * 
+	 * @param profile the profile to base this one on
 	 */
 	public ResourceProfile(ResourceProfile<?> profile) {
 		setFromProfile(profile);
@@ -91,7 +93,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 		try {
 			if (profile.schemeOptions != null) {
 				for (Class<? extends SchemeOptions> k : profile.schemeOptions.keySet()) {
-					SchemeOptions sopts = (SchemeOptions) profile.schemeOptions.get(k);
+					SchemeOptions sopts = profile.schemeOptions.get(k);
 					schemeOptions.put(k, (SchemeOptions) sopts.clone());
 				}
 			}
@@ -182,6 +184,12 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 		return null;
 	}
 
+	/**
+	 * Get if this profile has any scheme options for the given class.
+	 * 
+	 * @param clazz
+	 * @return has scheme options
+	 */
 	public boolean hasSchemeOptions(Class<? extends SchemeOptions> clazz) {
 		return schemeOptions.containsKey(clazz);
 	}
@@ -189,6 +197,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	/**
 	 * Get the SchemeOptions
 	 * 
+	 * @param clazz the class ofthe scheme options objecct
 	 * @return scheme options
 	 */
 	public <C extends SchemeOptions> C getSchemeOptions(Class<C> clazz) {
@@ -196,7 +205,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 		C sopts = (C) schemeOptions.get(clazz);
 		if (sopts == null) {
 			try {
-				sopts = (C) clazz.newInstance();
+				sopts = clazz.newInstance();
 			} catch (InstantiationException e) {
 				throw new IllegalArgumentException(e);
 			} catch (IllegalAccessException e) {
@@ -268,8 +277,8 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	 * @param out output stream to write XML data to
 	 * @throws IOException if profile cannot be written
 	 */
-	public void save(OutputStream in) throws IOException {
-		saveImpl(in);
+	public void save(OutputStream out) throws IOException {
+		saveImpl(out);
 	}
 
 	private void saveImpl(OutputStream out) {
@@ -316,22 +325,18 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	}
 
 	private void loadImpl(InputStream in) throws IOException {
-
 		// Initialise
 		properties.clear();
 		schemeOptions.clear();
 		extensions.clear();
-
 		// Load the xml data
 		XMLElement xml = new XMLElement();
 		xml.parseFromReader(new InputStreamReader(in));
-
 		name = (String) xml.getAttribute("name");
 		uri = new URI((String) xml.getAttribute("uri"));
 		if (name == null) {
 			throw new IOException("Profile has no name attribute.");
 		}
-
 		XMLElement el;
 		String n;
 		for (Enumeration<?> e = xml.enumerateChildren(); e.hasMoreElements();) {
@@ -361,7 +366,6 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 				 * a set of SchemeOptions using the createSchemeOptions method
 				 * that it supports.
 				 */
-
 				try {
 					SchemeOptions sopts = ConnectionManager.getInstance()
 							.getSchemeHandler((String) el.getAttribute("scheme", uri.getScheme())).createSchemeOptions();
@@ -370,7 +374,6 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 				} catch (Throwable t) {
 					System.err.println("Could not create scheme specific options for " + uri.getScheme());
 				}
-
 			} else {
 				extensions.put(el.getName(), el);
 			}
@@ -379,7 +382,6 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 		for (int i = listeners.size() - 1; i >= 0; i--) {
 			listeners.get(i).profileLoaded();
 		}
-
 	}
 
 	/**
@@ -424,7 +426,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	 * @return value
 	 */
 	public String getApplicationProperty(String name, String defaultValue) {
-		String value = (String) properties.get(name);
+		String value = properties.get(name);
 		if (value == null) {
 			return defaultValue;
 		}
@@ -484,7 +486,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	 * within the profile.
 	 * 
 	 * @param name
-	 * @return
+	 * @return has extension element
 	 */
 	public boolean hasApplicationExtension(String name) {
 		return extensions.containsKey(name);
@@ -494,7 +496,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	 * Get an application extension to the profile.
 	 * 
 	 * @param name
-	 * @return
+	 * @return extension element
 	 */
 	public XMLElement getApplicationExtension(String name) {
 		return extensions.get(name);
@@ -533,12 +535,20 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 		}
 	}
 
+	/**
+	 * Fire to event listeners the profile has changed.
+	 */
 	public void fireProfileChanged() {
 		for (int i = listeners.size() - 1; i >= 0; i--) {
 			listeners.get(i).profileChanged();
 		}
 	}
 
+	/**
+	 * Set the username.
+	 * 
+	 * @param username username
+	 */
 	public void setUsername(String username) {
 		String password = getPassword();
 		try {
@@ -550,6 +560,11 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 		}
 	}
 
+	/**
+	 * Set the password.
+	 * 
+	 * @param password
+	 */
 	public void setPassword(String password) {
 		String username = getUsername();
 		try {
@@ -561,6 +576,11 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 		}
 	}
 
+	/**
+	 * Get the username.
+	 * 
+	 * @return username
+	 */
 	public String getUsername() {
 		if (uri == null || uri.getUserinfo() == null) {
 			return null;
@@ -579,6 +599,11 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 		return null;
 	}
 
+	/**
+	 * Get the password.
+	 * 
+	 * @return password
+	 */
 	public String getPassword() {
 		if (uri == null || uri.getUserinfo() == null) {
 			return null;
@@ -594,10 +619,22 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 		return null;
 	}
 
+	/**
+	 * Get the list of scheme options in this profile.
+	 * 
+	 * @return scheme options
+	 */
 	public List<SchemeOptions> getSchemeOptionsList() {
 		return new ArrayList<SchemeOptions>(schemeOptions.values());
 	}
 
+	/**
+	 * Load a profile from a file.
+	 * 
+	 * @param file
+	 * @return profile
+	 * @throws IOException on any error
+	 */
 	public static ResourceProfile<ProfileTransport<?>> load(File file) throws IOException {
 		FileInputStream fin = new FileInputStream(file);
 		try {

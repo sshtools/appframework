@@ -6,22 +6,22 @@ package com.sshtools.virtualsession;
  */
 public abstract class VirtualSessionAdapter implements VirtualSessionListener {
 	@Override
-	public void connected(VirtualSession<?,?> session) {
+	public void connected(VirtualSession<?, ?> session) {
 	}
 
 	@Override
-	public void dataReceived(VirtualSession<?,?> session, byte[] data, int len) {
+	public void dataReceived(VirtualSession<?, ?> session, byte[] data, int len) {
 	}
 
 	@Override
-	public void dataSent(VirtualSession<?,?> session, byte[] data, int len) {
+	public void dataSent(VirtualSession<?, ?> session, byte[] data, int len) {
 	}
 
 	@Override
-	public void disconnected(VirtualSession<?,?> session, Throwable exception) {
+	public void disconnected(VirtualSession<?, ?> session, Throwable exception) {
 	}
 
 	@Override
-	public void titleChanged(VirtualSession<?,?> session, String title) {
+	public void titleChanged(VirtualSession<?, ?> session, String title) {
 	}
 }
