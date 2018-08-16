@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.google.code.gtkjfilechooser;
 
@@ -24,12 +32,20 @@ import com.google.code.gtkjfilechooser.ui.GtkFileChooserUI;
  */
 public class Log {
 
-	static final private Logger LOG = Logger.getLogger(GtkFileChooserUI.class.getName());
-
 	/**
 	 * Set false for production code
 	 */
 	static final private boolean DEBUG = false;
+
+	static final private Logger LOG = Logger.getLogger(GtkFileChooserUI.class.getName());
+
+	static public void debug(Object... msgs) {
+		if (LOG.isLoggable(Level.FINEST)) {
+			StringBuilder sb = new StringBuilder();
+			appendMessages(sb, msgs);
+			LOG.finest(sb.toString());
+		}
+	}
 
 	static public void debug0(Object... msgs) {
 		if (DEBUG) {
@@ -42,14 +58,6 @@ public class Log {
 			appendMessages(sb, msgs);
 
 			System.out.println(sb);
-		}
-	}
-
-	static public void debug(Object... msgs) {
-		if (LOG.isLoggable(Level.FINEST)) {
-			StringBuilder sb = new StringBuilder();
-			appendMessages(sb, msgs);
-			LOG.finest(sb.toString());
 		}
 	}
 
@@ -67,6 +75,16 @@ public class Log {
 			appendMessages(sb, msgs);
 			LOG.log(level, sb.toString(), thrown);
 		}
+	}
+
+	public static void main(String[] args) {
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				Log.debug("ciao");
+			}
+		}).start();
 	}
 
 	private static void appendMessages(StringBuilder sb, Object... msgs) {
@@ -101,16 +119,6 @@ public class Log {
 			}
 		}
 		return location;
-	}
-
-	public static void main(String[] args) {
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				Log.debug("ciao");
-			}
-		}).start();
 	}
 
 }

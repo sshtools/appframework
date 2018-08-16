@@ -1,15 +1,21 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /*-- 
-
- $Id: ToolButton.java,v 1.1.2.1 2010-04-30 22:04:38 brett Exp $
 
  Copyright (C) 2003 Brett Smith.
  All rights reserved.
@@ -61,23 +67,15 @@ import java.awt.event.MouseEvent;
 import javax.swing.Action;
 import javax.swing.JButton;
 
-
 /**
  * <p>
  * An extension of <code>JButton</code> that looks nicer on the tool bar
  * </p>
- *
- * @author Brett Smith
- * @version $Id: ToolButton.java,v 1.1.2.1 2010-04-30 22:04:38 brett Exp $
- *
- * @created 20 December 2002
  */
-public class ToolButton
-	extends JButton {
+public class ToolButton extends JButton {
 	//
 	private final static Insets INSETS = new Insets(0, 0, 0, 0);
 	private boolean hideText;
-
 
 	/**
 	 * Construct a new <code>IconPanel</code> given an icon and a component
@@ -100,22 +98,33 @@ public class ToolButton
 		setRequestFocusEnabled(false);
 		setFocusPainted(false);
 		setHideText(hideText);
-        addMouseListener(new MouseAdapter() {
+		addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				if (isEnabled()) {
+					setBorderPainted(true);
+					setContentAreaFilled(true);
+				}
+			}
 
-            public void mouseEntered(MouseEvent e) {
-                if(isEnabled()) {
-	                setBorderPainted(true);
-	                setContentAreaFilled(true);
-                }
-            }
+			@Override
+			public void mouseExited(MouseEvent e) {
+				setBorderPainted(false);
+				setContentAreaFilled(false);
+			}
+		});
+		setBorderPainted(false);
+		setContentAreaFilled(false);
+	}
 
-            public void mouseExited(MouseEvent e) {
-                setBorderPainted(false);
-                setContentAreaFilled(false);
-            }
-        });
-        setBorderPainted(false);
-        setContentAreaFilled(false);
+	/**
+	 * Gets the text for the button
+	 *
+	 * @return the button text if not hidden otherwise <tt>null</tt>
+	 */
+	@Override
+	public String getText() {
+		return hideText ? null : super.getText();
 	}
 
 	/**
@@ -123,6 +132,7 @@ public class ToolButton
 	 *
 	 * @return always returns <tt>false</tt>
 	 */
+	@Override
 	public boolean isFocusable() {
 		return false;
 	}
@@ -131,23 +141,13 @@ public class ToolButton
 	 * Sets the hide text property of the buttin
 	 *
 	 * @param hideText <tt>true</tt> if the text is to be hidden otherwies
-	 *        <tt>false</tt>
+	 *            <tt>false</tt>
 	 */
 	public void setHideText(boolean hideText) {
-		if (this.hideText!=hideText) {
+		if (this.hideText != hideText) {
 			firePropertyChange("hideText", this.hideText, hideText);
 		}
-
 		this.hideText = hideText;
 		repaint();
-	}
-
-	/**
-	 * Gets the text for the button
-	 *
-	 * @return the button text if not hidden otherwise <tt>null</tt>
-	 */
-	public String getText() {
-		return hideText ? null : super.getText();
 	}
 }

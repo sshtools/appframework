@@ -1,24 +1,32 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /*
  */
 package com.sshtools.appframework.api.ui;
 
 public class ActionMenu implements Comparable<ActionMenu> {
-	private int weight;
+	private String displayName;
 
 	private int mnemonic;
 
 	private String name;
 
-	private String displayName;
+	private int weight;
 
 	public ActionMenu(String name, String displayName, int mnemonic, int weight) {
 		this.name = name;
@@ -27,6 +35,7 @@ public class ActionMenu implements Comparable<ActionMenu> {
 		this.weight = weight;
 	}
 
+	@Override
 	public int compareTo(ActionMenu o) {
 		int i = new Integer(weight).compareTo(new Integer(o.weight));
 		return (i == 0) ? displayName.compareTo(o.displayName) : i;
@@ -40,18 +49,32 @@ public class ActionMenu implements Comparable<ActionMenu> {
 	}
 
 	/**
+	 * @return Returns the mnemonic.
+	 */
+	public int getMnemonic() {
+		return mnemonic;
+	}
+
+	/**
+	 * @return Returns the name.
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @return Returns the weight.
+	 */
+	public int getWeight() {
+		return weight;
+	}
+
+	/**
 	 * @param displayName
 	 *            The displayName to set.
 	 */
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
-	}
-
-	/**
-	 * @return Returns the mnemonic.
-	 */
-	public int getMnemonic() {
-		return mnemonic;
 	}
 
 	/**
@@ -63,25 +86,11 @@ public class ActionMenu implements Comparable<ActionMenu> {
 	}
 
 	/**
-	 * @return Returns the name.
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
 	 * @param name
 	 *            The name to set.
 	 */
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	/**
-	 * @return Returns the weight.
-	 */
-	public int getWeight() {
-		return weight;
 	}
 
 	/**
@@ -92,6 +101,7 @@ public class ActionMenu implements Comparable<ActionMenu> {
 		this.weight = weight;
 	}
 
+	@Override
 	public String toString() {
 		return getName();
 	}

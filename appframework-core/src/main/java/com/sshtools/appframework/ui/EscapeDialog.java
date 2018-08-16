@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.sshtools.appframework.ui;
 
@@ -19,138 +27,120 @@ import java.awt.event.KeyListener;
 
 import javax.swing.JDialog;
 
-public class EscapeDialog extends JDialog implements ContainerListener, KeyListener
-{
+public class EscapeDialog extends JDialog implements ContainerListener, KeyListener {
+	public EscapeDialog(Frame frame, String title, boolean modal) {
+		super(frame, title, modal);
+		addKeyAndContainerListenerRecursively(this);
+	}
 
-     public EscapeDialog(Frame frame, String title, boolean modal)
-     {
-          super(frame, title, modal);
-          addKeyAndContainerListenerRecursively(this);
-     }
+	public EscapeDialog(JDialog dialog, String title, boolean modal) {
+		super(dialog, title, modal);
+		addKeyAndContainerListenerRecursively(this);
+	}
+	// The following function is recursive and is intended for internal use
+	// only. It is private to prevent anyone calling it from other classes
+	// The function takes a Component as an argument and adds this Dialog as a
+	// KeyListener to it.
+	// Besides it checks if the component is actually a Container and if it is,
+	// there are 2 additional things to be done to this Container :
+	// 1 - add this Dialog as a ContainerListener to the Container
+	// 2 - call this function recursively for every child of the Container.
 
-     public EscapeDialog(JDialog dialog, String title, boolean modal)
-     {
-          super(dialog, title, modal);
-          addKeyAndContainerListenerRecursively(this);
-     }
+	// ContainerListener interface
+	/**********************************************************/
+	// This function is called whenever a Component or a Container is added to
+	// another Container belonging to this Dialog
+	@Override
+	public void componentAdded(ContainerEvent e) {
+		addKeyAndContainerListenerRecursively(e.getChild());
+	}
+	// The following function is the same as the function above with the
+	// exception that it does exactly the opposite - removes this Dialog
+	// from the listener lists of Components.
 
+	// This function is called whenever a Component or a Container is removed
+	// from another Container belonging to this Dialog
+	@Override
+	public void componentRemoved(ContainerEvent e) {
+		removeKeyAndContainerListenerRecursively(e.getChild());
+	}
 
-//The following function is recursive and is intended for internal use only. It is private to prevent anyone calling it from other classes
-//The function takes a Component as an argument and adds this Dialog as a KeyListener to it.
-//Besides it checks if the component is actually a Container and if it is, there  are 2 additional things to be done to this Container :
-// 1 - add this Dialog as a ContainerListener to the Container
-// 2 - call this function recursively for every child of the Container.
+	// KeyListener interface
+	/**********************************************************/
+	// This function is called whenever a Component belonging to this Dialog (or
+	// the Dialog itself) gets the KEY_PRESSED event
+	@Override
+	public void keyPressed(KeyEvent e) {
+		int code = e.getKeyCode();
+		if (code == KeyEvent.VK_ESCAPE) {
+			// Key pressed is the ESCAPE key. Hide this Dialog.
+			if (canClose())
+				setVisible(false);
+		} else if (code == KeyEvent.VK_ENTER) {
+			// Key pressed is the ENTER key. Redefine performEnterAction() in
+			// subclasses to respond to depressing the ENTER key.
+			performEnterAction(e);
+		}
+		// Insert code to process other keys here
+	}
 
-     private void addKeyAndContainerListenerRecursively(Component c)
-     {
-//To be on the safe side, try to remove KeyListener first just in case it has been added before.
-//If not, it won't do any harm
-          c.removeKeyListener(this);
-//Add KeyListener to the Component passed as an argument
-          c.addKeyListener(this);
+	// We need the following 2 functions to complete imlementation of
+	// KeyListener
+	@Override
+	public void keyReleased(KeyEvent e) {
+	}
 
-          if(c instanceof Container){
+	@Override
+	public void keyTyped(KeyEvent e) {
+	}
 
-//Component c is a Container. The following cast is safe.
-               Container cont = (Container)c;
+	protected boolean canClose() {
+		// This function must be overriden in any Escape dialog to return true
+		// when
+		// the subclass allows it to
+		return true;
+	}
 
-//To be on the safe side, try to remove ContainerListener first just in case it has been added before.
-//If not, it won't do any harm
-               cont.removeContainerListener(this);
-//Add ContainerListener to the Container.
-               cont.addContainerListener(this);
+	void performEnterAction(KeyEvent e) {
+		// Default response to ENTER key pressed goes here
+		// Redefine this function in subclasses to respond to ENTER key
+		// differently
+	}
 
-//Get the Container's array of children Components.
-               Component[] children = cont.getComponents();
+	private void addKeyAndContainerListenerRecursively(Component c) {
+		// To be on the safe side, try to remove KeyListener first just in case
+		// it has been added before.
+		// If not, it won't do any harm
+		c.removeKeyListener(this);
+		// Add KeyListener to the Component passed as an argument
+		c.addKeyListener(this);
+		if (c instanceof Container) {
+			// Component c is a Container. The following cast is safe.
+			Container cont = (Container) c;
+			// To be on the safe side, try to remove ContainerListener first
+			// just in case it has been added before.
+			// If not, it won't do any harm
+			cont.removeContainerListener(this);
+			// Add ContainerListener to the Container.
+			cont.addContainerListener(this);
+			// Get the Container's array of children Components.
+			Component[] children = cont.getComponents();
+			// For every child repeat the above operation.
+			for (int i = 0; i < children.length; i++) {
+				addKeyAndContainerListenerRecursively(children[i]);
+			}
+		}
+	}
 
-//For every child repeat the above operation.
-               for(int i = 0; i < children.length; i++){
-                    addKeyAndContainerListenerRecursively(children[i]);
-               }
-          }
-     }
-
-
-//The following function is the same as the function above with the exception that it does exactly the opposite - removes this Dialog
-//from the listener lists of Components.
-
-    private void removeKeyAndContainerListenerRecursively(Component c)
-    {
-          c.removeKeyListener(this);
-
-          if(c instanceof Container){
-
-               Container cont = (Container)c;
-
-               cont.removeContainerListener(this);
-
-               Component[] children = cont.getComponents();
-
-               for(int i = 0; i < children.length; i++){
-                    removeKeyAndContainerListenerRecursively(children[i]);
-               }
-          }
-     }
-
-
-//ContainerListener interface
-/**********************************************************/
-
-//This function is called whenever a Component or a Container is added to another Container belonging to this Dialog
-     public void componentAdded(ContainerEvent e)
-     {
-          addKeyAndContainerListenerRecursively(e.getChild());
-     }
-
-//This function is called whenever a Component or a Container is removed from another Container belonging to this Dialog
-     public void componentRemoved(ContainerEvent e)
-     {
-          removeKeyAndContainerListenerRecursively(e.getChild());
-     }
-
-     // This function must be overriden in any Escape dialog to return true when the subclass allows it to
-     protected boolean canClose() {
-       return true;
-     }
-
-/**********************************************************/
-
-
-//KeyListener interface
-/**********************************************************/
-//This function is called whenever a Component belonging to this Dialog (or the Dialog itself) gets the KEY_PRESSED event
-     public void keyPressed(KeyEvent e)
-     {
-       int code = e.getKeyCode();
-       if (code == KeyEvent.VK_ESCAPE) {
-   //Key pressed is the ESCAPE key. Hide this Dialog.
-         if (canClose())
-           setVisible(false);
-       }
-       else if (code == KeyEvent.VK_ENTER) {
-   //Key pressed is the ENTER key. Redefine performEnterAction() in subclasses to respond to depressing the ENTER key.
-         performEnterAction(e);
-       }
-
-//Insert code to process other keys here
-     }
-
-//We need the following 2 functions to complete imlementation of KeyListener
-     public void keyReleased(KeyEvent e)
-     {
-     }
-
-     public void keyTyped(KeyEvent e)
-     {
-     }
-
-/************************************************************/
-
-     void performEnterAction(KeyEvent e)
-     {
-//Default response to ENTER key pressed goes here
-//Redefine this function in subclasses to respond to ENTER key differently
-     }
-
+	private void removeKeyAndContainerListenerRecursively(Component c) {
+		c.removeKeyListener(this);
+		if (c instanceof Container) {
+			Container cont = (Container) c;
+			cont.removeContainerListener(this);
+			Component[] children = cont.getComponents();
+			for (int i = 0; i < children.length; i++) {
+				removeKeyAndContainerListenerRecursively(children[i]);
+			}
+		}
+	}
 }
-

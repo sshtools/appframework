@@ -1,15 +1,23 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.google.code.gtkjfilechooser;
 
-import static com.google.code.gtkjfilechooser.I18N._;
+import static com.google.code.gtkjfilechooser.I18N.i18n;
 
 import java.io.File;
 
@@ -24,8 +32,12 @@ import com.google.code.gtkjfilechooser.FreeDesktopUtil.WellKnownDir;
  */
 public class BasicPath implements Path {
 
-	static public final BasicPath HOME = new BasicPath(System.getProperty("user.name"), System.getProperty("user.home"), "places/user-home");
 	static public BasicPath DESKTOP;
+	static public final BasicPath HOME = new BasicPath(System.getProperty("user.name"), System.getProperty("user.home"), "places/user-home");
+	static public final BasicPath ROOT = new BasicPath(i18n("File System"), "/", "gtk-harddisk");
+
+	private static final long serialVersionUID = 1L; 
+
 	static {
 		File desktopPath = FreeDesktopUtil.getWellKnownDirPath(WellKnownDir.DESKTOP);
 		if (desktopPath != null) {
@@ -33,13 +45,9 @@ public class BasicPath implements Path {
 		}		
 	}
 
-	static public final BasicPath ROOT = new BasicPath(_("File System"), "/", "gtk-harddisk"); 
-
-	private static final long serialVersionUID = 1L;
-
+	protected String iconName;
 	protected String location;
 	protected String name;
-	protected String iconName;
 
 	public BasicPath() {
 		super();
@@ -53,6 +61,11 @@ public class BasicPath implements Path {
 	}
 
 	@Override
+	public String getIconName() {
+		return iconName;
+	}
+
+	@Override
 	public String getLocation() {
 		return location;
 	}
@@ -60,11 +73,6 @@ public class BasicPath implements Path {
 	@Override
 	public String getName() {
 		return name;
-	}
-
-	@Override
-	public String getIconName() {
-		return iconName;
 	}
 
 }

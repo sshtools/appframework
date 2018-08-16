@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /*
  */
@@ -20,13 +28,19 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 public class ArrowIcon implements Icon, SwingConstants {
-	private Color shadow;
-
 	private Color darkShadow;
+
+	private int direction;
 
 	private Color highlight;
 
-	private int direction;
+	private Color shadow;
+
+	public ArrowIcon(int direction) {
+		this(direction, UIManager.getColor("controlDkShadow"), UIManager
+				.getColor("controlText"), UIManager
+				.getColor("controlLtHighlight"));
+	}
 
 	public ArrowIcon(int direction, Color shadow, Color darkShadow,
 			Color highlight) {
@@ -36,28 +50,21 @@ public class ArrowIcon implements Icon, SwingConstants {
 		setDirection(direction);
 	}
 
-	public ArrowIcon(int direction) {
-		this(direction, UIManager.getColor("controlDkShadow"), UIManager
-				.getColor("controlText"), UIManager
-				.getColor("controlLtHighlight"));
-	}
-
-	public int getIconHeight() {
-		return 16;
-	}
-
-	public int getIconWidth() {
-		return 16;
-	}
-
 	public int getDirection() {
 		return direction;
 	}
 
-	public void setDirection(int dir) {
-		direction = dir;
+	@Override
+	public int getIconHeight() {
+		return 16;
 	}
 
+	@Override
+	public int getIconWidth() {
+		return 16;
+	}
+
+	@Override
 	public void paintIcon(Component c, Graphics g, int x, int y) {
 		int h = getIconHeight();
 		int w = getIconWidth();
@@ -135,5 +142,9 @@ public class ArrowIcon implements Icon, SwingConstants {
 		}
 		g.translate(-x, -y);
 		g.setColor(oldColor);
+	}
+
+	public void setDirection(int dir) {
+		direction = dir;
 	}
 }

@@ -1,15 +1,21 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /*-- 
-
- $Id: PluginUtil.java,v 1.1.2.1 2010-04-30 22:04:38 brett Exp $
 
  Copyright (C) 2003 Brett Smith.
  All rights reserved.
@@ -62,24 +68,15 @@ import java.io.OutputStream;
 
 /**
  * Utilities used by the plugin manager API
- *
- *@author     magicthize
- *@created    26 May 2002
  */
 public class PluginUtil
 {
-	/**
-	 * Prevent instantiation
-	 */
-	private PluginUtil() {
-	}
-
 	/**
 	 * Close an input stream and don't worry about any exceptions, but return
 	 * true or false instead. If <code>null</code> is supplied as they stream
 	 * then it is just ignored
 	 *
-	 * @param stream stream to close
+	 * @param in stream to close
 	 * @return closed ok
 	 */
 	public static boolean closeStream(InputStream in)
@@ -95,13 +92,13 @@ public class PluginUtil
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Close an output stream and don't worry about any exceptions, but return
 	 * true or false instead. If <code>null</code> is supplied as they stream
 	 * then it is just ignored
 	 *
-	 * @param stream stream to close
+	 * @param out stream to close
 	 * @return closed ok
 	 */
 	public static boolean closeStream(OutputStream out)
@@ -117,6 +114,7 @@ public class PluginUtil
 			return false;
 		}
 	}
+	
 	/**
 	 * Copy the input from one stream to the output of another until EOF. It
 	 * is up to the invoker to close the streams.
@@ -124,13 +122,13 @@ public class PluginUtil
 	 * @param in input stream
 	 * @param out output stream
 	 * @param buf buffer size (-1 means don't buffer)
+	 * @throws IOException on I/O error
 	 */
 	public static void copyStreams(InputStream in, OutputStream out, int buf)
 		throws IOException
 	{
 		copyStreams(in, out, buf, -1);
 	}
-
 	/**
 	 * Copy the input from one stream to the output of another for a number of
 	 * bytes (-1 means until EOF)
@@ -139,6 +137,7 @@ public class PluginUtil
 	 * @param out output stream
 	 * @param buf buffer size (-1 means don't buffer)
 	 * @param bytes bytes to copy
+	 * @throws IOException on I/O error
 	 */
 	public static void copyStreams(InputStream in, OutputStream out, int buf, long bytes)
 		throws IOException
@@ -164,5 +163,11 @@ public class PluginUtil
 			bout.write(b, 0, a);
 		}
 		bout.flush();
+	}
+
+	/**
+	 * Prevent instantiation
+	 */
+	private PluginUtil() {
 	}
 }

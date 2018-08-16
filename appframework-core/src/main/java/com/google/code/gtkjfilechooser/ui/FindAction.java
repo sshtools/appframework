@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.google.code.gtkjfilechooser.ui;
 
@@ -48,17 +56,25 @@ import javax.swing.text.Position;
 public abstract class FindAction extends AbstractAction implements
 		DocumentListener, KeyListener {
 
+	static final private int TIMEOUT = 5;
+	protected JComponent comp = null;
+	protected boolean controlDown = false;
+	protected JTextField searchField;
+	protected boolean shiftDown = false;
+
+	private long lastKeyPressed;
+
+	private JPopupMenu popup = new JPopupMenu();
+
 	private JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 3,
 			3));
-	protected JTextField searchField;
-	private JPopupMenu popup = new JPopupMenu();
-	static final private int TIMEOUT = 5;
-	private long lastKeyPressed;
 
 	/**
 	 * Interrupt the timeout thread for the popup
 	 */
 	private boolean stop = false;
+
+	/*-------------------------------------------------[ ActionListener ]---------------------------------------------------*/
 
 	public FindAction() {
 		super("Incremental Search"); // NOI18N
@@ -72,6 +88,7 @@ public abstract class FindAction extends AbstractAction implements
 		// the event is sent to the window. to overcome this we
 		// register an action for Esc.
 		searchField.registerKeyboardAction(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				popup.setVisible(false);
 			}
@@ -79,14 +96,7 @@ public abstract class FindAction extends AbstractAction implements
 				JComponent.WHEN_FOCUSED);
 	}
 
-	public String getName() {
-		return (String) getValue(Action.NAME);
-	}
-
-	protected JComponent comp = null;
-
-	/*-------------------------------------------------[ ActionListener ]---------------------------------------------------*/
-
+	@Override
 	public void actionPerformed(ActionEvent ae) {
 		if (ae.getSource() == searchField) {
 			popup.setVisible(false);
@@ -111,70 +121,20 @@ public abstract class FindAction extends AbstractAction implements
 		}
 	}
 
-	/**
-	 * Can be overridden by subclasses to change initial search text etc.
-	 */
-	protected void initSearch(ActionEvent ae) {
-		searchField.setText(ae.getActionCommand()); // NOI18N
-		changed(null);
-	}
-
-	private void changed(Position.Bias bias) {
-		popup.pack();
-
-		searchField.requestFocus();
-		Color color = changed(comp, searchField.getText(), bias) ? BLACK : RED;
-		searchField.setForeground(color);
-		lastKeyPressed = System.currentTimeMillis();
-	}
-
-	/**
-	 * Should search for given text and select item and
-	 * 
-	 * @return true if search is successful
-	 */
-	protected abstract boolean changed(JComponent comp, String text,
-			Position.Bias bias);
-
-	/*-------------------------------------------------[ DocumentListener ]---------------------------------------------------*/
-
-	public void insertUpdate(DocumentEvent e) {
-		changed(null);
-	}
-
-	public void removeUpdate(DocumentEvent e) {
-		changed(null);
-	}
-
+	@Override
 	public void changedUpdate(DocumentEvent e) {
 	}
 
-	/*-------------------------------------------------[ KeyListener ]---------------------------------------------------*/
-
-	protected boolean shiftDown = false;
-	protected boolean controlDown = false;
-
-	public void keyPressed(KeyEvent ke) {
-		shiftDown = ke.isShiftDown();
-		controlDown = ke.isControlDown();
-
-		switch (ke.getKeyCode()) {
-		case KeyEvent.VK_UP:
-			changed(Position.Bias.Backward);
-			break;
-		case KeyEvent.VK_DOWN:
-			changed(Position.Bias.Forward);
-			break;
-		}
+	public String getName() {
+		return (String) getValue(Action.NAME);
 	}
 
-	public void keyTyped(KeyEvent e) {
-	}
+	/*-------------------------------------------------[ DocumentListener ]---------------------------------------------------*/
 
-	public void keyReleased(KeyEvent e) {
+	@Override
+	public void insertUpdate(DocumentEvent e) {
+		changed(null);
 	}
-
-	/*-------------------------------------------------[ Installation ]---------------------------------------------------*/
 
 	public void install(final JComponent comp) {
 		comp.addKeyListener(new KeyAdapter() {
@@ -248,5 +208,64 @@ public abstract class FindAction extends AbstractAction implements
 			}
 
 		});
+	}
+
+	@Override
+	public void keyPressed(KeyEvent ke) {
+		shiftDown = ke.isShiftDown();
+		controlDown = ke.isControlDown();
+
+		switch (ke.getKeyCode()) {
+		case KeyEvent.VK_UP:
+			changed(Position.Bias.Backward);
+			break;
+		case KeyEvent.VK_DOWN:
+			changed(Position.Bias.Forward);
+			break;
+		}
+	}
+
+	/*-------------------------------------------------[ KeyListener ]---------------------------------------------------*/
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+	}
+	@Override
+	public void keyTyped(KeyEvent e) {
+	}
+
+	@Override
+	public void removeUpdate(DocumentEvent e) {
+		changed(null);
+	}
+
+	/**
+	 * Should search for given text and select item and
+	 *
+	 * @param comp component
+	 * @param text text
+	 * @param bias bias
+	 * @return true if search is successful
+	 */
+	protected abstract boolean changed(JComponent comp, String text,
+			Position.Bias bias);
+
+	/*
+	 * Can be overridden by subclasses to change initial search text etc.
+	 */
+	protected void initSearch(ActionEvent ae) {
+		searchField.setText(ae.getActionCommand()); // NOI18N
+		changed(null);
+	}
+
+	/*-------------------------------------------------[ Installation ]---------------------------------------------------*/
+
+	private void changed(Position.Bias bias) {
+		popup.pack();
+
+		searchField.requestFocus();
+		Color color = changed(comp, searchField.getText(), bias) ? BLACK : RED;
+		searchField.setForeground(color);
+		lastKeyPressed = System.currentTimeMillis();
 	}
 }

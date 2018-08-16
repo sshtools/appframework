@@ -1,15 +1,21 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /*-- 
-
- $Id: PluginException.java,v 1.1.2.1 2010-04-30 22:04:38 brett Exp $
 
  Copyright (C) 2003 Brett Smith.
  All rights reserved.
@@ -57,44 +63,32 @@ package plugspud;
 import java.lang.reflect.Method;
 
 /**
- *  Exception thrown by plugin
- *
- *@author     magicthize
- *@created    26 May 2002
+ * Exception thrown by plugin
  */
-public class PluginException extends Exception
-{
-    /**
-     * Construct a new execption
-     *
-     * @param message messages
-     */
-    public PluginException(String message)
-    {
-        super(message);
-    }
+public class PluginException extends Exception {
+	/**
+	 * Construct a new execption
+	 *
+	 * @param message messages
+	 */
+	public PluginException(String message) {
+		super(message);
+	}
 
-    /**
-     * Construct a new execption
-     *
-     * @param message message
-     * @param cause underlying exception
-     */
-    public PluginException(String message, Throwable cause)
-    {
-        super(message);
-        if(cause != null)
-        {
-            try
-            {
-                Method m = getClass().getMethod("initCause", new Class[]
-                    { Throwable.class });
-                m.invoke(this, new Object[] { cause } );
-            }
-            catch(Exception e)
-            {
-            }
-        }
-    }
+	/**
+	 * Construct a new execption
+	 *
+	 * @param message message
+	 * @param cause underlying exception
+	 */
+	public PluginException(String message, Throwable cause) {
+		super(message);
+		if (cause != null) {
+			try {
+				Method m = getClass().getMethod("initCause", new Class[] { Throwable.class });
+				m.invoke(this, new Object[] { cause });
+			} catch (Exception e) {
+			}
+		}
+	}
 }
-

@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.google.code.gtkjfilechooser;
 
@@ -29,28 +37,21 @@ import javax.swing.ImageIcon;
 
 import com.google.code.gtkjfilechooser.FreeDesktopUtil.WellKnownDir;
 import com.google.code.gtkjfilechooser.ui.MissingResourceIcon;
-
+import com.sshtools.appframework.ui.IconStore;
 
 public class GtkStockIcon {
-
-	static private final String ICONS_FOLDER = "/usr/share/icons/gnome";
-	static private final String ALL_USER_MIME_DIR = "/usr/share/mime";
-	static private final String CURRENT_USER_MIME_DIR = System.getProperty("user.home")
-	+ "/.local/share/mime";
-
 	/**
 	 * These are type-safe versions of the hard-coded numbers in GTKStyle, for
 	 * use with getGnomeStockIcon.
 	 */
 	public enum Size {
-		GTK_ICON_SIZE_INVALID(-1), // 
-		GTK_ICON_SIZE_MENU(16), // 16 x 16
-		GTK_ICON_SIZE_SMALL_TOOLBAR(22), // 18x18
-		GTK_ICON_SIZE_LARGE_TOOLBAR(24), // 24x24
-		GTK_ICON_SIZE_BUTTON(22), // 20x20
-		GTK_ICON_SIZE_DND(32), // 32x32
-		GTK_ICON_SIZE_DIALOG(48);// 48x48
-
+		GTK_ICON_SIZE_BUTTON(22), //
+		GTK_ICON_SIZE_DIALOG(48), // 16 x 16
+		GTK_ICON_SIZE_DND(32), // 18x18
+		GTK_ICON_SIZE_INVALID(-1), // 24x24
+		GTK_ICON_SIZE_LARGE_TOOLBAR(24), // 20x20
+		GTK_ICON_SIZE_MENU(16), // 32x32
+		GTK_ICON_SIZE_SMALL_TOOLBAR(22);// 48x48
 		private int size;
 
 		Size(int size) {
@@ -61,50 +62,20 @@ public class GtkStockIcon {
 			return size;
 		}
 	}
+	static private final String ALL_USER_MIME_DIR = "/usr/share/mime";
+	static private final String CURRENT_USER_MIME_DIR = System.getProperty("user.home") + "/.local/share/mime";
 
-	/**
-	 * Returns an Icon for one of the GNOME stock icons. If the icon is not
-	 * available for any reason, you'll get null. (Not using the GTK LAF is one
-	 * reason why.)
-	 * 
-	 * @see http://library.gnome.org/devel/gtk/unstable/gtk-Stock-Items.html
-	 */
-	static public Icon get(String name, Size size) {
-		if (name.startsWith("gtk-")) {
-			return getFromStock(name, size);
-		}
-
-		// If not in stock, read from the file system
-		String filename = ICONS_FOLDER + "/" + size.getSize() + "x" + size.getSize()
-		+ "/" + name + ".png";
-		if (!new File(filename).exists()) {
-			Log.log(Level.WARNING, "No icon file '" , filename , "'.");
-			return new MissingResourceIcon(size.getSize());
-		}
-		return new ImageIcon(filename);
-	}
-
-	private static Icon getFromStock(String name, Size size) {
-		try {
-			Class<?> gtkStockIconClass = Class.forName("com.sun.java.swing.plaf.gtk.GTKStyle$GTKStockIcon");
-			Constructor<?> constructor = gtkStockIconClass.getDeclaredConstructor(String.class, int.class);
-			constructor.setAccessible(true);
-			return (Icon) constructor.newInstance(name, size.ordinal());
-		} catch (Exception ex) {
-			return null;
-		}
-	}
+	static private final String ICONS_FOLDER = "/usr/share/icons/gnome";
 
 	/**
 	 * Given a file or directory, return the corresponding gtk icon.
 	 * 
-	 * @param file
-	 * @param size
+	 * @param file file
+	 * @param size size
 	 * @return The gtk icon for the given file.
 	 */
 	static public Icon get(File file, Size size) {
 		try {
-
 			if (file.isDirectory()) {
 				if (System.getProperty("user.home").endsWith(file.getAbsolutePath())) {
 					// home dir ico
@@ -117,8 +88,6 @@ public class GtkStockIcon {
 					return GtkStockIcon.get("gtk-directory", size);
 				}
 			}
-
-
 			File iconFile = lookForThumbs(file);
 			if (iconFile == null) {
 				iconFile = lookForMime(file);
@@ -126,18 +95,14 @@ public class GtkStockIcon {
 			if (iconFile == null) {
 				iconFile = lookForMagic(file);
 			}
-
 			if (iconFile == null) {
 				// generic icon for file
 				return get("gtk-file", size);
 			}
-
 			ImageIcon icon = new ImageIcon(iconFile.toURI().toURL());
 			Image img = icon.getImage();
-
 			int width = icon.getIconWidth();
 			int height = icon.getIconHeight();
-
 			Image scaledImg = null;
 			if (size != Size.GTK_ICON_SIZE_INVALID && size.getSize() != height) {
 				// If GTK_ICON_SIZE_INVALID don't resize the icons
@@ -149,10 +114,8 @@ public class GtkStockIcon {
 					height = size.getSize();
 					width = (int) (height / ratio);
 				}
-
 				scaledImg = img.getScaledInstance(width, height, SCALE_SMOOTH);
 			}
-
 			// If we haven't scaled the image, return the original one.
 			return (scaledImg != null) ? new ImageIcon(scaledImg) : icon;
 		} catch (Exception e) {
@@ -162,103 +125,43 @@ public class GtkStockIcon {
 	}
 
 	/**
-	 * If the other methods coudn't identify the mime type, we try with magic.
-	 * This is a very naive implementation that follows this rules:
+	 * Returns an Icon for one of the GNOME stock icons. If the icon is not
+	 * available for any reason, you'll get null. (Not using the GTK LAF is one
+	 * reason why.). See <a href=
+	 * "http://library.gnome.org/devel/gtk/unstable/gtk-Stock-Items.html">gtk-Stock-Items.html</a>
 	 * 
-	 * 1. If the file is a script (first three bytes are !#/), we return the
-	 * icon "text-x-script"
-	 * 
-	 * 2. If the file is executable, we return application-x-executable.png
-	 * 
-	 * 3. else null
+	 * @param name name
+	 * @param size size
+	 * @return icon
 	 */
-	private static File lookForMagic(File file) throws IOException {
-		// don't handle /dev files (devices)
-		if (!file.exists() || file.getAbsolutePath().startsWith("/dev")) {
-			return null;
+	static public Icon get(String name, Size size) {
+		Icon icon = IconStore.getInstance().getIcon(name, size.getSize());
+		if (icon != null)
+			return icon;
+		if (name.startsWith("gtk-")) {
+			return getFromStock(name, size);
 		}
-
-		if (isTextScript(file)) {
-			return new File(ICONS_FOLDER + "/16x16/mimetypes/text-x-script.png");
+		// If not in stock, read from the file system
+		String filename = ICONS_FOLDER + "/" + size.getSize() + "x" + size.getSize() + "/" + name + ".png";
+		if (!new File(filename).exists()) {
+			Log.log(Level.WARNING, "No icon file '", filename, "'.");
+			return new MissingResourceIcon(size.getSize());
 		}
-
-		if (file.canExecute()) {
-			return new File(ICONS_FOLDER
-					+ "/16x16/mimetypes/application-x-executable.png");
-		}
-
-		return null;
+		return new ImageIcon(filename);
 	}
 
-	private static boolean isTextScript(File file) throws IOException {
-		if (!file.canRead()){
-			return false;
+	static String md5(String uri) {
+		try {
+			MessageDigest md5 = MessageDigest.getInstance("MD5");
+			byte[] result = md5.digest(uri.getBytes());
+			return toHex(result);
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalArgumentException(e);
 		}
-
-		byte[] bytes = new byte[3];
-		InputStream is = null;
-		try {			
-			is = new FileInputStream(file);
-			is.read(bytes);
-		} finally {
-			if (is != null) {
-				is.close();
-			}
-		}
-
-		return (bytes[0] == '#' && bytes[1] == '!' && bytes[2] == '/');
 	}
 
-	/**
-	 * Detect the mime of file according to the "shared-mime-info-spec" and
-	 * returns the corresponding icon file.
-	 * 
-	 * @see {@link http://standards.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-latest.html}
-	 */
-	private static File lookForMime(File file) throws IOException {
-		String name = file.getName();
-
-		String mimeType = scanMimeFile(name, ALL_USER_MIME_DIR);
-		String iconname = null;
-		if (mimeType != null) {
-			// scan for all user
-			iconname = extractIconName(ALL_USER_MIME_DIR, mimeType);
-		} else {
-			// if not for for all user, scan the mime directory for the current
-			// user
-			mimeType = scanMimeFile(name, CURRENT_USER_MIME_DIR);
-			if (mimeType != null) {
-				iconname = extractIconName(CURRENT_USER_MIME_DIR, mimeType);
-			}
-		}
-
-		if (mimeType != null && iconname == null) {
-			int indexOf = mimeType.indexOf('/');
-			if (indexOf != -1) {
-				/**
-				 * If this element is not specified then the mimetype is used to
-				 * generate the generic icon by using the top-level media type
-				 * (e.g. "video" in "video/ogg") and appending "-x-generic"
-				 * (i.e. "video-x-generic" in the previous example).
-				 */
-				String genericType = mimeType.substring(0, indexOf);
-
-				// if text, check is executable script
-				if ("text".equals(genericType)) {
-					iconname = isTextScript(file) ? "text-x-script" : "text-x-generic";
-				} else {
-					iconname = genericType + "-x-generic";
-				}
-			}
-		}
-
-		if (mimeType == null) {
-			return null;
-		}
-
-		// We use icons only for the file chooser, there the size 16x16 is ok
-		File iconFile = new File(ICONS_FOLDER + "/16x16/mimetypes/" + iconname + ".png");
-		return iconFile.exists() ? iconFile : null;
+	static String toFileuri(File file) {
+		return file.toURI().toASCIIString().replace("file:", "file://");
 	}
 
 	/**
@@ -281,8 +184,7 @@ public class GtkStockIcon {
 	 * @return
 	 * @throws FileNotFoundException
 	 */
-	private static String extractIconName(String parentdir, String mimeType)
-	throws FileNotFoundException {
+	private static String extractIconName(String parentdir, String mimeType) throws FileNotFoundException {
 		Scanner sc = null;
 		try {
 			sc = new Scanner(new File(parentdir + "/generic-icons"));
@@ -298,7 +200,6 @@ public class GtkStockIcon {
 					break;
 				}
 			}
-
 			return iconname;
 		} finally {
 			if (sc != null) {
@@ -307,16 +208,126 @@ public class GtkStockIcon {
 		}
 	}
 
-	private static String scanMimeFile(String filename, String parentDir)
-	throws FileNotFoundException {
+	private static Icon getFromStock(String name, Size size) {
+		try {
+			Class<?> gtkStockIconClass = Class.forName("com.sun.java.swing.plaf.gtk.GTKStyle$GTKStockIcon");
+			Constructor<?> constructor = gtkStockIconClass.getDeclaredConstructor(String.class, int.class);
+			constructor.setAccessible(true);
+			return (Icon) constructor.newInstance(name, size.ordinal());
+		} catch (Exception ex) {
+			return null;
+		}
+	}
+
+	private static boolean isTextScript(File file) throws IOException {
+		if (!file.canRead()) {
+			return false;
+		}
+		byte[] bytes = new byte[3];
+		InputStream is = null;
+		try {
+			is = new FileInputStream(file);
+			is.read(bytes);
+		} finally {
+			if (is != null) {
+				is.close();
+			}
+		}
+		return (bytes[0] == '#' && bytes[1] == '!' && bytes[2] == '/');
+	}
+
+	/**
+	 * If the other methods coudn't identify the mime type, we try with magic.
+	 * This is a very naive implementation that follows this rules:
+	 * 
+	 * 1. If the file is a script (first three bytes are !#/), we return the
+	 * icon "text-x-script"
+	 * 
+	 * 2. If the file is executable, we return application-x-executable.png
+	 * 
+	 * 3. else null
+	 */
+	private static File lookForMagic(File file) throws IOException {
+		// don't handle /dev files (devices)
+		if (!file.exists() || file.getAbsolutePath().startsWith("/dev")) {
+			return null;
+		}
+		if (isTextScript(file)) {
+			return new File(ICONS_FOLDER + "/16x16/mimetypes/text-x-script.png");
+		}
+		if (file.canExecute()) {
+			return new File(ICONS_FOLDER + "/16x16/mimetypes/application-x-executable.png");
+		}
+		return null;
+	}
+
+	/**
+	 * Detect the mime of file according to the "shared-mime-info-spec" and
+	 * returns the corresponding icon file. See <a href=
+	 * "http://standards.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-latest.html">shared-mime-info-spec-latest.html</a>.
+	 */
+	private static File lookForMime(File file) throws IOException {
+		String name = file.getName();
+		String mimeType = scanMimeFile(name, ALL_USER_MIME_DIR);
+		String iconname = null;
+		if (mimeType != null) {
+			// scan for all user
+			iconname = extractIconName(ALL_USER_MIME_DIR, mimeType);
+		} else {
+			// if not for for all user, scan the mime directory for the current
+			// user
+			mimeType = scanMimeFile(name, CURRENT_USER_MIME_DIR);
+			if (mimeType != null) {
+				iconname = extractIconName(CURRENT_USER_MIME_DIR, mimeType);
+			}
+		}
+		if (mimeType != null && iconname == null) {
+			int indexOf = mimeType.indexOf('/');
+			if (indexOf != -1) {
+				/**
+				 * If this element is not specified then the mimetype is used to
+				 * generate the generic icon by using the top-level media type
+				 * (e.g. "video" in "video/ogg") and appending "-x-generic"
+				 * (i.e. "video-x-generic" in the previous example).
+				 */
+				String genericType = mimeType.substring(0, indexOf);
+				// if text, check is executable script
+				if ("text".equals(genericType)) {
+					iconname = isTextScript(file) ? "text-x-script" : "text-x-generic";
+				} else {
+					iconname = genericType + "-x-generic";
+				}
+			}
+		}
+		if (mimeType == null) {
+			return null;
+		}
+		// We use icons only for the file chooser, there the size 16x16 is ok
+		File iconFile = new File(ICONS_FOLDER + "/16x16/mimetypes/" + iconname + ".png");
+		return iconFile.exists() ? iconFile : null;
+	}
+
+	/**
+	 * Look for thumns. Return null is no thumn was found. See <a href=
+	 * "http://library.gnome.org/devel/libgnomeui/stable/libgnomeui-GnomeThumbnail.html#gnome-thumbnail-md5">libgnomeui-GnomeThumbnail.html#gnome-thumbnail-md5</a>
+	 */
+	private static File lookForThumbs(File file) {
+		String thumbsFolder = System.getProperty("user.home") + "/.thumbnails/normal";
+		String md5 = md5(toFileuri(file));
+		File thumn = new File(thumbsFolder + "/" + md5 + ".png");
+		if (!thumn.exists()) {
+			return null;
+		}
+		return thumn;
+	}
+
+	private static String scanMimeFile(String filename, String parentDir) throws FileNotFoundException {
 		File globs2 = new File(parentDir + "/globs2");
 		if (!globs2.exists()) {
 			return null;
 		}
-
 		Scanner sc = null;
 		try {
-
 			sc = new Scanner(globs2);
 			String mimeType = null;
 			while (sc.hasNextLine()) {
@@ -339,37 +350,6 @@ public class GtkStockIcon {
 		}
 	}
 
-	/**
-	 * Look for thumns. Return null is no thumn was found.
-	 * 
-	 * @see {@link http://library.gnome.org/devel/libgnomeui/stable/libgnomeui-GnomeThumbnail.html#gnome-thumbnail-md5}
-	 */
-	private static File lookForThumbs(File file) {
-		String thumbsFolder = System.getProperty("user.home") + "/.thumbnails/normal";
-		String md5 = md5(toFileuri(file));
-
-		File thumn = new File(thumbsFolder + "/" + md5 + ".png");
-
-		if (!thumn.exists()) {
-			return null;
-		}
-		return thumn;
-	}
-
-	static String toFileuri(File file) {
-		return file.toURI().toASCIIString().replace("file:", "file://");
-	}
-
-	static String md5(String uri) {
-		try {
-			MessageDigest md5 = MessageDigest.getInstance("MD5");
-			byte[] result = md5.digest(uri.getBytes());
-			return toHex(result);
-		} catch (NoSuchAlgorithmException e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
-
 	static private String toHex(byte[] b) {
 		StringBuilder sb = new StringBuilder(64);
 		for (int i = 0; i < b.length; i++) {
@@ -377,5 +357,4 @@ public class GtkStockIcon {
 		}
 		return sb.toString();
 	}
-
 }

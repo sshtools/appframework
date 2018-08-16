@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.sshtools.appframework.api.ui;
 
@@ -30,10 +38,21 @@ import com.sshtools.ui.swing.ToolBarSeparator;
 
 public class ToolsBuilder<T extends JComponent> {
 
+	class ToolBarActionComparator implements Comparator<AppAction> {
+		@Override
+		public int compare(AppAction o1, AppAction o2) {
+			int i = ((Integer) o1.getValue(AppAction.TOOLBAR_GROUP))
+					.compareTo((Integer) o2.getValue(AppAction.TOOLBAR_GROUP));
+			return (i == 0) ? ((Integer) o1.getValue(AppAction.TOOLBAR_WEIGHT))
+					.compareTo((Integer) o2.getValue(AppAction.TOOLBAR_WEIGHT))
+					: i;
+		}
+	}
+
 	final static Log log = LogFactory.getLog(ToolsBuilder.class);
+	private List<AppAction> actions;
 
 	private T container;
-	private List<AppAction> actions;
 
 	public ToolsBuilder(T container) {
 		this(container, null);
@@ -42,6 +61,14 @@ public class ToolsBuilder<T extends JComponent> {
 	public ToolsBuilder(T container, List<AppAction> actions) {
 		this.container = container;
 		this.actions = actions;
+	}
+
+	public boolean isActionVisible(String name) {
+		return true;
+	}
+
+	public Collection<AppAction> listActions() {
+		return actions;
 	}
 
 	public void rebuildActionComponents() {
@@ -67,11 +94,12 @@ public class ToolsBuilder<T extends JComponent> {
 		log.debug("Rebuilt action components");
 	}
 
-	protected void rebuildForActions(List<AppAction> enabledActions) {
-		// Rebuild components
-		if (container != null) {
-			rebuildContainer(enabledActions);
-		}
+	public void resetActionState() {
+
+	}
+
+	protected T getContainer() {
+		return container;
 	}
 
 	protected void rebuildContainer(Collection<AppAction> enabledActions) {
@@ -114,7 +142,7 @@ public class ToolsBuilder<T extends JComponent> {
 			} else {
 				ActionButton btn = new ActionButton(z,
 						!useSmallIcons ? AppAction.MEDIUM_ICON
-								: AppAction.SMALL_ICON, showSelectiveText);
+								: Action.SMALL_ICON, showSelectiveText);
 				container.add(btn, constraints);
 			}
 			grp = (Integer) z.getValue(AppAction.TOOLBAR_GROUP);
@@ -126,29 +154,10 @@ public class ToolsBuilder<T extends JComponent> {
 		}
 	}
 
-	public void resetActionState() {
-
-	}
-
-	public boolean isActionVisible(String name) {
-		return true;
-	}
-
-	public Collection<AppAction> listActions() {
-		return actions;
-	}
-
-	protected T getContainer() {
-		return container;
-	}
-
-	class ToolBarActionComparator implements Comparator<AppAction> {
-		public int compare(AppAction o1, AppAction o2) {
-			int i = ((Integer) o1.getValue(AppAction.TOOLBAR_GROUP))
-					.compareTo((Integer) o2.getValue(AppAction.TOOLBAR_GROUP));
-			return (i == 0) ? ((Integer) o1.getValue(AppAction.TOOLBAR_WEIGHT))
-					.compareTo((Integer) o2.getValue(AppAction.TOOLBAR_WEIGHT))
-					: i;
+	protected void rebuildForActions(List<AppAction> enabledActions) {
+		// Rebuild components
+		if (container != null) {
+			rebuildContainer(enabledActions);
 		}
 	}
 }

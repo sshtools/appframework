@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.sshtools.appframework.ui;
 
@@ -20,31 +28,34 @@ import com.sshtools.ui.swing.ResourceIcon;
 
 public class ImagePanel extends JPanel {
 
-    private Icon icon;
     private boolean alignBottomRight = false;
-
-    public ImagePanel(String imageName) {
-        icon = new ResourceIcon(getClass(), imageName);
-        setOpaque(false);
-    }
+    private Icon icon;
 
     public ImagePanel(Icon icon) {
         this.icon = icon;
         setOpaque(false);
     }
+
+    public ImagePanel(String imageName) {
+        icon = new ResourceIcon(getClass(), imageName);
+        setOpaque(false);
+    }
     
-    public Dimension getPreferredSize() {
+    @Override
+	public Dimension getMinimumSize() {
+        return getPreferredSize();
+
+    }
+    
+    @Override
+	public Dimension getPreferredSize() {
         Insets insets = getInsets();
         return new Dimension(icon.getIconWidth() + insets.left + insets.right, icon.getIconHeight() + insets.top + insets.bottom);
 
     }
-    
-    public Dimension getMinimumSize() {
-        return getPreferredSize();
 
-    }
-
-    public void paintComponent(Graphics g) {
+    @Override
+	public void paintComponent(Graphics g) {
         Insets insets = getInsets();
         if (!alignBottomRight) {
             // Paint the image at the top left hand side of the panel

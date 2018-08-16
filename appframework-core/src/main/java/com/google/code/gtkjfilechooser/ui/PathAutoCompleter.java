@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.google.code.gtkjfilechooser.ui;
 
@@ -32,10 +40,10 @@ import javax.swing.ListCellRenderer;
  */
 public class PathAutoCompleter extends Autocompleter {
 
-	private String currentPath;
-	private boolean showHidden = false;
-	private int fileSelectionMode = JFileChooser.FILES_AND_DIRECTORIES;
 	private javax.swing.filechooser.FileFilter currentFilter;
+	private String currentPath;
+	private int fileSelectionMode = JFileChooser.FILES_AND_DIRECTORIES;
+	private boolean showHidden = false;
 
 	public PathAutoCompleter(JTextField comp) {
 		super(comp);
@@ -46,12 +54,20 @@ public class PathAutoCompleter extends Autocompleter {
 		return currentPath;
 	}
 
+	public void setCurrentFilter(javax.swing.filechooser.FileFilter currentFilter) {
+		this.currentFilter = currentFilter;
+	}
+
+	public void setCurrentPath(String currentPath) {
+		this.currentPath = currentPath;
+	}
+
 	/**
 	 * Sets the auto completion to allow the user to justselect files, just
 	 * select directories, or select both files and directories. The default is
 	 * <code>JFileChooser.FILES_ONLY</code>.
 	 * 
-	 * @param mode
+	 * @param fileSelectionMode
 	 *            the type of files to be displayed:
 	 *            <ul>
 	 *            <li>JFileChooser.FILES_ONLY</li>
@@ -69,21 +85,32 @@ public class PathAutoCompleter extends Autocompleter {
 		this.fileSelectionMode = fileSelectionMode;
 	}
 
-	public void setCurrentFilter(javax.swing.filechooser.FileFilter currentFilter) {
-		this.currentFilter = currentFilter;
-	}
-
 	/**
 	 * Show hidden files?
 	 * 
-	 * @param showHidden
+	 * @param showHidden show hidden
 	 */
 	public void setShowHidden(boolean showHidden) {
 		this.showHidden = showHidden;
 	}
 
-	public void setCurrentPath(String currentPath) {
-		this.currentPath = currentPath;
+	@Override
+	protected ListCellRenderer getCellRenderer() {
+		return new DefaultListCellRenderer() {
+			@Override
+			public Component getListCellRendererComponent(JList list, Object value,
+					int index, boolean isSelected, boolean cellHasFocus) {
+				super.getListCellRendererComponent(list, value, index, isSelected,
+						cellHasFocus);
+
+				String suggestion = (String) value;
+				int lastIndexOf = suggestion.lastIndexOf(File.separatorChar);
+				if (lastIndexOf < suggestion.length() - 1) {
+					setText(suggestion.substring(lastIndexOf + 1));
+				}
+				return this;
+			}
+		};
 	}
 
 	@Override
@@ -145,25 +172,6 @@ public class PathAutoCompleter extends Autocompleter {
 
 	private boolean isAbsolute(String value) {
 		return new File(value).isAbsolute();
-	}
-
-	@Override
-	protected ListCellRenderer getCellRenderer() {
-		return new DefaultListCellRenderer() {
-			@Override
-			public Component getListCellRendererComponent(JList list, Object value,
-					int index, boolean isSelected, boolean cellHasFocus) {
-				super.getListCellRendererComponent(list, value, index, isSelected,
-						cellHasFocus);
-
-				String suggestion = (String) value;
-				int lastIndexOf = suggestion.lastIndexOf(File.separatorChar);
-				if (lastIndexOf < suggestion.length() - 1) {
-					setText(suggestion.substring(lastIndexOf + 1));
-				}
-				return this;
-			}
-		};
 	}
 
 }

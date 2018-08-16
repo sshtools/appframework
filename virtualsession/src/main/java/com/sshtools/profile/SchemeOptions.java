@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Virtual Session - Framework for a tabbed user interface of connections to some local or remote resources.
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /*
  */
@@ -29,19 +37,14 @@ import nanoxml.XMLElement;
  * @author $Author: brett $
  */
 public interface SchemeOptions {
-
 	/** Standard connection - just connect directly to the host */
 	public static final int USE_STANDARD_SOCKET = 1;
-
 	/** Connect to the host through a HTTP proxy */
 	public static final int USE_HTTP_PROXY = 2;
-
 	/** Connect to the host using a SOCKS 4 proxy */
 	public static final int USE_SOCKS4_PROXY = 3;
-
 	/** Connect to the host using a SOCKS 5 proxy */
 	public static final int USE_SOCKS5_PROXY = 4;
-
 	/** Connect to the host using an SSL-Explorer proxy **/
 	public static final int USE_SSL_EXPLORER_PROXY = 5;
 
@@ -50,10 +53,8 @@ public interface SchemeOptions {
 	 * a new profile. If <code>null</code> is provided as the element, default
 	 * options will be set.
 	 * 
-	 * @param element
-	 *            SchemeOptions element
-	 * @throws ProfileException
-	 *             if any data provided by the element is invalid
+	 * @param element SchemeOptions element
+	 * @throws ProfileException if any data provided by the element is invalid
 	 */
 	public void init(XMLElement element) throws ProfileException;
 
@@ -68,7 +69,7 @@ public interface SchemeOptions {
 	/**
 	 * Return if these options are appropriate for a scheme
 	 * 
-	 * @param schemeName
+	 * @param schemeName scheme name
 	 * @return <code>true</code> if these options are appropriate for a scheme
 	 */
 	public boolean isAppropriateForScheme(String schemeName);
@@ -77,7 +78,7 @@ public interface SchemeOptions {
 	 * The type of transport to communicate over. This will be one of the proxy
 	 * settings defined on this interface
 	 * 
-	 * @return
+	 * @return transport code
 	 */
 	public int getTransportProvider();
 
@@ -85,6 +86,7 @@ public interface SchemeOptions {
 	 * Clone these scheme options.
 	 * 
 	 * @return cloned scheme options
+	 * @throws CloneNotSupportedException if cloning is not support
 	 */
 	public Object clone() throws CloneNotSupportedException;
 

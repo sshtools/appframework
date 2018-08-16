@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.google.code.gtkjfilechooser;
 
@@ -30,9 +38,11 @@ public class ButtonAreaLayout implements LayoutManager {
 	
 	private int topMargin = 17;
 
+	@Override
 	public void addLayoutComponent(String string, Component comp) {
 	}
 
+	@Override
 	public void layoutContainer(Container container) {
 		Component[] children = container.getComponents();
 
@@ -63,6 +73,7 @@ public class ButtonAreaLayout implements LayoutManager {
 		}
 	}
 
+	@Override
 	public Dimension minimumLayoutSize(Container c) {
 		if (c != null) {
 			Component[] children = c.getComponents();
@@ -87,10 +98,12 @@ public class ButtonAreaLayout implements LayoutManager {
 		return new Dimension(0, 0);
 	}
 
+	@Override
 	public Dimension preferredLayoutSize(Container c) {
 		return minimumLayoutSize(c);
 	}
 
+	@Override
 	public void removeLayoutComponent(Component c) {
 	}
 }

@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.google.code.gtkjfilechooser.ui;
 
@@ -22,11 +30,6 @@ import javax.swing.Icon;
 public class MissingResourceIcon implements Icon {
 
 	/**
-	 * Width
-	 */
-	private int w;
-
-	/**
 	 * Height
 	 */
 	private int h;
@@ -35,21 +38,37 @@ public class MissingResourceIcon implements Icon {
 	 * Margin
 	 */
 	private int mx = 2;
-	private int my = 2;
 
-	public MissingResourceIcon(int w, int h) {
-		this.w = w;
-		this.h = h;
+	private int my = 2;
+	/**
+	 * Width
+	 */
+	private int w;
+
+	public MissingResourceIcon() {
+		this(16, 16);
 	}
 
 	public MissingResourceIcon(int x) {
 		this(x, x);
 	}
 
-	public MissingResourceIcon() {
-		this(16, 16);
+	public MissingResourceIcon(int w, int h) {
+		this.w = w;
+		this.h = h;
 	}
 
+	@Override
+	public int getIconHeight() {
+		return h;
+	}
+
+	@Override
+	public int getIconWidth() {
+		return w;
+	}
+
+	@Override
 	public void paintIcon(Component c, Graphics g, int x, int y) {
 		Graphics2D g2d = (Graphics2D) g.create();
 
@@ -75,14 +94,6 @@ public class MissingResourceIcon implements Icon {
 		g2d.draw(cross);
 
 		g2d.dispose();
-	}
-
-	public int getIconWidth() {
-		return w;
-	}
-
-	public int getIconHeight() {
-		return h;
 	}
 
 }

@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /**
  * 
@@ -44,9 +52,9 @@ public class MessagePanel extends GradientPanel {
 	}
 
 	public enum Type {
-		progress(new Color(251, 255, 139), Color.black, null), error(new Color(255, 68, 59), Color.white,
+		error(new Color(255, 68, 59), Color.white,
 				new ResourceIcon("/images/error-24x24.png")), hidden(null, null, null), information(
-						new Color(59, 133, 255), Color.white, new ResourceIcon("/images/information-24x24.png"));
+						new Color(59, 133, 255), Color.white, new ResourceIcon("/images/information-24x24.png")), progress(new Color(251, 255, 139), Color.black, null);
 
 		Color background;
 		Color foreground;
@@ -57,130 +65,6 @@ public class MessagePanel extends GradientPanel {
 			this.foreground = foreground;
 			this.icon = icon;
 		}
-	}
-
-	private JLabel message;
-	private JLabel icon;
-	private JPanel progressPanel;
-	private JProgressBar progressBar;
-	private JPanel actionsPanel;
-	private boolean cancelled;
-	private BlockingQueue updates;
-	private BlockingQueue waitQueue;
-	private Thread updateThread;
-	private boolean stopUpdateThread;
-	private int progress;
-	private List<Listener> listeners = new ArrayList<Listener>();
-
-	private Object lock = new Object();
-
-	public MessagePanel() {
-		this(Type.hidden);
-	}
-
-	public MessagePanel(Type type) {
-		super(new MigLayout("wrap 3, hidemode 3", "[][fill,grow][]", "push[][]push"));
-		setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-		setOpaque(true);
-
-		add(icon = new JLabel());
-		add(message = new JLabel());
-		actionsPanel = new JPanel(new MigLayout());
-		actionsPanel.setOpaque(false);
-		add(actionsPanel);
-		progressPanel = new JPanel(new BorderLayout());
-		progressPanel.setOpaque(false);
-		progressBar = new JProgressBar();
-		progressPanel.add(progressBar, BorderLayout.CENTER);
-		add(progressPanel, "span 2, wrap");
-
-		updates = new ArrayBlockingQueue(100, true);
-		waitQueue = new ArrayBlockingQueue(3, true);
-
-	}
-
-	public void addListener(Listener listener) {
-		listeners.add(listener);
-	}
-
-	public void removeListener(Listener listener) {
-		listeners.remove(listener);
-	}
-
-	public void setProgressMaximum(int max) {
-		progressBar.setMaximum(max);
-	}
-
-	public void setProgressValue(int val) {
-		progressBar.setValue(val);
-		clearUpdates();
-	}
-
-	public synchronized void setIcon(Icon icon) {
-		clearUpdates();
-		this.icon.setIcon(icon);
-	}
-
-	public void setMessage(String message) {
-		clearUpdates();
-		this.message.setText(message);
-	}
-
-	public void setType(Type type) {
-		invalidate();
-		setBackground(type.background);
-		setForeground(type.foreground);
-		setVisible(!type.equals(Type.hidden));
-		setIcon(type.icon);
-		progressPanel.setVisible(type.equals(Type.progress));
-		actionsPanel.setVisible(false);
-		validate();
-		repaint();
-		if (type.equals(Type.progress)) {
-			setActions(new AppAction[] { new CancelAction() });
-		} else {
-			setActions(null);
-		}
-	}
-
-	public void setActions(AppAction[] actions) {
-		invalidate();
-		actionsPanel.removeAll();
-		if (actions != null) {
-			for (AppAction action : actions) {
-				JButton button = new JButton(action);
-				actionsPanel.add(button);
-			}
-		}
-		actionsPanel.setVisible(actionsPanel.getComponentCount() > 0);
-		validate();
-		repaint();
-	}
-
-	public void updateProgress(int progress, String message, boolean wait) {
-		synchronized (lock) {
-			if (updateThread == null) {
-				stopUpdateThread = false;
-				updateThread = new UpdateThread();
-			}
-		}
-		Update update = new Update(message, progress);
-		waitQueue.clear();
-		try {
-			updates.put(update);
-			if (wait && updates.size() > 0) {
-				waitQueue.take();
-			}
-		} catch (InterruptedException e1) {
-		}
-	}
-	
-	public void uncancel() {
-		cancelled = false;
-	}
-
-	public boolean isCancelled() {
-		return cancelled;
 	}
 
 	class CancelAction extends AppAction {
@@ -199,35 +83,59 @@ public class MessagePanel extends GradientPanel {
 		}
 
 	}
+	class Update {
+		int progress;
+		String text;
 
-	public void error(String mesg, Throwable exception) {
-		setType(Type.error);
-		StringBuffer buf = new StringBuffer("<html>");
-		if (mesg != null) {
-			buf.append(mesg.replace("\n", " ") + ""); //$NON-NLS-1$
+		Update(String text, int progress) {
+			this.text = text;
+			this.progress = progress;
+		}
+	}
+	class UpdateThread extends Thread {
+		UpdateThread() {
+			super("ProgressUpdateThread");
+			start();
+			progress = 0;
 		}
 
-		// Search up the exception chain until we get a message
-		while (exception != null) {
-			String message = exception.getLocalizedMessage();
-			if (message == null) {
-				message = exception.getMessage();
+		@Override
+		public void run() {
+			try {
+				while (!stopUpdateThread) {
+					consume(updates.take());
+				}
+			} catch (Exception e) {
 			}
-			if (message != null) {
-				message = message.trim().replace("\n", " ");
-				buf.append(message);
-				if (!message.trim().endsWith(".")) {
-					buf.append(". ");
+			updateThread = null;
+		}
+
+		void consume(Object o) throws InterruptedException, InvocationTargetException {
+			final Update update = (Update) o;
+			while (!stopUpdateThread && progress < update.progress) {
+				progress += 2;
+				SwingUtilities.invokeAndWait(new Runnable() {
+					@Override
+					public void run() {
+						progressBar.setValue(progress);
+					}
+				});
+			}
+			SwingUtilities.invokeAndWait(new Runnable() {
+				@Override
+				public void run() {
+					progressBar.setValue(update.progress);
+					message.setText(update.text);
+				}
+			});
+			if (updates.size() == 0) {
+				try {
+					waitQueue.put(Boolean.TRUE);
+				} catch (InterruptedException e) {
 				}
 			}
-			exception = exception.getCause();
 		}
-
-		// appendException(exception, 0, buf, false);/
-		buf.append("</html>");
-		setMessage(buf.toString());
 	}
-
 	protected static void appendException(Throwable exception, int level, StringBuffer buf, boolean details) {
 		try {
 			if (((exception != null) && (exception.getMessage() != null)) && (exception.getMessage().length() > 0)) {
@@ -261,6 +169,161 @@ public class MessagePanel extends GradientPanel {
 		} catch (Throwable ex) {
 		}
 	}
+	private JPanel actionsPanel;
+	private boolean cancelled;
+	private JLabel icon;
+	private List<Listener> listeners = new ArrayList<Listener>();
+	private Object lock = new Object();
+	private JLabel message;
+	private int progress;
+	private JProgressBar progressBar;
+
+	private JPanel progressPanel;
+
+	private boolean stopUpdateThread;
+
+	private BlockingQueue updates;
+
+	private Thread updateThread;
+
+	private BlockingQueue waitQueue;
+
+	public MessagePanel() {
+		this(Type.hidden);
+	}
+
+	public MessagePanel(Type type) {
+		super(new MigLayout("wrap 3, hidemode 3", "[][fill,grow][]", "push[][]push"));
+		setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+		setOpaque(true);
+
+		add(icon = new JLabel());
+		add(message = new JLabel());
+		actionsPanel = new JPanel(new MigLayout());
+		actionsPanel.setOpaque(false);
+		add(actionsPanel);
+		progressPanel = new JPanel(new BorderLayout());
+		progressPanel.setOpaque(false);
+		progressBar = new JProgressBar();
+		progressPanel.add(progressBar, BorderLayout.CENTER);
+		add(progressPanel, "span 2, wrap");
+
+		updates = new ArrayBlockingQueue(100, true);
+		waitQueue = new ArrayBlockingQueue(3, true);
+
+	}
+
+	public void addListener(Listener listener) {
+		listeners.add(listener);
+	}
+
+	public void error(String mesg, Throwable exception) {
+		setType(Type.error);
+		StringBuffer buf = new StringBuffer("<html>");
+		if (mesg != null) {
+			buf.append(mesg.replace("\n", " ") + ""); //$NON-NLS-1$
+		}
+
+		// Search up the exception chain until we get a message
+		while (exception != null) {
+			String message = exception.getLocalizedMessage();
+			if (message == null) {
+				message = exception.getMessage();
+			}
+			if (message != null) {
+				message = message.trim().replace("\n", " ");
+				buf.append(message);
+				if (!message.trim().endsWith(".")) {
+					buf.append(". ");
+				}
+			}
+			exception = exception.getCause();
+		}
+
+		// appendException(exception, 0, buf, false);/
+		buf.append("</html>");
+		setMessage(buf.toString());
+	}
+
+	public boolean isCancelled() {
+		return cancelled;
+	}
+
+	public void removeListener(Listener listener) {
+		listeners.remove(listener);
+	}
+
+	public void setActions(AppAction[] actions) {
+		invalidate();
+		actionsPanel.removeAll();
+		if (actions != null) {
+			for (AppAction action : actions) {
+				JButton button = new JButton(action);
+				actionsPanel.add(button);
+			}
+		}
+		actionsPanel.setVisible(actionsPanel.getComponentCount() > 0);
+		validate();
+		repaint();
+	}
+	
+	public synchronized void setIcon(Icon icon) {
+		clearUpdates();
+		this.icon.setIcon(icon);
+	}
+
+	public void setMessage(String message) {
+		clearUpdates();
+		this.message.setText(message);
+	}
+
+	public void setProgressMaximum(int max) {
+		progressBar.setMaximum(max);
+	}
+
+	public void setProgressValue(int val) {
+		progressBar.setValue(val);
+		clearUpdates();
+	}
+
+	public void setType(Type type) {
+		invalidate();
+		setBackground(type.background);
+		setForeground(type.foreground);
+		setVisible(!type.equals(Type.hidden));
+		setIcon(type.icon);
+		progressPanel.setVisible(type.equals(Type.progress));
+		actionsPanel.setVisible(false);
+		validate();
+		repaint();
+		if (type.equals(Type.progress)) {
+			setActions(new AppAction[] { new CancelAction() });
+		} else {
+			setActions(null);
+		}
+	}
+
+	public void uncancel() {
+		cancelled = false;
+	}
+
+	public void updateProgress(int progress, String message, boolean wait) {
+		synchronized (lock) {
+			if (updateThread == null) {
+				stopUpdateThread = false;
+				updateThread = new UpdateThread();
+			}
+		}
+		Update update = new Update(message, progress);
+		waitQueue.clear();
+		try {
+			updates.put(update);
+			if (wait && updates.size() > 0) {
+				waitQueue.take();
+			}
+		} catch (InterruptedException e1) {
+		}
+	}
 
 	private void clearUpdates() {
 		if (updateThread != null) {
@@ -277,58 +340,6 @@ public class MessagePanel extends GradientPanel {
 				}
 				updates.clear();
 			} catch (InterruptedException e) {
-			}
-		}
-	}
-
-	class Update {
-		String text;
-		int progress;
-
-		Update(String text, int progress) {
-			this.text = text;
-			this.progress = progress;
-		}
-	}
-
-	class UpdateThread extends Thread {
-		UpdateThread() {
-			super("ProgressUpdateThread");
-			start();
-			progress = 0;
-		}
-
-		public void run() {
-			try {
-				while (!stopUpdateThread) {
-					consume(updates.take());
-				}
-			} catch (Exception e) {
-			}
-			updateThread = null;
-		}
-
-		void consume(Object o) throws InterruptedException, InvocationTargetException {
-			final Update update = (Update) o;
-			while (!stopUpdateThread && progress < update.progress) {
-				progress += 2;
-				SwingUtilities.invokeAndWait(new Runnable() {
-					public void run() {
-						progressBar.setValue(progress);
-					}
-				});
-			}
-			SwingUtilities.invokeAndWait(new Runnable() {
-				public void run() {
-					progressBar.setValue(update.progress);
-					message.setText(update.text);
-				}
-			});
-			if (updates.size() == 0) {
-				try {
-					waitQueue.put(Boolean.TRUE);
-				} catch (InterruptedException e) {
-				}
 			}
 		}
 	}

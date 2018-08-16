@@ -1,14 +1,21 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /* HEADER */
-
 package com.sshtools.appframework.ui.wizard;
 
 import java.awt.BorderLayout;
@@ -18,6 +25,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 import com.sshtools.appframework.ui.TextBox;
@@ -30,9 +38,9 @@ public class WizardWelcomePanel extends JPanel {
 	/**
 	 * Creates a new WizardWelcomePanel object.
 	 * 
-	 * @param title
-	 * @param description
-	 * @param icon
+	 * @param title title
+	 * @param description description
+	 * @param icon icon
 	 */
 	public WizardWelcomePanel(String title, String description, Icon icon) {
 		this.icon = icon;
@@ -45,6 +53,14 @@ public class WizardWelcomePanel extends JPanel {
 		}
 	}
 
+	/**
+	 * Creates a new WizardWelcomePanel object.
+	 * 
+	 * @param title title
+	 * @param description description
+	 * @param icon icon
+	 * @param welcomeLabel wecome label
+	 */
 	public WizardWelcomePanel(String title, String description, Icon icon, JLabel welcomeLabel) {
 		this.icon = icon;
 		this.description = description;
@@ -63,7 +79,6 @@ public class WizardWelcomePanel extends JPanel {
 		top.setOpaque(false);
 		top.setBorder(BorderFactory.createEmptyBorder(16, 16, 0, 8));
 		TextBox welcomeTitle = new TextBox(title);
-
 		// Add the welcome label if we have one
 		if (welcomeLabel == null) {
 			welcomeTitle.setFont(new java.awt.Font("Dialog", 1, 16));
@@ -72,7 +87,6 @@ public class WizardWelcomePanel extends JPanel {
 		} else {
 			top.add(welcomeLabel, BorderLayout.CENTER);
 		}
-
 		JPanel middle = new JPanel(new BorderLayout());
 		middle.setOpaque(false);
 		middle.setBorder(BorderFactory.createEmptyBorder(24, 16, 0, 8));
@@ -87,6 +101,7 @@ public class WizardWelcomePanel extends JPanel {
 		bottom.setOpaque(false);
 		// Side bar
 		JPanel left = new JPanel(new BorderLayout()) {
+			@Override
 			public Dimension getPreferredSize() {
 				return new Dimension(120, super.getPreferredSize().height);
 			}
@@ -97,8 +112,8 @@ public class WizardWelcomePanel extends JPanel {
 		left.setDebugGraphicsOptions(0);
 		JLabel welcomeIcon = new JLabel();
 		welcomeIcon.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-		welcomeIcon.setHorizontalAlignment(JLabel.CENTER);
-		welcomeIcon.setVerticalAlignment(JLabel.TOP);
+		welcomeIcon.setHorizontalAlignment(SwingConstants.CENTER);
+		welcomeIcon.setVerticalAlignment(SwingConstants.TOP);
 		welcomeIcon.setIcon(icon);
 		left.add(welcomeIcon, BorderLayout.NORTH);
 		// Right

@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /*
  * Copyright 2010 Costantino Cerbo.  All Rights Reserved.
@@ -45,20 +53,17 @@ import java.io.IOException;
  * "libgtk-x11-2.0.so.0.600.7" is GTK+ 2.6.7, "libgtk-x11-2.0.so.0.1600.1" is
  * GTK+ 2.16.1 an so on...
  * </p>
+ * <p> See <a href="http://library.gnome.org/devel/gtk/unstable/gtk-Feature-Test-Macros.html">gtk-Feature-Test-Macros.html</a>
+ * and <a href="http://git.gnome.org/cgit/gtk+/tree/gtk/gtkversion.h.in">gtkversion.h.in</a> 
  * 
- * 
- * 
- * @see {@link http
- *      ://library.gnome.org/devel/gtk/unstable/gtk-Feature-Test-Macros.html}
- * @see {@link http://git.gnome.org/cgit/gtk+/tree/gtk/gtkversion.h.in}
  * 
  * @author Costantino Cerbo
  * 
  */
 public class GtkVersion {
 	static int gtkMajorVersion;
-	static int gtkMinorVersion;
 	static int gtkMicroVersion;
+	static int gtkMinorVersion;
 	static {
 		gtkMajorVersion = 2;
 		gtkMinorVersion = Short.MAX_VALUE;
@@ -93,9 +98,9 @@ public class GtkVersion {
 	 * Checks that the GTK+ library in use is compatible (the same or newer)
 	 * with the given version.
 	 * 
-	 * @param required_major
-	 * @param required_minor
-	 * @param required_micro
+	 * @param major required major
+	 * @param minor required minor
+	 * @param micro required micro
 	 * @return {@code null} if the GTK+ library is compatible with the given
 	 *         version, or a string describing the version mismatch. The
 	 *         returned string is owned by GTK+ and should not be modified or

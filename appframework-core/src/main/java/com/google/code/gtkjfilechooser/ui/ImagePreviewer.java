@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.google.code.gtkjfilechooser.ui;
 
@@ -22,6 +30,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 /**
  * Panel to provide {@link JFileChooser} a preview for images. Simply set it as
@@ -36,15 +45,15 @@ import javax.swing.JPanel;
  * 
  */
 public class ImagePreviewer extends JPanel implements PropertyChangeListener {
-	private static final int SCALED_WIDTH = 180;
 	private static final int OFFSET = 20;
+	private static final int SCALED_WIDTH = 180;
 	ImageIcon thumbnail = null;
 	private JLabel filenameLabel;
 	private JLabel previewLabel;
 
 	public ImagePreviewer(JFileChooser fc) {
-		filenameLabel = new JLabel("", JLabel.CENTER);
-		previewLabel = new JLabel("", JLabel.CENTER);
+		filenameLabel = new JLabel("", SwingConstants.CENTER);
+		previewLabel = new JLabel("", SwingConstants.CENTER);
 
 		setLayout(new BorderLayout());
 		setPreferredSize(new Dimension(SCALED_WIDTH + OFFSET, -1));
@@ -74,6 +83,7 @@ public class ImagePreviewer extends JPanel implements PropertyChangeListener {
 		}
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent e) {
 		String property = e.getPropertyName();
 		if (SELECTED_FILE_CHANGED_PROPERTY.equals(property)) {

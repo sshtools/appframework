@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.google.code.gtkjfilechooser;
 
@@ -17,20 +25,13 @@ import java.lang.reflect.Method;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 
-import com.sun.java.swing.plaf.gtk.GTKConstants.ArrowType;
+import com.google.code.gtkjfilechooser.GTKConstants.ArrowType;
 
 /**
  * @author Costantino Cerbo
  * 
  */
 public class GtkArrow extends JLabel {
-
-	private ArrowType type;
-
-	public GtkArrow(ArrowType type) {
-		super(null, get(type), CENTER);
-		this.type = type;
-	}
 
 	static public Icon get(ArrowType type) {
 		try {
@@ -46,6 +47,13 @@ public class GtkArrow extends JLabel {
 		} catch (Throwable e) {
 			return null;
 		}
+	}
+
+	private ArrowType type;
+
+	public GtkArrow(ArrowType type) {
+		super(null, get(type), CENTER);
+		this.type = type;
 	}
 
 	@Override

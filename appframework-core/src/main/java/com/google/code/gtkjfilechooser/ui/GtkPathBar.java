@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.google.code.gtkjfilechooser.ui;
 
@@ -35,44 +43,44 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 
 import com.google.code.gtkjfilechooser.FreeDesktopUtil;
+import com.google.code.gtkjfilechooser.FreeDesktopUtil.WellKnownDir;
+import com.google.code.gtkjfilechooser.GTKConstants.ArrowType;
 import com.google.code.gtkjfilechooser.GtkArrow;
 import com.google.code.gtkjfilechooser.GtkStockIcon;
-import com.google.code.gtkjfilechooser.FreeDesktopUtil.WellKnownDir;
 import com.google.code.gtkjfilechooser.GtkStockIcon.Size;
-import com.sun.java.swing.plaf.gtk.GTKConstants.ArrowType;
 
 
 public class GtkPathBar extends JPanel {
 
-	private static final String DIRECTORY_INDEX = "directory index";
-
 	private static final int BUTTON_HEIGHT = 34;
 
+	private static final String DIRECTORY_INDEX = "directory index";
+
 	private static final long serialVersionUID = 1L;
-
-	private JToggleButton selectedButton;
-
-	/**
-	 * Group of buttons for the directories
-	 */
-	private ButtonGroup dirButtonsgroup;
 
 	/**
 	 * Number of visible buttons
 	 */
 	static private int VISIBLE_BUTTONS = 6;
 
-	private int currentStartIndex = 0;
+	private List<ActionListener> actionListeners = new ArrayList<ActionListener>();
 
-	private String[] directories;
+	private JButton backButton;
+
+	private JPanel buttonsPanel;
 
 	private String currentDirectory;
 
-	private JButton backButton;
-	private JPanel buttonsPanel;
+	private int currentStartIndex = 0;
+
+	/**
+	 * Group of buttons for the directories
+	 */
+	private ButtonGroup dirButtonsgroup;
+	private String[] directories;
 	private JButton forwardButton;
 
-	private List<ActionListener> actionListeners = new ArrayList<ActionListener>();
+	private JToggleButton selectedButton;
 
 	public GtkPathBar(File location) {
 		setDirectories(location);
@@ -93,11 +101,35 @@ public class GtkPathBar extends JPanel {
 		selectButton(directories.length - 1);
 	}
 
-	private FlowLayout flowLayout(int align) {
-		FlowLayout flowLayout = new FlowLayout(align, 0, 5);
-		flowLayout.setAlignOnBaseline(true);
+	public void addActionListener(ActionListener l) {
+		actionListeners.add(l);
+	}
 
-		return flowLayout;
+	public void downFolder() {
+		Enumeration<AbstractButton> buttons = dirButtonsgroup.getElements();
+		AbstractButton previousButton = null;
+		while (buttons.hasMoreElements()) {
+			AbstractButton button = buttons.nextElement();
+			if (button.isSelected()) {
+				if (previousButton != null) {
+					previousButton.doClick();
+				}
+			}
+
+			previousButton = button;
+		}
+	}
+
+	public List<ActionListener> getActionListeners() {
+		return actionListeners;
+	}
+
+	public File getCurrentDirectory() {
+		return new File(currentDirectory);
+	}
+
+	public void removeActionListener(ActionListener l) {
+		actionListeners.remove(l);
 	}
 
 	public void setCurrentDirectory(File location) {
@@ -114,20 +146,17 @@ public class GtkPathBar extends JPanel {
 		selectButton(directories.length - 1);
 	}
 
-	public File getCurrentDirectory() {
-		return new File(currentDirectory);
-	}
-
-	public void addActionListener(ActionListener l) {
-		actionListeners.add(l);
-	}
-
-	public void removeActionListener(ActionListener l) {
-		actionListeners.remove(l);
-	}
-
-	public List<ActionListener> getActionListeners() {
-		return actionListeners;
+	public void upFolder() {
+		Enumeration<AbstractButton> buttons = dirButtonsgroup.getElements();
+		while (buttons.hasMoreElements()) {
+			AbstractButton button = buttons.nextElement();
+			if (button.isSelected()) {
+				if (buttons.hasMoreElements()) {
+					AbstractButton nextButton = buttons.nextElement();
+					nextButton.doClick();
+				}
+			}
+		}
 	}
 
 	private JButton createBackButton() {
@@ -147,12 +176,6 @@ public class GtkPathBar extends JPanel {
 			}
 		});
 		return backButton;
-	}
-
-	private void setStandardHeight(JButton backButton) {
-		Dimension size = backButton.getPreferredSize();
-		size.height = BUTTON_HEIGHT;
-		backButton.setPreferredSize(size);
 	}
 
 	private void createButtonsPanel() {
@@ -246,33 +269,6 @@ public class GtkPathBar extends JPanel {
 		}
 	}
 
-	private void updateCurrentDir() {
-		int dirIndex = (Integer) selectedButton
-				.getClientProperty(DIRECTORY_INDEX);
-
-		if (dirIndex == 0) {
-			// If zero, it's the root dir (it's the only button with no text but
-			// just an icon)
-			currentDirectory = File.separator;
-			return;
-		}
-
-		StringBuilder sb = new StringBuilder(File.separator);
-		for (int i = 1; i <= dirIndex; i++) {
-			sb.append(directories[i]);
-			sb.append(File.separator);
-		}
-		currentDirectory = sb.toString();
-	}
-
-	private File getDirectory(int n) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i <= n; i++) {
-			sb.append(directories[i]).append(File.separator);
-		}
-		return new File(sb.toString());
-	}
-
 	private JButton createForwardButton() {
 		JButton forwardButton = new JButton();
 		forwardButton.add(new GtkArrow(ArrowType.RIGHT));
@@ -293,14 +289,19 @@ public class GtkPathBar extends JPanel {
 		return forwardButton;
 	}
 
-	private void showButtons(int startIndex, int endIndex) {
-		Enumeration<AbstractButton> buttons = dirButtonsgroup.getElements();
-		int count = 0;
-		while (buttons.hasMoreElements()) {
-			AbstractButton button = buttons.nextElement();
-			button.setVisible(count >= startIndex && count <= endIndex);
-			count++;
+	private FlowLayout flowLayout(int align) {
+		FlowLayout flowLayout = new FlowLayout(align, 0, 5);
+		flowLayout.setAlignOnBaseline(true);
+
+		return flowLayout;
+	}
+
+	private File getDirectory(int n) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i <= n; i++) {
+			sb.append(directories[i]).append(File.separator);
 		}
+		return new File(sb.toString());
 	}
 
 	private void selectButton(int index) {
@@ -314,34 +315,6 @@ public class GtkPathBar extends JPanel {
 			}
 
 			count++;
-		}
-	}
-
-	public void upFolder() {
-		Enumeration<AbstractButton> buttons = dirButtonsgroup.getElements();
-		while (buttons.hasMoreElements()) {
-			AbstractButton button = buttons.nextElement();
-			if (button.isSelected()) {
-				if (buttons.hasMoreElements()) {
-					AbstractButton nextButton = buttons.nextElement();
-					nextButton.doClick();
-				}
-			}
-		}
-	}
-
-	public void downFolder() {
-		Enumeration<AbstractButton> buttons = dirButtonsgroup.getElements();
-		AbstractButton previousButton = null;
-		while (buttons.hasMoreElements()) {
-			AbstractButton button = buttons.nextElement();
-			if (button.isSelected()) {
-				if (previousButton != null) {
-					previousButton.doClick();
-				}
-			}
-
-			previousButton = button;
 		}
 	}
 
@@ -370,5 +343,40 @@ public class GtkPathBar extends JPanel {
 		dirs[0] = File.separator;
 
 		directories = dirs;
+	}
+
+	private void setStandardHeight(JButton backButton) {
+		Dimension size = backButton.getPreferredSize();
+		size.height = BUTTON_HEIGHT;
+		backButton.setPreferredSize(size);
+	}
+
+	private void showButtons(int startIndex, int endIndex) {
+		Enumeration<AbstractButton> buttons = dirButtonsgroup.getElements();
+		int count = 0;
+		while (buttons.hasMoreElements()) {
+			AbstractButton button = buttons.nextElement();
+			button.setVisible(count >= startIndex && count <= endIndex);
+			count++;
+		}
+	}
+
+	private void updateCurrentDir() {
+		int dirIndex = (Integer) selectedButton
+				.getClientProperty(DIRECTORY_INDEX);
+
+		if (dirIndex == 0) {
+			// If zero, it's the root dir (it's the only button with no text but
+			// just an icon)
+			currentDirectory = File.separator;
+			return;
+		}
+
+		StringBuilder sb = new StringBuilder(File.separator);
+		for (int i = 1; i <= dirIndex; i++) {
+			sb.append(directories[i]);
+			sb.append(File.separator);
+		}
+		currentDirectory = sb.toString();
 	}
 }

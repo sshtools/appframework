@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /* HEADER */
 
@@ -23,6 +31,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 import com.sshtools.appframework.ui.TextBox;
@@ -30,9 +39,9 @@ import com.sshtools.ui.swing.UIUtil;
 
 public class WizardFinishPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
-	private TextBox title, description, summary, nameDescription;
 	private JLabel icon;
 	private JTextField name;
+	private TextBox title, description, summary, nameDescription;
 
 	public WizardFinishPanel() {
 		try {
@@ -40,6 +49,39 @@ public class WizardFinishPanel extends JPanel {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	public String getSelectedName() {
+		return name.getText();
+	}
+
+	public void setDefaultName(String name) {
+		this.name.setText(name);
+	}
+
+	public void setDescription(String description) {
+		this.description.setText(description);
+	}
+
+	public void setIcon(Icon icon) {
+		this.icon.setIcon(icon);
+	}
+
+	public void setNameVisible(boolean nameVisible) {
+		name.setVisible(nameVisible);
+		nameDescription.setVisible(nameVisible);
+	}
+
+	public void setSelectNameDescription(String str) {
+		nameDescription.setText(str);
+	}
+
+	public void setSummary(String summary) {
+		this.summary.setText(summary);
+	}
+
+	public void setTitle(String title) {
+		this.title.setText(title);
 	}
 
 	void jbInit() throws Exception {
@@ -80,6 +122,7 @@ public class WizardFinishPanel extends JPanel {
 		JPanel left = new JPanel(new BorderLayout()) {
 			private static final long serialVersionUID = 1L;
 
+			@Override
 			public Dimension getPreferredSize() {
 				return new Dimension(120, super.getPreferredSize().height);
 			}
@@ -89,8 +132,8 @@ public class WizardFinishPanel extends JPanel {
 		left.setOpaque(true);
 		icon = new JLabel();
 		icon.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-		icon.setHorizontalAlignment(JLabel.CENTER);
-		icon.setVerticalAlignment(JLabel.TOP);
+		icon.setHorizontalAlignment(SwingConstants.CENTER);
+		icon.setVerticalAlignment(SwingConstants.TOP);
 		left.add(icon, BorderLayout.NORTH);
 		// Right
 		JPanel right = new JPanel(new GridBagLayout());
@@ -109,38 +152,5 @@ public class WizardFinishPanel extends JPanel {
 		this.setForeground(UIManager.getColor("Scrollpane.foreground"));
 		this.add(left, BorderLayout.WEST);
 		this.add(right, BorderLayout.CENTER);
-	}
-
-	public void setNameVisible(boolean nameVisible) {
-		name.setVisible(nameVisible);
-		nameDescription.setVisible(nameVisible);
-	}
-
-	public void setSummary(String summary) {
-		this.summary.setText(summary);
-	}
-
-	public void setSelectNameDescription(String str) {
-		nameDescription.setText(str);
-	}
-
-	public void setDefaultName(String name) {
-		this.name.setText(name);
-	}
-
-	public String getSelectedName() {
-		return name.getText();
-	}
-
-	public void setTitle(String title) {
-		this.title.setText(title);
-	}
-
-	public void setDescription(String description) {
-		this.description.setText(description);
-	}
-
-	public void setIcon(Icon icon) {
-		this.icon.setIcon(icon);
 	}
 }

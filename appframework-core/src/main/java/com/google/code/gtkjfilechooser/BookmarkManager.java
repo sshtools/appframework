@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.google.code.gtkjfilechooser;
 
@@ -31,6 +39,55 @@ import java.util.Scanner;
 public class BookmarkManager implements Serializable {
 
 
+	/**
+	 * Inner Class
+	 * 
+	 * Bookmark entity
+	 */
+	public class GtkBookmark extends BasicPath {
+
+		private static final long serialVersionUID = 1L;
+
+		public GtkBookmark() {
+			super();
+		}
+
+		public GtkBookmark(String name, File location) {
+			setName(name);
+			setLocation(location.getAbsolutePath());
+		}
+
+		public GtkBookmark(String name, String location) {
+			setName(name);
+			setLocation(location);
+		}
+
+		@Override
+		public String getIconName() {
+			return "gtk-directory";
+		}
+
+		public void setLocation(String location) {
+			this.location = location;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+
+
+		public String toGtkString() {
+			String loc = encode(getLocation());
+			return "file://" + loc + " " + getName();
+		}
+
+		@Override
+		public String toString() {
+			return getName() + " = " + getLocation();
+		}
+	}
+
 	private static final long serialVersionUID = 1L;
 
 	private File bookmarkfile;
@@ -48,6 +105,7 @@ public class BookmarkManager implements Serializable {
 	 * @param name
 	 *            the name of the bookmark. If {@code null}, the name is the
 	 *            simple directory name.
+	 * @return bookmark
 	 */
 	public GtkBookmark add(File dir, String name) {
 		if (!dir.exists()) {
@@ -80,7 +138,7 @@ public class BookmarkManager implements Serializable {
 	/**
 	 * Delete bookmark by name
 	 * 
-	 * @param name
+	 * @param name name of bookmark
 	 */
 	public void delete(String name) {
 		String[] lines = null;
@@ -105,50 +163,6 @@ public class BookmarkManager implements Serializable {
 
 				// If the current name differs, write it again in file
 				if (!currentName.equals(name)) {
-					pw.println(line);
-				}
-			}
-		} catch (Exception e) {
-			throw new IOError(e);
-		} finally {
-			if (pw != null) {
-				pw.close();
-			}
-		}
-	}
-
-	/**
-	 * Rename a bookmark
-	 * 
-	 * @param oldName
-	 * @param newName
-	 */
-	public void rename(String oldName, String newName) {
-		String[] lines = null;
-		PrintWriter pw = null;
-		try {
-			lines = toStringArray(bookmarkfile);
-			pw = new PrintWriter(new FileWriter(bookmarkfile, false));
-			for (String line : lines) {
-
-				String currentName = null;
-				String location = null;
-				int spaceIndex = line.indexOf(' ');
-				if (spaceIndex != -1) {
-					// Specific name
-					currentName = line.substring(spaceIndex + 1);
-					location = line.substring(0, spaceIndex);
-				} else {
-					// Standard name (the part after the last file separator)
-					int lastSeparator = line.lastIndexOf(File.separatorChar);
-					currentName = line.substring(lastSeparator + 1);
-					location = line;
-				}
-
-				// If the current name differs, write it again in file
-				if (currentName.equals(oldName)) {
-					pw.println(location + " " + newName);
-				} else {
 					pw.println(line);
 				}
 			}
@@ -217,51 +231,46 @@ public class BookmarkManager implements Serializable {
 
 
 	/**
-	 * Inner Class
+	 * Rename a bookmark
 	 * 
-	 * Bookmark entity
+	 * @param oldName old name
+	 * @param newName new name
 	 */
-	public class GtkBookmark extends BasicPath {
+	public void rename(String oldName, String newName) {
+		String[] lines = null;
+		PrintWriter pw = null;
+		try {
+			lines = toStringArray(bookmarkfile);
+			pw = new PrintWriter(new FileWriter(bookmarkfile, false));
+			for (String line : lines) {
 
-		private static final long serialVersionUID = 1L;
+				String currentName = null;
+				String location = null;
+				int spaceIndex = line.indexOf(' ');
+				if (spaceIndex != -1) {
+					// Specific name
+					currentName = line.substring(spaceIndex + 1);
+					location = line.substring(0, spaceIndex);
+				} else {
+					// Standard name (the part after the last file separator)
+					int lastSeparator = line.lastIndexOf(File.separatorChar);
+					currentName = line.substring(lastSeparator + 1);
+					location = line;
+				}
 
-		public GtkBookmark() {
-			super();
-		}
-
-		public GtkBookmark(String name, String location) {
-			setName(name);
-			setLocation(location);
-		}
-
-		public GtkBookmark(String name, File location) {
-			setName(name);
-			setLocation(location.getAbsolutePath());
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public void setLocation(String location) {
-			this.location = location;
-		}
-
-		public String toGtkString() {
-			String loc = encode(getLocation());
-			return "file://" + loc + " " + getName();
-		}
-
-
-
-		@Override
-		public String toString() {
-			return getName() + " = " + getLocation();
-		}
-
-		@Override
-		public String getIconName() {
-			return "gtk-directory";
+				// If the current name differs, write it again in file
+				if (currentName.equals(oldName)) {
+					pw.println(location + " " + newName);
+				} else {
+					pw.println(line);
+				}
+			}
+		} catch (Exception e) {
+			throw new IOError(e);
+		} finally {
+			if (pw != null) {
+				pw.close();
+			}
 		}
 	}
 

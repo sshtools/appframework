@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /*-- 
 
@@ -59,24 +67,25 @@ import org.apache.commons.cli.Options;
 /**
  * All plugin's must implement this
  * 
- * @created 26 May 2002
+ * @param <T> type of host
+ * 
  */
-public interface Plugin {
-	/**
-	 * Invoked by Plugspud when it starts the plugin
-	 * 
-	 * @param context context
-	 * @throws PluginException on any initialisation error
-	 */
-	public void startPlugin(PluginHostContext context) throws PluginException;
-
+public interface Plugin<T extends PluginHostContext> {
 	/**
 	 * Invoked by Plugspud when it activates the plugin
 	 * 
 	 * @param context context
 	 * @throws PluginException on any initialisation error
 	 */
-	public void activatePlugin(PluginHostContext context) throws PluginException;
+	void activatePlugin(T context) throws PluginException;
+
+	/**
+	 * Configure the {@link Options} with any command line arguments this plugin
+	 * contributes.
+	 * 
+	 * @param options options
+	 */
+	void buildCLIOptions(Options options);
 
 	/**
 	 * Invoked by Plugspud when it wants to stop the plugin (e.g. when it is
@@ -85,12 +94,20 @@ public interface Plugin {
 	 * 
 	 * @return can close
 	 */
-	public boolean canStopPlugin();
+	boolean canStopPlugin();
+
+	/**
+	 * Invoked by Plugspud when it starts the plugin
+	 * 
+	 * @param context context
+	 * @throws PluginException on any initialisation error
+	 */
+	void startPlugin(T context) throws PluginException;
 
 	/**
 	 * Stop the plugin.
+	 * 
+	 * @throws PluginException on any plugin error
 	 */
-	public void stopPlugin() throws PluginException;
-
-	public void buildCLIOptions(Options options);
+	void stopPlugin() throws PluginException;
 }

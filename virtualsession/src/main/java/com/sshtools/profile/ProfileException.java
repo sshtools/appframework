@@ -1,93 +1,73 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Virtual Session - Framework for a tabbed user interface of connections to some local or remote resources.
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /* HEADER */
 package com.sshtools.profile;
 
 /**
- * Exception thrown when there are errors caused by handling of
- * a {@link ResourceProfile}.
- *
- * @author $Author: brett $
+ * Exception thrown when there are errors caused by handling of a
+ * {@link ResourceProfile}.
  */
-public class ProfileException
-    extends Exception {
+public class ProfileException extends Exception {
+	private static final long serialVersionUID = 1320347127357230845L;
 
-// #ifdef JAVA1
-/*
-  private Throwable cause;
-*/
+	/**
+	 * Construct a new ProfileException with no message
+	 */
+	public ProfileException() {
+		super();
+	}
 
-// #else
-  
-  //  Using supers cause
-      
-// #endif
+	/**
+	 * Construct a new ProfileException with a message.
+	 *
+	 * @param message message
+	 */
+	public ProfileException(String message) {
+		super(message);
+	}
 
-  /**
-   * Construct a new ProfileException with no message
-   */
-  public ProfileException() {
-    super();
-  }
+	/**
+	 * Construct a new ProfileException with a message.
+	 *
+	 * @param message message
+	 * @param cause cause
+	 */
+	public ProfileException(String message, Throwable cause) {
+		super(message);
+		setCause(cause);
+	}
 
-  /**
-   * Construct a new ProfileException with a message.
-   *
-   * @param message message
-   */
-  public ProfileException(String message) {
-    super(message);
-  }
+	/**
+	 * Construct a new ProfileException with an underlying cause.
+	 *
+	 * @param cause cause
+	 */
+	public ProfileException(Throwable cause) {
+		super();
+		setCause(cause);
+	}
 
-  /**
-   * Construct a new ProfileException with a message.
-   *
-   * @param message message
-   * @param cause cause
-   */
-  public ProfileException(String message, Throwable cause) {
-    super(message);
-    setCause(cause);
-  }
+	private void setCause(Throwable cause) {
+		initCause(cause);
+	}
 
-  /**
-   * Construct a new ProfileException with an underlying cause.
-   *
-   * @param cause cause
-   */
-  public ProfileException(Throwable cause) {
-    super();
-    setCause(cause);
-  }
-  
-  private void setCause(Throwable cause) {
-// #ifdef JAVA1
-/*
-   this.cause = cause;
-*/
-
-// #else
-    initCause(cause);
-        
-// #endif
-  }
-  
-  public Throwable getCause() {
-// #ifdef JAVA1
-/*
-    return cause;
-*/
-
-// #else
-    return super.getCause();      
-// #endif
-    
-  }
+	@Override
+	public Throwable getCause() {
+		return super.getCause();
+	}
 }

@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /*
  * Copyright 2010 Costantino Cerbo.  All Rights Reserved.
@@ -45,20 +53,21 @@ import javax.swing.KeyStroke;
  */
 public class FocusUtil {
 
-	static public void setNextFocusable(JComponent component, final JComponent nextFocusable) {
-		component.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), "setNextFocusable");
-		component.getActionMap().put("setNextFocusable", new AbstractAction() {
-			public void actionPerformed(ActionEvent e) {
-				nextFocusable.requestFocusInWindow();
-			}
-		});
-	}
-
 	static public void setFocusOrder(JComponent... components) {
 		for (int i = 0; i < components.length - 1; i++) {
 			setNextFocusable(components[i], components[i+1]);			
 		}
 		setNextFocusable(components[components.length - 1], components[0]);			
+	}
+
+	static public void setNextFocusable(JComponent component, final JComponent nextFocusable) {
+		component.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), "setNextFocusable");
+		component.getActionMap().put("setNextFocusable", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				nextFocusable.requestFocusInWindow();
+			}
+		});
 	}
 
 }

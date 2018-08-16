@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.sshtools.appframework.api.ui;
 
@@ -37,10 +45,35 @@ import com.sshtools.ui.swing.MenuAction;
 
 public abstract class ActionBuilder extends ToolsBuilder<ActionToolBar> {
 
+	class ContextActionComparator implements Comparator<AppAction> {
+		@Override
+		public int compare(AppAction o1, AppAction o2) {
+			int i = ((Integer) o1.getValue(AppAction.CONTEXT_MENU_GROUP))
+					.compareTo((Integer) o2
+							.getValue(AppAction.CONTEXT_MENU_GROUP));
+			return (i == 0) ? ((Integer) o1
+					.getValue(AppAction.CONTEXT_MENU_WEIGHT))
+					.compareTo((Integer) o2
+							.getValue(AppAction.CONTEXT_MENU_WEIGHT)) : i;
+		}
+	}
+
+	class MenuItemActionComparator implements Comparator<AppAction> {
+		@Override
+		public int compare(AppAction o1, AppAction o2) {
+			int i = ((Integer) o1.getValue(AppAction.MENU_ITEM_GROUP))
+					.compareTo((Integer) o2.getValue(AppAction.MENU_ITEM_GROUP));
+			return (i == 0) ? ((Integer) o1
+					.getValue(AppAction.MENU_ITEM_WEIGHT))
+					.compareTo((Integer) o2
+							.getValue(AppAction.MENU_ITEM_WEIGHT)) : i;
+		}
+	}
 	final static Log log = LogFactory.getLog(ActionBuilder.class);
 
-	protected JMenuBar menuBar;
 	protected JPopupMenu contextMenu;
+
+	protected JMenuBar menuBar;
 
 	public ActionBuilder(JMenuBar menuBar, ActionToolBar toolBar,
 			JPopupMenu contextMenu) {
@@ -49,6 +82,63 @@ public abstract class ActionBuilder extends ToolsBuilder<ActionToolBar> {
 		this.contextMenu = contextMenu;
 	}
 
+	public abstract Collection<ActionMenu> listActionMenus();
+
+	@Override
+	protected void rebuildContainer(Collection<AppAction> enabledActions) {
+		getContainer().setWrap(PreferencesStore.getBoolean(
+				SshToolsApplication.PREF_TOOLBAR_WRAP, false));
+		super.rebuildContainer(enabledActions);
+	}
+
+	protected void rebuildContextMenu(Collection<AppAction> enabledActions) {
+		contextMenu.invalidate();
+
+		// Build the context menu action list
+		List<AppAction> contextMenuActions = new ArrayList<AppAction>();
+		contextMenu.removeAll();
+		for (AppAction action : enabledActions) {
+			if (Boolean.TRUE.equals(action.getValue(AppAction.ON_CONTEXT_MENU))) {
+				contextMenuActions.add(action);
+			}
+		}
+		log.debug("There are " + contextMenuActions.size()
+				+ " on the context menu");
+		Collections.sort(contextMenuActions, new ContextActionComparator());
+
+		// Build the context menu
+		Integer grp = null;
+		for (AppAction action : contextMenuActions) {
+			if ((grp != null)
+					&& !grp.equals(action
+							.getValue(AppAction.CONTEXT_MENU_GROUP))) {
+				contextMenu.addSeparator();
+			}
+			if (Boolean.TRUE
+					.equals(action.getValue(AppAction.IS_TOGGLE_BUTTON))) {
+				final JCheckBoxMenuItem item = new JCheckBoxMenuItem(action);
+				action.addPropertyChangeListener(new PropertyChangeListener() {
+					@Override
+					public void propertyChange(PropertyChangeEvent evt) {
+						if (evt.getPropertyName().equals(AppAction.IS_SELECTED)) {
+							item.setSelected(((Boolean) evt.getNewValue())
+									.booleanValue());
+						}
+					}
+				});
+				contextMenu.add(item);
+				item.setSelected(Boolean.TRUE.equals(action
+						.getValue(AppAction.IS_SELECTED)));
+			} else {
+				contextMenu.add(action);
+			}
+			grp = (Integer) action.getValue(AppAction.CONTEXT_MENU_GROUP);
+		}
+		contextMenu.validate();
+		contextMenu.repaint();
+	}
+
+	@Override
 	protected void rebuildForActions(List<AppAction> enabledActions) {
 		super.rebuildForActions(enabledActions);
 		if (contextMenu != null) {
@@ -128,58 +218,6 @@ public abstract class ActionBuilder extends ToolsBuilder<ActionToolBar> {
 		menuBar.repaint();
 	}
 
-	protected void rebuildContextMenu(Collection<AppAction> enabledActions) {
-		contextMenu.invalidate();
-
-		// Build the context menu action list
-		List<AppAction> contextMenuActions = new ArrayList<AppAction>();
-		contextMenu.removeAll();
-		for (AppAction action : enabledActions) {
-			if (Boolean.TRUE.equals(action.getValue(AppAction.ON_CONTEXT_MENU))) {
-				contextMenuActions.add(action);
-			}
-		}
-		log.debug("There are " + contextMenuActions.size()
-				+ " on the context menu");
-		Collections.sort(contextMenuActions, new ContextActionComparator());
-
-		// Build the context menu
-		Integer grp = null;
-		for (AppAction action : contextMenuActions) {
-			if ((grp != null)
-					&& !grp.equals(action
-							.getValue(AppAction.CONTEXT_MENU_GROUP))) {
-				contextMenu.addSeparator();
-			}
-			if (Boolean.TRUE
-					.equals(action.getValue(AppAction.IS_TOGGLE_BUTTON))) {
-				final JCheckBoxMenuItem item = new JCheckBoxMenuItem(action);
-				action.addPropertyChangeListener(new PropertyChangeListener() {
-					public void propertyChange(PropertyChangeEvent evt) {
-						if (evt.getPropertyName().equals(AppAction.IS_SELECTED)) {
-							item.setSelected(((Boolean) evt.getNewValue())
-									.booleanValue());
-						}
-					}
-				});
-				contextMenu.add(item);
-				item.setSelected(Boolean.TRUE.equals(action
-						.getValue(AppAction.IS_SELECTED)));
-			} else {
-				contextMenu.add(action);
-			}
-			grp = (Integer) action.getValue(AppAction.CONTEXT_MENU_GROUP);
-		}
-		contextMenu.validate();
-		contextMenu.repaint();
-	}
-
-	protected void rebuildContainer(Collection<AppAction> enabledActions) {
-		getContainer().setWrap(PreferencesStore.getBoolean(
-				SshToolsApplication.PREF_TOOLBAR_WRAP, false));
-		super.rebuildContainer(enabledActions);
-	}
-
 	private ActionMenu getActionMenu(Iterator<ActionMenu> actions,
 			String actionMenuName) {
 		while (actions.hasNext()) {
@@ -189,30 +227,5 @@ public abstract class ActionBuilder extends ToolsBuilder<ActionToolBar> {
 			}
 		}
 		return null;
-	}
-
-	public abstract Collection<ActionMenu> listActionMenus();
-
-	class ContextActionComparator implements Comparator<AppAction> {
-		public int compare(AppAction o1, AppAction o2) {
-			int i = ((Integer) o1.getValue(AppAction.CONTEXT_MENU_GROUP))
-					.compareTo((Integer) o2
-							.getValue(AppAction.CONTEXT_MENU_GROUP));
-			return (i == 0) ? ((Integer) o1
-					.getValue(AppAction.CONTEXT_MENU_WEIGHT))
-					.compareTo((Integer) o2
-							.getValue(AppAction.CONTEXT_MENU_WEIGHT)) : i;
-		}
-	}
-
-	class MenuItemActionComparator implements Comparator<AppAction> {
-		public int compare(AppAction o1, AppAction o2) {
-			int i = ((Integer) o1.getValue(AppAction.MENU_ITEM_GROUP))
-					.compareTo((Integer) o2.getValue(AppAction.MENU_ITEM_GROUP));
-			return (i == 0) ? ((Integer) o1
-					.getValue(AppAction.MENU_ITEM_WEIGHT))
-					.compareTo((Integer) o2
-							.getValue(AppAction.MENU_ITEM_WEIGHT)) : i;
-		}
 	}
 }

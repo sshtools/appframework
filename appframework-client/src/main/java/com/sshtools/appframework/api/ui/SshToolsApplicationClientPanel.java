@@ -1,16 +1,23 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Client Application Framework - Framework for 'client' applications.
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.sshtools.appframework.api.ui;
 
 import java.awt.LayoutManager;
-import java.awt.Window;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -21,10 +28,10 @@ import java.io.OutputStream;
 import java.security.AccessControlException;
 import java.security.AccessController;
 import java.util.Comparator;
+import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 import com.sshtools.appframework.api.SshToolsApplicationException;
 import com.sshtools.appframework.ui.Messages;
@@ -43,57 +50,52 @@ import com.sshtools.ui.OptionChooser;
 import com.sshtools.ui.swing.AppAction;
 import com.sshtools.ui.swing.OptionDialog;
 
-/**
- * 
- * 
- * @author $author$
- */
+public abstract class SshToolsApplicationClientPanel extends SshToolsApplicationPanel {
+	class ConnectionFileFilter extends javax.swing.filechooser.FileFilter {
+		@Override
+		public boolean accept(File f) {
+			return f.isDirectory() || f.getName().toLowerCase().endsWith(".xml");
+		}
 
-public abstract class SshToolsApplicationClientPanel
-
-extends SshToolsApplicationPanel {
-
-	/**  */
-
-	public final static String PREF_CONNECTION_FILE_DIRECTORY =
-
-	"sshapps.connectionFile.directory";
-
-	//
-
-	/**  */
-
+		@Override
+		public String getDescription() {
+			return "Connection files (*.xml)";
+		}
+	}
+	class MenuItemActionComparator implements Comparator<AppAction> {
+		@Override
+		public int compare(AppAction o1, AppAction o2) {
+			int i = ((Integer) (o1).getValue(AppAction.MENU_ITEM_GROUP))
+					.compareTo((Integer) (o2).getValue(AppAction.MENU_ITEM_GROUP));
+			return (i == 0) ? ((Integer) (o1).getValue(AppAction.MENU_ITEM_WEIGHT))
+					.compareTo((Integer) (o2).getValue(AppAction.MENU_ITEM_WEIGHT)) : i;
+		}
+	}
+	class ToolBarActionComparator implements Comparator<AppAction> {
+		@Override
+		public int compare(AppAction o1, AppAction o2) {
+			int i = ((Integer) (o1).getValue(AppAction.TOOLBAR_GROUP)).compareTo((Integer) (o2).getValue(AppAction.TOOLBAR_GROUP));
+			return (i == 0) ? ((Integer) (o1).getValue(AppAction.TOOLBAR_WEIGHT))
+					.compareTo((Integer) (o2).getValue(AppAction.TOOLBAR_WEIGHT)) : i;
+		}
+	}
 	public final static int BANNER_TIMEOUT = 2000;
-
-	/**  */
-
+	public final static String PREF_CONNECTION_FILE_DIRECTORY = "sshapps.connectionFile.directory";
+	private static final long serialVersionUID = 1L;
+	protected javax.swing.filechooser.FileFilter connectionFileFilter = new ConnectionFileFilter();
 	protected File currentConnectionFile;
 
-	/**  */
+	protected ResourceProfile<ProfileTransport<?>> currentConnectionProfile;
 
 	protected boolean needSave;
 
-	/**  */
-
-	protected ResourceProfile currentConnectionProfile;
-
-	/**  */
-
-	protected javax.swing.filechooser.FileFilter connectionFileFilter = new
-
-	ConnectionFileFilter();
-
-	// Private instance variables
-
-	private ProfileTransport transport;
+	private ProfileTransport<?> transport;
 
 	/**
 	 * Creates a new SshToolsApplicationClientPanel object.
 	 */
-
 	public SshToolsApplicationClientPanel() {
 		super();
-
 	}
 
 	/**
@@ -101,42 +103,68 @@ extends SshToolsApplicationPanel {
 	 * 
 	 * @param mgr
 	 */
-
 	public SshToolsApplicationClientPanel(LayoutManager mgr) {
 		super(mgr);
-
 	}
 
 	/**
 	 * 
 	 * 
-	 * @return
+	 * @param disconnect
 	 */
-
-	public abstract SshToolsConnectionTab[] getAdditionalConnectionTabs();
-
-	public void init(SshToolsApplication application) throws
-
-	SshToolsApplicationException {
-		if (!(application instanceof SshToolsClientApplication)) {
-			throw new SshToolsApplicationException("Application must extend SshToolsClientApplication.");
+	public void closeConnection(boolean disconnect) {
+		//
+		if (isNeedSave()) {
+			// Only allow saving of files if allowed by the security manager
+			try {
+				if (System.getSecurityManager() != null) {
+					AccessController.checkPermission(new FilePermission("<<ALL FILES>>", "write"));
+					if (JOptionPane.showConfirmDialog(this,
+							Messages.getString("SshToolsApplicationClientPanel.UnsavedChanges1") + " "
+									+ ((currentConnectionFile == null) ? "<Untitled>" : currentConnectionFile.getName())
+									+ Messages.getString("SshToolsApplicationClientPanel.UnsavedChanges2"),
+							Messages.getString("SshToolsApplicationClientPanel.UnsavedChanges3"), JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
+						saveConnection(false, getCurrentFile(), getCurrentProfile());
+						setNeedSave(false);
+					}
+				}
+			} catch (AccessControlException ace) {
+			}
 		}
-		super.init(application);
-
+		if (disconnect && transport != null) {
+			try {
+				transport.disconnect();
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
+		}
 	}
 
 	/**
-     * 
-     */
+	 * Connect.
+	 * 
+	 * @throws ApplicationException om errpr
+	 */
+	public void connect() throws ApplicationException {
+		if (getCurrentProfile() == null) {
+			throw new ApplicationException(Messages.getString("SshToolsApplicationClientPanel.CantConnect"));
+		}
+		// There isn't anywhere to store this setting yet
+		connect(getCurrentProfile(), false);
+	}
+
+	public void connect(final ResourceProfile<ProfileTransport<?>> profile, final boolean newProfile) {
+		currentConnectionProfile = profile;
+	}
 
 	public void editConnection() {
 		// Create a file chooser with the current directory set to the
 		// application home
 		JFileChooser fileDialog = new JFileChooser(PreferencesStore.get(PREF_CONNECTION_FILE_DIRECTORY,
-			System.getProperty("sshtools.home", System.getProperty("user.home"))));
+				System.getProperty("sshtools.home", System.getProperty("user.home"))));
 		fileDialog.setFileFilter(connectionFileFilter);
 		// Show it
-		Window w = (Window) SwingUtilities.getAncestorOfClass(Window.class, this);
 		int ret = fileDialog.showOpenDialog(this);
 		// If we've approved the selection then process
 		if (ret == JFileChooser.APPROVE_OPTION) {
@@ -144,7 +172,7 @@ extends SshToolsApplicationPanel {
 			// Get the file
 			File f = fileDialog.getSelectedFile();
 			// Load the profile
-			ResourceProfile p = new ResourceProfile();
+			ResourceProfile<ProfileTransport<?>> p = new ResourceProfile<>();
 			InputStream in = null;
 			try {
 				in = new FileInputStream(f);
@@ -154,32 +182,90 @@ extends SshToolsApplicationPanel {
 				}
 			} catch (IOException ioe) {
 				OptionDialog.error(this, Messages.getString("Error"),
-					Messages.getString("SshToolsApplicationClientPanel.ProfileFail"), ioe);
+						Messages.getString("SshToolsApplicationClientPanel.ProfileFail"), ioe);
 			} finally {
 				IOUtil.closeStream(in);
 			}
 		}
-
 	}
 
 	/**
+	 * Edit the specified profile.
 	 * 
+	 * @param profile profile
+	 * @return true for edit applied or false for edit cancelled.
+	 */
+	public boolean editConnection(ResourceProfile<ProfileTransport<?>> profile) {
+		final SshToolsConnectionPanel panel = new SshToolsConnectionPanel(allowConnectionSettingsEditing(),
+				getAdditionalConnectionTabs());
+		panel.setConnectionProfile(profile);
+		OptionCallback callback = new OptionCallback() {
+			@Override
+			public boolean canClose(OptionChooser dialog, Option option) {
+				if (Option.CHOICE_OK.equals(option)) {
+					return panel.validateTabs();
+				}
+				return true;
+			}
+		};
+		Option opt = OptionDialog.prompt(SshToolsApplicationClientPanel.this, OptionChooser.UNCATEGORISED,
+				Messages.getString("SshToolsApplicationClientPanel.ConnSettings"), panel, Option.CHOICES_OK_CANCEL,
+				Option.CHOICE_CANCEL, callback, null, SshToolsConnectionPanel.DEFAULT_SIZE);
+		if (Option.CHOICE_OK.equals(opt)) {
+			panel.applyTabs();
+			if (profile == getCurrentProfile()) {
+				setNeedSave(true);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Get additional tabs to add to the connection dialog.
+	 * 
+	 * @return tabs
+	 */
+	public abstract List<SshToolsConnectionTab<ProfileTransport<?>>> getAdditionalConnectionTabs();
+
+	public abstract File getCurrentFile();
+
+	public abstract ResourceProfile<ProfileTransport<?>> getCurrentProfile();
+
+	public ProfileTransport<?> getTransport() {
+		return transport;
+	}
+
+	@Override
+	public void init(SshToolsApplication application) throws SshToolsApplicationException {
+		if (!(application instanceof SshToolsClientApplication)) {
+			throw new SshToolsApplicationException("Application must extend SshToolsClientApplication.");
+		}
+		super.init(application);
+	}
+
+	public boolean isConnected() {
+		return (transport != null) && transport.isConnected();
+	}
+
+	public boolean isNeedSave() {
+		return needSave;
+	}
+
+	/**
+	 * Create a new profile.
 	 * 
 	 * @param profile
-	 * 
-	 * @return
+	 * @return profile
 	 */
-
-	public ResourceProfile newConnectionProfile(ResourceProfile profile) {
+	public ResourceProfile<?> newConnectionProfile(ResourceProfile<ProfileTransport<?>> profile) {
 		return SshToolsConnectionPanel.showConnectionDialog(SshToolsApplicationClientPanel.this, profile,
-			getAdditionalConnectionTabs());
-
+				getAdditionalConnectionTabs());
 	}
 
 	/**
-     * 
-     */
-
+	 * 
+	 */
 	public void open() {
 		// Create a file chooser with the current directory set to the
 		// application home
@@ -194,7 +280,6 @@ extends SshToolsApplicationPanel {
 			File f = fileDialog.getSelectedFile();
 			open(f);
 		}
-
 	}
 
 	/**
@@ -202,17 +287,16 @@ extends SshToolsApplicationPanel {
 	 * 
 	 * @param f
 	 */
-
 	public void open(File f) {
 		// Make sure a connection is not already open
 		if (isConnected()) {
 			Option optNew = new Option(Messages.getString("AbstractSshToolsApplicationClientPanel.New"),
-				Messages.getString("AbstractSshToolsApplicationClientPanel.NewDesc"), Messages.getString(
-					"AbstractSshToolsApplicationClientPanel.NewMnemonic").charAt(0));
-			Option opt = OptionDialog.prompt(this, OptionDialog.WARNING,
-				Messages.getString("SshToolsApplicationClientPanel.ExistingConnection"),
-				Messages.getString("SshToolsApplicationClientPanel.ConnectionOpenMsg"), new Option[] { optNew, Option.CHOICE_CLOSE,
-					Option.CHOICE_CANCEL }, Option.CHOICE_CANCEL);
+					Messages.getString("AbstractSshToolsApplicationClientPanel.NewDesc"),
+					Messages.getString("AbstractSshToolsApplicationClientPanel.NewMnemonic").charAt(0));
+			Option opt = OptionDialog.prompt(this, OptionChooser.WARNING,
+					Messages.getString("SshToolsApplicationClientPanel.ExistingConnection"),
+					Messages.getString("SshToolsApplicationClientPanel.ConnectionOpenMsg"),
+					new Option[] { optNew, Option.CHOICE_CLOSE, Option.CHOICE_CANCEL }, Option.CHOICE_CANCEL);
 			if ((opt == null) || (opt == Option.CHOICE_CANCEL)) {
 				return;
 			} else if (opt == optNew) {
@@ -234,7 +318,7 @@ extends SshToolsApplicationPanel {
 		// Make sure its not invalid
 		if (f != null) {
 			// Create a new connection properties object
-			ResourceProfile profile = new ResourceProfile();
+			ResourceProfile<ProfileTransport<?>> profile = new ResourceProfile<>();
 			InputStream in = null;
 			try {
 				in = new FileInputStream(f);
@@ -252,186 +336,20 @@ extends SshToolsApplicationPanel {
 			}
 		} else {
 			OptionDialog.error(this, Messages.getString("SshToolsApplicationClientPanel.OpenConnection"),
-				Messages.getString("SshToolsApplicationClientPanel.InvalidFile"));
-		}
-
-	}
-
-	public ProfileTransport getTransport() {
-		return transport;
-
-	}
-
-	public void setTransport(ProfileTransport transport) {
-		this.transport = transport;
-
-	}
-
-	public void connect(final ResourceProfile profile, final boolean newProfile) {
-		currentConnectionProfile = profile;
-
-	}
-
-	/**
-	 * 
-	 * 
-	 * @param file
-	 */
-
-	public void setContainerTitle(File file) {
-		String verString = GeneralUtil.getVersionString(application.getApplicationName(), getClass());
-		if (container != null) {
-			container.setContainerTitle((file == null) ? verString : (verString + " [" + file.getName() + "]"));
-		}
-
-	}
-
-	/**
-	 * 
-	 * 
-	 * @param needSave
-	 */
-
-	public void setNeedSave(boolean needSave) {
-		if (needSave != this.needSave) {
-			this.needSave = needSave;
-			setAvailableActions();
-		}
-
-	}
-
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
-
-	public boolean isNeedSave() {
-		return needSave;
-
-	}
-
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
-
-	public boolean isConnected() {
-		return (transport != null) && transport.isConnected();
-
-	}
-
-	public abstract ResourceProfile getCurrentProfile();
-
-	public abstract File getCurrentFile();
-
-	/**
-	 * 
-	 * 
-	 * @throws SshException
-	 */
-
-	public void connect() throws ApplicationException {
-		if (getCurrentProfile() == null) {
-			throw new ApplicationException(Messages.getString("SshToolsApplicationClientPanel.CantConnect"));
-		}
-		// There isn't anywhere to store this setting yet
-		connect(getCurrentProfile(), false);
-
-	}
-
-	/**
-	 * 
-	 * 
-	 * @param disconnect
-	 */
-
-	public void closeConnection(boolean disconnect) {
-		//
-		if (isNeedSave()) {
-			// Only allow saving of files if allowed by the security manager
-			try {
-				if (System.getSecurityManager() != null) {
-					AccessController.checkPermission(new FilePermission("<<ALL FILES>>", "write"));
-					if (JOptionPane.showConfirmDialog(
-						this,
-						Messages.getString("SshToolsApplicationClientPanel.UnsavedChanges1") + " "
-							+ ((currentConnectionFile == null) ? "<Untitled>" : currentConnectionFile.getName())
-							+ Messages.getString("SshToolsApplicationClientPanel.UnsavedChanges2"),
-						Messages.getString("SshToolsApplicationClientPanel.UnsavedChanges3"), JOptionPane.YES_NO_OPTION,
-						JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
-						saveConnection(false, getCurrentFile(), getCurrentProfile());
-						setNeedSave(false);
-					}
-				}
-			} catch (AccessControlException ace) {
-			}
-		}
-		if (disconnect && transport != null) {
-			try {
-				transport.disconnect();
-			} catch (IOException ioe) {
-				ioe.printStackTrace();
-			}
+					Messages.getString("SshToolsApplicationClientPanel.InvalidFile"));
 		}
 	}
 
 	/**
+	 * Save connection.
 	 * 
-	 * 
-	 * @return
-	 */
-
-	protected boolean allowConnectionSettingsEditing() {
-		return true;
-
-	}
-
-	/**
-	 * Edit the specified profile.
-	 * 
+	 * @param saveAs save as
+	 * @param file file
 	 * @param profile profile
-	 * @return true for edit applied or false for edit cancelled.
+	 * 
+	 * @return file
 	 */
-
-	public boolean editConnection(ResourceProfile profile) {
-		final SshToolsConnectionPanel panel = new SshToolsConnectionPanel(allowConnectionSettingsEditing(),
-			getAdditionalConnectionTabs());
-		panel.setConnectionProfile(profile);
-		OptionCallback callback = new OptionCallback() {
-			public boolean canClose(OptionChooser dialog, Option option) {
-				if (Option.CHOICE_OK.equals(option)) {
-					return panel.validateTabs();
-				}
-				return true;
-			}
-		};
-		Option opt = OptionDialog.prompt(SshToolsApplicationClientPanel.this, OptionDialog.UNCATEGORISED,
-			Messages.getString("SshToolsApplicationClientPanel.ConnSettings"), panel, Option.CHOICES_OK_CANCEL,
-			Option.CHOICE_CANCEL, callback, null, SshToolsConnectionPanel.DEFAULT_SIZE);
-		if (Option.CHOICE_OK.equals(opt)) {
-			panel.applyTabs();
-			if (profile == getCurrentProfile()) {
-				setNeedSave(true);
-			}
-			return true;
-		}
-		return false;
-
-	}
-
-	/**
-	 * 
-	 * 
-	 * @param saveAs
-	 * @param file
-	 * @param profile
-	 * 
-	 * @return
-	 */
-
-	public File saveConnection(boolean saveAs, File file, ResourceProfile profile) {
+	public File saveConnection(boolean saveAs, File file, ResourceProfile<ProfileTransport<?>> profile) {
 		if (profile != null) {
 			if ((file == null) || saveAs) {
 				JFileChooser fileDialog = new JFileChooser(getDefaultChooserDir(PREF_CONNECTION_FILE_DIRECTORY));
@@ -450,72 +368,46 @@ extends SshToolsApplicationPanel {
 			try {
 				if (saveAs && file.exists()) {
 					if (JOptionPane.showConfirmDialog(this, Messages.getString("SshToolsApplicationClientPanel.FileExistsSure"),
-						Messages.getString("SshToolsApplicationClientPanel.FileExists"), JOptionPane.YES_NO_OPTION,
-						JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION) {
+							Messages.getString("SshToolsApplicationClientPanel.FileExists"), JOptionPane.YES_NO_OPTION,
+							JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION) {
 						return null;
 					}
 				}
 				// Check to make sure its valid
-				if (file != null) {
-					// Save the connection details to file
-					out = new FileOutputStream(file);
-					profile.save(out);
-					if (profile == getCurrentProfile()) {
-						setNeedSave(false);
-					}
-					return file;
+				// Save the connection details to file
+				out = new FileOutputStream(file);
+				profile.save(out);
+				if (profile == getCurrentProfile()) {
+					setNeedSave(false);
 				}
-				OptionDialog.error(this, Messages.getString("SshToolsApplicationClientPanel.SaveCon"),
-					Messages.getString("SshToolsApplicationClientPanel.InvalidFile"));
+				return file;
 			} catch (IOException e) {
 				OptionDialog.error(this, Messages.getString("SshToolsApplicationClientPanel.SaveCon"), e);
 			}
 		}
 		return null;
-
 	}
 
-	class ToolBarActionComparator
-
-	implements Comparator {
-		public int compare(Object o1, Object o2) {
-			int i = ((Integer) ((AppAction) o1).getValue(AppAction.TOOLBAR_GROUP)).compareTo((Integer) ((AppAction) o2)
-				.getValue(AppAction.TOOLBAR_GROUP));
-			return (i == 0) ? ((Integer) ((AppAction) o1).getValue(AppAction.TOOLBAR_WEIGHT)).compareTo((Integer) ((AppAction) o2)
-				.getValue(AppAction.TOOLBAR_WEIGHT)) : i;
-
+	@Override
+	public void setContainerTitle(File file) {
+		String verString = GeneralUtil.getVersionString(application.getApplicationName(), getClass());
+		if (container != null) {
+			container.setContainerTitle((file == null) ? verString : (verString + " [" + file.getName() + "]"));
 		}
-
 	}
 
-	class MenuItemActionComparator
-
-	implements Comparator {
-
-		public int compare(Object o1, Object o2) {
-			int i = ((Integer) ((AppAction) o1).getValue(AppAction.MENU_ITEM_GROUP)).compareTo((Integer) ((AppAction) o2)
-				.getValue(AppAction.MENU_ITEM_GROUP));
-			return (i == 0) ? ((Integer) ((AppAction) o1).getValue(AppAction.MENU_ITEM_WEIGHT))
-				.compareTo((Integer) ((AppAction) o2).getValue(AppAction.MENU_ITEM_WEIGHT)) : i;
-
+	public void setNeedSave(boolean needSave) {
+		if (needSave != this.needSave) {
+			this.needSave = needSave;
+			setAvailableActions();
 		}
-
 	}
 
-	class ConnectionFileFilter
-
-	extends javax.swing.filechooser.FileFilter {
-
-		public boolean accept(File f) {
-			return f.isDirectory() || f.getName().toLowerCase().endsWith(".xml");
-
-		}
-
-		public String getDescription() {
-			return "Connection files (*.xml)";
-
-		}
-
+	public void setTransport(ProfileTransport<?> transport) {
+		this.transport = transport;
 	}
 
+	protected boolean allowConnectionSettingsEditing() {
+		return true;
+	}
 }

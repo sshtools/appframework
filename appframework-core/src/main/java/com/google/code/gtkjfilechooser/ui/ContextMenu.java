@@ -1,15 +1,23 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.google.code.gtkjfilechooser.ui;
 
-import static com.google.code.gtkjfilechooser.I18N._;
+import static com.google.code.gtkjfilechooser.I18N.i18n;
 import static com.google.code.gtkjfilechooser.I18N.getMnemonic;
 
 import java.awt.event.ActionEvent;
@@ -31,13 +39,13 @@ import com.google.code.gtkjfilechooser.GtkStockIcon.Size;
 
 
 public class ContextMenu extends JPopupMenu implements PropertyChangeListener, ActionDispatcher {
-	static final public String SHOW_SIZE_COLUMN_CHANGED_PROPERTY = "ShowSizeColumnChanged";
-
 	static final public String ACTION_ADD_BOOKMARK = "AddBookmark";
+
+	static final public String ACTION_NEW_FOLDER = "New Folder";
 
 	static final public String ACTION_REFRESH = "refresh";
 
-	static final public String ACTION_NEW_FOLDER = "New Folder";
+	static final public String SHOW_SIZE_COLUMN_CHANGED_PROPERTY = "ShowSizeColumnChanged";
 
 	private ActionDispatcher actionDispatcher = new BasicActionDispatcher();
 
@@ -47,7 +55,7 @@ public class ContextMenu extends JPopupMenu implements PropertyChangeListener, A
 		addPropertyChangeListener(this);
 
 		addToBookmarkMenuItem = new JMenuItem();
-		addToBookmarkMenuItem.setText(_("_Add to Bookmarks"));
+		addToBookmarkMenuItem.setText(i18n("_Add to Bookmarks"));
 		addToBookmarkMenuItem.setMnemonic(getMnemonic("_Add to Bookmarks"));
 		addToBookmarkMenuItem.setIcon(GtkStockIcon.get("gtk-add", Size.GTK_ICON_SIZE_MENU));
 		addToBookmarkMenuItem.addActionListener(new ActionListener(){
@@ -63,7 +71,7 @@ public class ContextMenu extends JPopupMenu implements PropertyChangeListener, A
 
 		// Add "show hidden files" CheckBoxMenuItem
 		JCheckBoxMenuItem showHiddenCheckBoxItem = new JCheckBoxMenuItem();
-		showHiddenCheckBoxItem.setText(_("Show _Hidden Files"));
+		showHiddenCheckBoxItem.setText(i18n("Show _Hidden Files"));
 		showHiddenCheckBoxItem.setMnemonic(getMnemonic("Show _Hidden Files"));
 		showHiddenCheckBoxItem.setSelected(GtkFileChooserSettings.get().getShowHidden());
 		showHiddenCheckBoxItem.addActionListener(new ActionListener() {
@@ -84,7 +92,7 @@ public class ContextMenu extends JPopupMenu implements PropertyChangeListener, A
 
 		// Add "show file size column" CheckBoxMenuItem
 		JCheckBoxMenuItem showFileSizeCheckBoxItem = new JCheckBoxMenuItem();
-		showFileSizeCheckBoxItem.setText(_("Show _Size Column"));
+		showFileSizeCheckBoxItem.setText(i18n("Show _Size Column"));
 		showFileSizeCheckBoxItem.setMnemonic(getMnemonic("Show _Size Column"));
 		showFileSizeCheckBoxItem.setSelected(GtkFileChooserSettings.get()
 				.getShowSizeColumn());
@@ -100,9 +108,17 @@ public class ContextMenu extends JPopupMenu implements PropertyChangeListener, A
 	}
 
 
-	public void setAddToBookmarkMenuItemEnabled(boolean enabled) {
-		// enable if path != null && path.isDirectory()
-		addToBookmarkMenuItem.setEnabled(enabled);
+	@Override
+	public void addActionListener(ActionListener l) {
+		actionDispatcher.addActionListener(l);
+
+	}
+
+
+	@Override
+	public void fireActionEvent(ActionEvent e) {
+		actionDispatcher.fireActionEvent(e);
+
 	}
 
 
@@ -114,19 +130,6 @@ public class ContextMenu extends JPopupMenu implements PropertyChangeListener, A
 		Log.debug(property, " = ", value);		
 	}
 
-
-	@Override
-	public void addActionListener(ActionListener l) {
-		actionDispatcher.addActionListener(l);
-
-	}
-
-	@Override
-	public void fireActionEvent(ActionEvent e) {
-		actionDispatcher.fireActionEvent(e);
-
-	}
-
 	@Override
 	public void removeActionListener(ActionListener l) {
 		actionDispatcher.removeActionListener(l);
@@ -136,6 +139,11 @@ public class ContextMenu extends JPopupMenu implements PropertyChangeListener, A
 	@Override
 	public void removeAllActionListeners() {
 		actionDispatcher.removeAllActionListeners();		
+	}
+
+	public void setAddToBookmarkMenuItemEnabled(boolean enabled) {
+		// enable if path != null && path.isDirectory()
+		addToBookmarkMenuItem.setEnabled(enabled);
 	}
 
 }

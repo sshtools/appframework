@@ -1,14 +1,21 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /* HEADER */
-
 package com.sshtools.appframework.ui.wizard;
 
 import java.awt.BorderLayout;
@@ -23,120 +30,100 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 
 import com.sshtools.ui.swing.ResourceIcon;
 import com.sshtools.ui.swing.UIUtil;
 
-/**
- *
- *
- * @author $author$
- */
-public class InfoDialog
-    extends JDialog {
-  InfoPanel infopanel = new InfoPanel();
-  FlowLayout flowLayout1 = new FlowLayout();
+public class InfoDialog extends JDialog {
+	FlowLayout flowLayout1 = new FlowLayout();
+	InfoPanel infopanel = new InfoPanel();
 
-  /**
-   * Creates a new InfoDialog object.
-   */
-  public InfoDialog() {
-    super();
-    try {
-      jbInit();
-      //      infopanel.setVisible(true);
-      getContentPane().add(infopanel);
-      setSize(300, 200);
-      //setResizable(false);
-      UIUtil.positionComponent(UIUtil.CENTER, this);
-      setVisible(true);
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
+	/**
+	 * Creates a new InfoDialog object.
+	 */
+	public InfoDialog() {
+		super();
+		try {
+			jbInit();
+			// infopanel.setVisible(true);
+			getContentPane().add(infopanel);
+			setSize(300, 200);
+			// setResizable(false);
+			UIUtil.positionComponent(SwingConstants.CENTER, this);
+			setVisible(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
-  /**
-   *
-   *
-   * @param args
-   */
-  public final static void main(String[] args) {
-    InfoDialog dialog = new InfoDialog();
-    dialog.setVisible(true);
-  }
-
-  private void jbInit() throws Exception {
-    this.getContentPane().setLayout(flowLayout1);
-  }
+	private void jbInit() throws Exception {
+		this.getContentPane().setLayout(flowLayout1);
+	}
 }
 
-class InfoPanel
-    extends JPanel {
-  JPanel iconPanel = new JPanel();
-  JLabel iconLabel = new JLabel();
-  JPanel panelButtons = new JPanel();
-  JButton buttonok = new JButton("OK");
-  ResourceIcon resicon = new ResourceIcon(InfoDialog.class,
-                                          "/images/dialog-information.png");
-  JTextPane finishSummary = new JTextPane();
-  JScrollPane summaryScrollPane = new JScrollPane();
-  BorderLayout borderLayout1 = new BorderLayout();
-  BorderLayout borderLayout2 = new BorderLayout();
-  BorderLayout borderLayout3 = new BorderLayout();
-  private int xWidth;
-  private int yHeight;
+class InfoPanel extends JPanel {
+	BorderLayout borderLayout1 = new BorderLayout();
+	BorderLayout borderLayout2 = new BorderLayout();
+	BorderLayout borderLayout3 = new BorderLayout();
+	JButton buttonok = new JButton("OK");
+	JTextPane finishSummary = new JTextPane();
+	JLabel iconLabel = new JLabel();
+	JPanel iconPanel = new JPanel();
+	JPanel panelButtons = new JPanel();
+	ResourceIcon resicon = new ResourceIcon(InfoDialog.class, "/images/dialog-information.png");
+	JScrollPane summaryScrollPane = new JScrollPane();
+	private int xWidth;
+	private int yHeight;
 
-  /**
-   * Creates a new InfoPanel object.
-   */
-  public InfoPanel() {
-    try {
-      jbInit();
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
+	/**
+	 * Creates a new InfoPanel object.
+	 */
+	public InfoPanel() {
+		try {
+			jbInit();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
-  private void jbInit() throws Exception {
-    setLayout(borderLayout1);
-    setBackground(Color.white);
-    // The icon panel
-    iconLabel.setIcon(resicon);
-    iconPanel.add(iconLabel, null);
-    panelButtons.add(buttonok);
-    // The wizard details summary
-    finishSummary.setBorder(null);
-    //finishSummary.setLineWrap(true);
-    //finishSummary.setWrapStyleWord(true);
-    // The scrollpane to which we will add our summary text area
-    summaryScrollPane.setVerticalScrollBarPolicy(JScrollPane.
-                                                 VERTICAL_SCROLLBAR_AS_NEEDED);
-    JTextArea maintext = new JTextArea();
-    JLabel titletext = new JLabel();
-    JCheckBox check = new JCheckBox("Don't show this message again");
-    JPanel checkpanel = new JPanel();
-    checkpanel.add(check, BorderLayout.CENTER);
-    titletext.setText("This is the title of the window");
-    //titletext.setFont(My3sp.MY3SP_FONT.deriveFont(Font.BOLD));
-    maintext.setText(
-        "This is an information message.  Please make sure you listen carefully");
-    maintext.setWrapStyleWord(true);
-    maintext.setLineWrap(true);
-    summaryScrollPane.getViewport().add(maintext);
-    summaryScrollPane.setBorder(null);
-    summaryScrollPane.setBackground(Color.lightGray);
-    maintext.setBorder(null);
-    JPanel mainpanel = new JPanel();
-    mainpanel.setLayout(new BorderLayout());
-    mainpanel.add(titletext, BorderLayout.NORTH);
-    mainpanel.add(summaryScrollPane, BorderLayout.CENTER);
-    mainpanel.add(checkpanel, BorderLayout.SOUTH);
-    //iconLabel.setLayout(borderLayout3);
-    this.add(iconPanel, BorderLayout.WEST);
-    this.add(mainpanel, BorderLayout.CENTER);
-    this.add(panelButtons, BorderLayout.SOUTH);
-    summaryScrollPane.getViewport().add(finishSummary, null);
-  }
+	private void jbInit() throws Exception {
+		setLayout(borderLayout1);
+		setBackground(Color.white);
+		// The icon panel
+		iconLabel.setIcon(resicon);
+		iconPanel.add(iconLabel, null);
+		panelButtons.add(buttonok);
+		// The wizard details summary
+		finishSummary.setBorder(null);
+		// finishSummary.setLineWrap(true);
+		// finishSummary.setWrapStyleWord(true);
+		// The scrollpane to which we will add our summary text area
+		summaryScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+		JTextArea maintext = new JTextArea();
+		JLabel titletext = new JLabel();
+		JCheckBox check = new JCheckBox("Don't show this message again");
+		JPanel checkpanel = new JPanel();
+		checkpanel.add(check, BorderLayout.CENTER);
+		titletext.setText("This is the title of the window");
+		// titletext.setFont(My3sp.MY3SP_FONT.deriveFont(Font.BOLD));
+		maintext.setText("This is an information message.  Please make sure you listen carefully");
+		maintext.setWrapStyleWord(true);
+		maintext.setLineWrap(true);
+		summaryScrollPane.getViewport().add(maintext);
+		summaryScrollPane.setBorder(null);
+		summaryScrollPane.setBackground(Color.lightGray);
+		maintext.setBorder(null);
+		JPanel mainpanel = new JPanel();
+		mainpanel.setLayout(new BorderLayout());
+		mainpanel.add(titletext, BorderLayout.NORTH);
+		mainpanel.add(summaryScrollPane, BorderLayout.CENTER);
+		mainpanel.add(checkpanel, BorderLayout.SOUTH);
+		// iconLabel.setLayout(borderLayout3);
+		this.add(iconPanel, BorderLayout.WEST);
+		this.add(mainpanel, BorderLayout.CENTER);
+		this.add(panelButtons, BorderLayout.SOUTH);
+		summaryScrollPane.getViewport().add(finishSummary, null);
+	}
 }

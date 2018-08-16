@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /*
  * Copyright 2010 Costantino Cerbo.  All Rights Reserved.
@@ -48,7 +56,7 @@ import java.util.EventObject;
 public class FileEvent extends EventObject {
 
 	public enum FileEventType {
-		CREATED, MODIFIED, DELETED
+		CREATED, DELETED, MODIFIED
 	}
 
 	private File file;
@@ -73,10 +81,6 @@ public class FileEvent extends EventObject {
 		return type;
 	}
 
-	public void setWhen(long aWhen) {
-		when = aWhen;
-	}
-
 	/**
 	 * Returns the timestamp in milliseconds of when this event occurred. By default is the time when the current event was created, but
 	 * you can also change it with {@link #setWhen(long)}.
@@ -85,6 +89,10 @@ public class FileEvent extends EventObject {
 	 */
 	public long getWhen() {
 		return when;
+	}
+
+	public void setWhen(long aWhen) {
+		when = aWhen;
 	}
 
 }

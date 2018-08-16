@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /* HEADER */
 package com.sshtools.appframework.ui;
@@ -25,6 +33,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 
 
 /**
@@ -32,40 +41,14 @@ import javax.swing.SwingUtilities;
  */
 public class MemoryMonitor extends JPanel implements ActionListener {
 
-  private JProgressBar memoryGauge;
   private static JFrame frame;
-
-  public MemoryMonitor() {
-    memoryGauge = new JProgressBar(0, 100) {
-
-      public Dimension getMinimumSize() {
-        return new Dimension(100, 16);
-      }
-
-      public Dimension getSize() {
-        return getMinimumSize();
-      }
-    };
-    memoryGauge.setBorder(BorderFactory.createLineBorder(Color.black));
-    memoryGauge.setBackground(Color.white);
-    memoryGauge.setForeground(Color.red);
-    memoryGauge.setStringPainted(true);
-    memoryGauge.addMouseListener(new MouseAdapter() {
-      public void mouseClicked(MouseEvent evt) {
-        System.gc();
-      }
-    });
-    add(memoryGauge);
-    javax.swing.Timer timer = new javax.swing.Timer(2000, this);
-    timer.start();
-  }
-  
   public static void showMemoryMonitor() {
     if(frame == null) {
       frame = new JFrame("Memory monitor");
-      frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+      frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
       frame.addWindowListener(new WindowAdapter() {
-        public void windowClosing(WindowEvent evt) {
+        @Override
+		public void windowClosing(WindowEvent evt) {
           frame.setVisible(false);
         }
       });
@@ -76,9 +59,41 @@ public class MemoryMonitor extends JPanel implements ActionListener {
     frame.setVisible(true);
   }
 
-  public void actionPerformed(ActionEvent evt) {
+  private JProgressBar memoryGauge;
+  
+  public MemoryMonitor() {
+    memoryGauge = new JProgressBar(0, 100) {
+
+      @Override
+	public Dimension getMinimumSize() {
+        return new Dimension(100, 16);
+      }
+
+      @Override
+	public Dimension getSize() {
+        return getMinimumSize();
+      }
+    };
+    memoryGauge.setBorder(BorderFactory.createLineBorder(Color.black));
+    memoryGauge.setBackground(Color.white);
+    memoryGauge.setForeground(Color.red);
+    memoryGauge.setStringPainted(true);
+    memoryGauge.addMouseListener(new MouseAdapter() {
+      @Override
+	public void mouseClicked(MouseEvent evt) {
+        System.gc();
+      }
+    });
+    add(memoryGauge);
+    javax.swing.Timer timer = new javax.swing.Timer(2000, this);
+    timer.start();
+  }
+
+  @Override
+public void actionPerformed(ActionEvent evt) {
       SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
+          @Override
+		public void run() {
               doUpdate();
           }
       });

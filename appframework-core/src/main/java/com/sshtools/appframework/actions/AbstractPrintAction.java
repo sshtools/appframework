@@ -1,16 +1,25 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /* HEADER */
 
 package com.sshtools.appframework.actions;
 
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -39,8 +48,8 @@ public abstract class AbstractPrintAction extends AbstractAppAction {
 		putValue(MNEMONIC_KEY, new Integer('p'));
 		putValue(
 				ACCELERATOR_KEY,
-				KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.ALT_MASK
-						+ KeyEvent.CTRL_MASK));
+				KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.ALT_MASK
+						+ InputEvent.CTRL_MASK));
 		putValue(ON_MENUBAR, true);
 		putValue(MENU_NAME, "File");
 		putValue(MENU_ITEM_GROUP, 80);

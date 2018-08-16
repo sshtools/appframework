@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Virtual Session - Framework for a tabbed user interface of connections to some local or remote resources.
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /*
  */
@@ -16,21 +24,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * A scheme handler is responsible from creating {@link SchemeOptions} and
+ * {@link ProfileTransport}s.
  * 
- * 
- * @author $Author: brett $
+ * @param <T> the type of transport this handler is for
  */
-public abstract class SchemeHandler {
+public abstract class SchemeHandler<T extends ProfileTransport<?>> {
 	private String name;
 	private String description;
 
 	/**
 	 * Construct a new SchemeHandler
 	 * 
-	 * @param name
-	 *            scheme name
-	 * @param description
-	 *            description
+	 * @param name scheme name
+	 * @param description description
 	 */
 	public SchemeHandler(String name, String description) {
 		this.name = name;
@@ -51,8 +58,8 @@ public abstract class SchemeHandler {
 	 * 
 	 * @return list of scheme options
 	 */
-	public List createMultipleSchemeOptions() {
-		List l = new ArrayList();
+	public List<SchemeOptions> createMultipleSchemeOptions() {
+		List<SchemeOptions> l = new ArrayList<SchemeOptions>();
 		SchemeOptions createSchemeOptions = createSchemeOptions();
 		if (createSchemeOptions != null) {
 			l.add(createSchemeOptions);
@@ -63,11 +70,15 @@ public abstract class SchemeHandler {
 	/**
 	 * Create the {@link ProfileTransport} appropriate for this scheme
 	 * 
+	 * @param profile profile
+	 * 
 	 * @return profile transport
+	 * @throws ProfileException on profile error
+	 * @throws IOException on I/O error
+	 * @throws AuthenticationException on authentication error
 	 */
-	public abstract ProfileTransport createProfileTransport(
-			ResourceProfile profile) throws ProfileException, IOException,
-			AuthenticationException;
+	public abstract T createProfileTransport(ResourceProfile<T> profile)
+			throws ProfileException, IOException, AuthenticationException;
 
 	/**
 	 * Get the scheme name

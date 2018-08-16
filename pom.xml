@@ -1,20 +1,30 @@
 <!--
 
-    Appframework
-    Copyright (C) 2003-2016 SSHTOOLS Limited
+    Appframework - Parent project for appframework, consisting of a Swing framework for applications and
+    	modules that are used across a number of projects.
+    Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
 
-    This program is free software; you can redistribute it and/or
-    modify it under the terms of the GNU General Public License
-    as published by the Free Software Foundation; either version 2
-    of the License, or (at your option) any later version.
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<properties>
-		<maven.compiler.target>1.6</maven.compiler.target>
-		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -24,11 +34,20 @@
 	<name>Appframework</name>
 	<description>Parent project for appframework, consisting of a Swing framework for applications and
 	modules that are used across a number of projects.</description>
-	<url>https://github.com/sshtools/appframework</url>
+	<url>http://www.sshtools.com</url>
 	<packaging>pom</packaging>
 
-
-
+	<!-- <distributionManagement>
+		<snapshotRepository>
+			<id>ossrh-sshtools</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh-sshtools</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement> -->
+	
 	<distributionManagement>
 		<snapshotRepository>
 			<uniqueVersion>true</uniqueVersion>
@@ -57,8 +76,8 @@
 		</license>
 	</licenses>
 	<scm>
-		<url>scm:https://github.com/sshtools/appframework</url>
-		<connection>https://github.com/sshtools/appframework.git</connection>
+		<url>https://github.com/sshtools/jfreedesktop</url>
+		<connection>https://github.com/sshtools/jfreedesktop.git</connection>
 	</scm>
 	<developers>
 		<developer>
@@ -70,7 +89,6 @@
 
 	<modules>
 		<module>virtualsession</module>
-		<module>virtualsession-swt</module>
 		<module>appframework-core</module>
 		<module>appframework-client</module>
 	</modules>
@@ -116,6 +134,7 @@
 	</profiles>
 
 	<build>
+		<pluginManagement>
 			<plugins>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -135,19 +154,19 @@
 					<version>3.0.1</version>
 					<executions>
 						<execution>
-							<id>attach-javadocs</id>
+							<id>javadoc-jar</id>
+							<phase>package</phase>
 							<goals>
 								<goal>jar</goal>
 							</goals>
 							<configuration>
-								<additionalparam>-Xdoclint:none</additionalparam>
 								<!-- switch on dependency-driven aggregation -->
 								<includeDependencySources>false</includeDependencySources>
 								<dependencySourceIncludes>
 									<!-- include ONLY dependencies I control -->
 									<dependencySourceInclude>com.sshtools:*</dependencySourceInclude>
 								</dependencySourceIncludes>
-       							<doclint>none</doclint>
+								<doclint>none</doclint>
 							</configuration>
 						</execution>
 					</executions>
@@ -171,7 +190,7 @@
 					<artifactId>license-maven-plugin</artifactId>
 					<version>2.3</version>
 					<configuration>
-						<header>templates/GPL.txt</header>
+						<header>templates/GPL-3.txt</header>
 						<properties>
 							<owner>SSHTOOLS Limited</owner>
 							<email>support@sshtools.com</email>
@@ -204,5 +223,6 @@
 					</configuration>
 				</plugin>
 			</plugins>
+		</pluginManagement>
 	</build>
 </project>

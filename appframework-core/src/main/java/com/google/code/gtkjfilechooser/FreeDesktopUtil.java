@@ -1,15 +1,23 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.google.code.gtkjfilechooser;
 
-import static com.google.code.gtkjfilechooser.I18N._;
+import static com.google.code.gtkjfilechooser.I18N.i18n;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,29 +39,14 @@ import com.google.code.gtkjfilechooser.RemovableDevice.RemovableDeviceType;
  * 
  */
 public class FreeDesktopUtil {
-	/**
-	 * Kappabyte: 1024 Bytes
-	 */
-	private static final int KB = 1024;
-
-	/**
-	 * Megabyte: 1024^2 Bytes
-	 */
-	private static final int MB = 1048576;
-
-	/**
-	 * Gigabyte: 1024^3 Bytes
-	 */
-	private static final int GB = 1073741824;
-
 	public enum WellKnownDir {		
 		DESKTOP("~/Desktop"), 
-		DOWNLOAD("~/Download"), 
-		TEMPLATES("~/Templates"), 
-		PUBLICSHARE("~/Public"), 
 		DOCUMENTS("~/Documents"), 
-		MUSIC("~/Music"),
+		DOWNLOAD("~/Download"), 
+		MUSIC("~/Music"), 
 		PICTURES("~/Pictures"), 
+		PUBLICSHARE("~/Public"),
+		TEMPLATES("~/Templates"), 
 		VIDEOS("~/Videos");
 
 		private String defaultPath;
@@ -67,51 +60,24 @@ public class FreeDesktopUtil {
 		}
 	}
 
+	/**
+	 * Gigabyte: 1024^3 Bytes
+	 */
+	private static final int GB = 1073741824;
+
 	static private final String HUMAN_READABLE_FMT = "%.1f %s";
 
-	static private Properties userDirsProps;
+	/**
+	 * Kappabyte: 1024 Bytes
+	 */
+	private static final int KB = 1024;
 
 	/**
-	 * Retrieve the path of "well known" user directories like the desktop
-	 * folder and the music folder.
-	 * 
-	 * @param type
-	 * @return
-	 * 
-	 * @see http://freedesktop.org/wiki/Software/xdg-user-dirs
+	 * Megabyte: 1024^2 Bytes
 	 */
-	static public File getWellKnownDirPath(WellKnownDir type) {
-		if (userDirsProps == null) {
-			initUserDirsProps();
-		}
+	private static final int MB = 1048576;
 
-		String pathname = userDirsProps.getProperty("XDG_" + type + "_DIR");
-		String property = expandEnv(pathname != null ? pathname : type.getDefaultPath());
-		File path = new File(property);
-		return path.exists() ? path : null;
-	}
-
-	private static void initUserDirsProps() throws IOError {
-		userDirsProps = new Properties();
-		File userDirsFile = new File(System.getProperty("user.home") + "/.config/user-dirs.dirs");
-
-		// xdg-user-dirs may be not installed.
-		if (userDirsFile.exists()) {
-			try {
-				FileInputStream is = null;
-				try {
-					is = new FileInputStream(userDirsFile);
-					userDirsProps.load(is);
-				} finally {
-					if (is != null){
-						is.close();
-					}
-				}
-			} catch (IOException e) {
-				throw new IOError(e);
-			}
-		} 		
-	}
+	static private Properties userDirsProps;
 
 	/**
 	 * Expand the environment variables contained in a string
@@ -156,6 +122,19 @@ public class FreeDesktopUtil {
 		return sb.toString();
 	}
 
+	static public List<BasicPath> getBasicLocations() {
+		List<BasicPath> basicLocations = new ArrayList<BasicPath>();
+
+		basicLocations.add(BasicPath.HOME);
+		if (BasicPath.DESKTOP != null) {
+			// When the user has deleted the desktop folder.
+			basicLocations.add(BasicPath.DESKTOP);
+		}		
+		basicLocations.add(BasicPath.ROOT);
+
+		return basicLocations;
+	}
+
 	/**
 	 * Returns the list of the removable devices current mounted.
 	 * 
@@ -191,7 +170,7 @@ public class FreeDesktopUtil {
 						if (Arrays.binarySearch(diskUUIDs, name) >= 0) {
 							// Removable device without name.
 							// Set a generic name with size
-							name = humanreadble(new File(location).getTotalSpace(),	GB / 2) + " " + _("File System");
+							name = humanreadble(new File(location).getTotalSpace(),	GB / 2) + " " + i18n("File System");
 						}
 
 						device.setName(name);
@@ -217,11 +196,22 @@ public class FreeDesktopUtil {
 	}
 
 	/**
-	 * Replace space escape sequences.
+	 * Retrieve the path of "well known" user directories like the desktop
+	 * folder and the music folder. See <a href="http://freedesktop.org/wiki/Software/xdg-user-dirs">xdg-user-dirs</a>
+	 * 
+	 * @param type type
+	 * @return file
+	 * 
 	 */
-	private static String escapes(String name) {
-		name = name.replace("\\040", " ");
-		return name;
+	static public File getWellKnownDirPath(WellKnownDir type) {
+		if (userDirsProps == null) {
+			initUserDirsProps();
+		}
+
+		String pathname = userDirsProps.getProperty("XDG_" + type + "_DIR");
+		String property = expandEnv(pathname != null ? pathname : type.getDefaultPath());
+		File path = new File(property);
+		return path.exists() ? path : null;
 	}
 
 	/**
@@ -259,16 +249,33 @@ public class FreeDesktopUtil {
 		}
 	}
 
-	static public List<BasicPath> getBasicLocations() {
-		List<BasicPath> basicLocations = new ArrayList<BasicPath>();
+	/**
+	 * Replace space escape sequences.
+	 */
+	private static String escapes(String name) {
+		name = name.replace("\\040", " ");
+		return name;
+	}
 
-		basicLocations.add(BasicPath.HOME);
-		if (BasicPath.DESKTOP != null) {
-			// When the user has deleted the desktop folder.
-			basicLocations.add(BasicPath.DESKTOP);
-		}		
-		basicLocations.add(BasicPath.ROOT);
+	private static void initUserDirsProps() throws IOError {
+		userDirsProps = new Properties();
+		File userDirsFile = new File(System.getProperty("user.home") + "/.config/user-dirs.dirs");
 
-		return basicLocations;
+		// xdg-user-dirs may be not installed.
+		if (userDirsFile.exists()) {
+			try {
+				FileInputStream is = null;
+				try {
+					is = new FileInputStream(userDirsFile);
+					userDirsProps.load(is);
+				} finally {
+					if (is != null){
+						is.close();
+					}
+				}
+			} catch (IOException e) {
+				throw new IOError(e);
+			}
+		} 		
 	}
 }

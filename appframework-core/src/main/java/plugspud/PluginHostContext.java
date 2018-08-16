@@ -1,15 +1,21 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /*-- 
-
- $Id: PluginHostContext.java,v 1.1.2.1 2010-04-30 22:04:38 brett Exp $
 
  Copyright (C) 2003 Brett Smith.
  All rights reserved.
@@ -62,19 +68,18 @@ import org.apache.commons.cli.CommandLine;
 
 /**
  *  The  hosting application must provide an implementation of this interface.
- *
- *@author     magicthize
- *@created    26 May 2002
  */
 public interface PluginHostContext
 {
+	public final static int LOG_DEBUG = 3;
 	public final static int LOG_ERROR = 0;
 	public final static int LOG_INFORMATION = 1;
 	public final static int LOG_WARNING = 2;
-	public final static int LOG_DEBUG = 3;
 	
 	/**
 	 * Get the parsed command line
+	 * 
+	 * @return command line
 	 */
 	public CommandLine getCommandLine();
 	
@@ -96,22 +101,11 @@ public interface PluginHostContext
 	/**
 	 * Return the version for the plugin host. Each plugin may specify the
 	 * version of the plugin host that it requires. This version string should
-	 * be in the format of <major>.<minor>[.<micro>[-<other>]].
+	 * be in the format of major.minor[.micro[-other]].
 	 * 
 	 * @return plugin host version
 	 */
 	public PluginVersion getPluginHostVersion();
-	
-	/**
-	 * Return a resource that contains a list of "standard" plugins, i.e.
-	 * plugins whose classes are provided by the same class loader as is used
-	 * by the plugin manager itself. These plugins cannot be removed or updated
-	 * and are not showing by the plugin manager UI. If <code>null</code> is
-	 * returned, then no standard plugins are loaded.
-	 * 
-	 * @return standard plugins resource
-	 */
-	public URL getStandardPluginsResource();
 	
 	/**
 	 * Return a the location where plugin updates and installs may be obtained.
@@ -123,13 +117,26 @@ public interface PluginHostContext
 	public URL getPluginUpdatesResource();
 	
 	/**
-	 * Open a URL with a browser. 
+	 * Implement to get a preference. This is not required, but is recommended.
+	 * If this host does not want to do this, it should just return the default
+	 * value supplied.
 	 * 
-	 * @param url url to open
-	 * @throws IOException if url can't be opened
+	 * @param key preference name
+	 * @param defaultValue default value
+	 * @return value
 	 */
-	public void openURL(URL url)
-		throws IOException;
+	public String getPreference(String key, String defaultValue);
+	
+	/**
+	 * Return a resource that contains a list of "standard" plugins, i.e.
+	 * plugins whose classes are provided by the same class loader as is used
+	 * by the plugin manager itself. These plugins cannot be removed or updated
+	 * and are not showing by the plugin manager UI. If <code>null</code> is
+	 * returned, then no standard plugins are loaded.
+	 * 
+	 * @return standard plugins resource
+	 */
+	public URL getStandardPluginsResource();
 	
 	/**
 	 * Log. Type may be one of ..<br><br>
@@ -172,22 +179,20 @@ public interface PluginHostContext
 	public void log(int type, Throwable exception);
 	
 	/**
+	 * Open a URL with a browser. 
+	 * 
+	 * @param url url to open
+	 * @throws IOException if url can't be opened
+	 */
+	public void openURL(URL url)
+		throws IOException;
+	
+	/**
 	 * Implement to save a preference. This is not required, but is recommended
 	 * 
 	 * @param key preference name
 	 * @param val value
 	 */
 	public void putPreference(String key, String val);
-	
-	/**
-	 * Implement to get a preference. This is not required, but is recommended.
-	 * If this host does not want to do this, it should just return the default
-	 * value supplied.
-	 * 
-	 * @param key preference name
-	 * @param defaultVal default value
-	 * @return value
-	 */
-	public String getPreference(String key, String defaultValue);
 }
 

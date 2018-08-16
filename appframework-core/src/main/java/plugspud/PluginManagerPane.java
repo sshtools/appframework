@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /*--
 
@@ -67,6 +75,7 @@ import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -108,6 +117,7 @@ import javax.swing.JToolBar;
 import javax.swing.JViewport;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
@@ -123,47 +133,475 @@ import com.sshtools.appframework.ui.IconStore;
  */
 public class PluginManagerPane extends JPanel implements ActionListener, ListSelectionListener, Runnable {
 
-	public final static String PLUGIN_DOWNLOAD_LOCATION = "downloadLocation";
+	class ConfigureAction extends AbstractAction {
+		ConfigureAction() {
+			super();
+			putValue(Action.NAME, "Configure");
+			putValue(Action.SMALL_ICON, CONFIGURE_ICON);
+			putValue(Action.SHORT_DESCRIPTION, "Configure plugin");
+			putValue(Action.LONG_DESCRIPTION, "Configure the selected plugin");
+			putValue(Action.MNEMONIC_KEY, new Integer('c'));
+		}
 
-	public final static String PROGRESS_DIALOG_GEOMETRY = "pluginManager.progressDialog.geometry";
-	public final static String TABLE_GEOMETRY = "pluginManager.table.geometry";
+		@Override
+		public void actionPerformed(ActionEvent evt) {
+			PluginDefinition def = model.getPluginDefinitionAt(table.getSelectedRow());
+			ConfigurablePlugin sel = (ConfigurablePlugin) def.getPlugin();
+			sel.configure(PluginManagerPane.this);
+		}
+	}
 
-	// Icons
-	public final static Icon IDLE_ICON = IconStore.getInstance().getIcon("system-software-update", 32);;
+	// Supporting classes
+	class InstallAction extends AbstractAction {
+		InstallAction() {
+			super();
+			putValue(Action.NAME, "Install");
+			putValue(Action.SMALL_ICON, INSTALL_ICON);
+			putValue(Action.SHORT_DESCRIPTION, "Install plugin");
+			putValue(Action.LONG_DESCRIPTION, "Install the selected plugin");
+			putValue(Action.MNEMONIC_KEY, new Integer('i'));
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent evt) {
+			/** @todo install should warn about dependencies */
+			final PluginDefinition def = model.getPluginDefinitionAt(table.getSelectedRow());
+			status1Text.setText("Installing " + def.getName());
+			statusIcon.setIcon(LARGE_INSTALL_ICON);
+			install(def);
+		}
+	}
+	class PluginDefinition {
+		Properties localProperties, remoteProperties;
+
+		Plugin plugin;
+
+		PluginDefinition(Plugin plugin, Properties localProperties) {
+			this(plugin, localProperties, null);
+		}
+
+		PluginDefinition(Plugin plugin, Properties localProperties, Properties remoteProperties) {
+			this.plugin = plugin;
+			this.localProperties = localProperties;
+			this.remoteProperties = remoteProperties;
+		}
+
+		PluginDefinition(Properties remoteProperties) {
+			this(null, null, remoteProperties);
+		}
+
+		public String getAuthor() {
+			return getLocalProperties() != null ? getLocalProperties().getProperty(PluginManager.PLUGIN_AUTHOR)
+				: getRemoteProperties().getProperty(PluginManager.PLUGIN_AUTHOR);
+		}
+
+		public String getDownloadLocation() {
+			return getRemoteProperties() != null ? getRemoteProperties().getProperty(PLUGIN_DOWNLOAD_LOCATION) : null;
+		}
+
+		public String getInformation() {
+			return getLocalProperties() != null ? getLocalProperties().getProperty(PluginManager.PLUGIN_INFORMATION)
+				: getRemoteProperties().getProperty(PluginManager.PLUGIN_INFORMATION);
+		}
+
+		public String getLocalVersion() {
+			return getLocalProperties() != null ? getLocalProperties().getProperty(PluginManager.PLUGIN_VERSION) : null;
+		}
+
+		public String getName() {
+			return getLocalProperties() != null ? getLocalProperties().getProperty(PluginManager.PLUGIN_NAME, "")
+				: getRemoteProperties().getProperty(PluginManager.PLUGIN_NAME, "");
+		}
+
+		public String getRemoteVersion() {
+			return getRemoteProperties() != null ? getRemoteProperties().getProperty(PluginManager.PLUGIN_VERSION) : null;
+		}
+
+		public PluginVersion getRequiredHostVersion() {
+			String ver = getLocalProperties() != null ? getLocalProperties().getProperty(
+				PluginManager.PLUGIN_REQUIRED_HOST_VERSION, "") : getRemoteProperties().getProperty(
+				PluginManager.PLUGIN_REQUIRED_HOST_VERSION, "");
+			try {
+				if (ver.equalsIgnoreCase("any"))
+					return null;
+				return new PluginVersion(ver);
+			} catch (IllegalArgumentException iae) {
+				return null;
+			}
+		}
+
+		public String getShortDescription() {
+			return getLocalProperties() != null ? getLocalProperties().getProperty(PluginManager.PLUGIN_SHORT_DESCRIPTION)
+				: getRemoteProperties().getProperty(PluginManager.PLUGIN_SHORT_DESCRIPTION);
+		}
+
+		public int getStatus() {
+			if (getRemoteProperties() == null) {
+				return INSTALLED;
+			}
+			if (getLocalProperties() != null) {
+				if (!getLocalProperties().getProperty(PluginManager.PLUGIN_VERSION).equals(
+					getRemoteProperties().getProperty(PluginManager.PLUGIN_VERSION)))
+					return UPDATE_AVAILABLE;
+				return INSTALLED;
+			}
+			return NOT_INSTALLED;
+		}
+
+		public String getURL() {
+			return getLocalProperties() != null ? getLocalProperties().getProperty(PluginManager.PLUGIN_URL)
+				: getRemoteProperties().getProperty(PluginManager.PLUGIN_URL);
+		}
+
+		public boolean isStandard() {
+			return getPlugin() != null && getLocalProperties() != null
+				&& getPlugin().getClass().getClassLoader() != manager.getPluginClassLoader();
+		}
+
+		Properties getLocalProperties() {
+			return localProperties;
+		}
+
+		Plugin getPlugin() {
+			return plugin;
+		}
+
+		Properties getRemoteProperties() {
+			return remoteProperties;
+		}
+		void setRemoteProperties(Properties remoteProperties) {
+			this.remoteProperties = remoteProperties;
+		}
+	}
+
+	class PluginManagerTable extends JTable {
+		public PluginManagerTable(PluginManagerTableModel model) {
+			super(model);
+			setShowGrid(false);
+			setAutoResizeMode(0);
+			setRowHeight(18);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			restoreTableMetrics(this, TABLE_GEOMETRY, new int[] { 70, 70, 78, 78, 140, 70 });
+		}
+
+		@Override
+		public boolean getScrollableTracksViewportHeight() {
+			Component parent = getParent();
+
+			if (parent instanceof JViewport)
+				return parent.getHeight() > getPreferredSize().height;
+			return false;
+		}
+	};
+	class PluginManagerTableModel extends AbstractTableModel {
+		private Vector definitions;
+
+		PluginManagerTableModel() {
+			definitions = new Vector();
+			reload();
+		}
+
+		@Override
+		public Class getColumnClass(int c) {
+			switch (c) {
+			default:
+				return String.class;
+			}
+		}
+
+		@Override
+		public int getColumnCount() {
+			return 6;
+		}
+
+		@Override
+		public String getColumnName(int c) {
+			switch (c) {
+			case 0:
+				return "Status";
+			case 1:
+				return "Name";
+			case 2:
+				return "Version";
+			case 3:
+				return "Available";
+			case 4:
+				return "Description";
+			default:
+				return "Author";
+			}
+		}
+
+		public PluginDefinition getPluginDefinitionAt(int r) {
+			return (PluginDefinition) definitions.elementAt(r);
+		}
+
+		@Override
+		public int getRowCount() {
+			return definitions.size();
+		}
+
+		@Override
+		public Object getValueAt(int r, int c) {
+			PluginDefinition def = getPluginDefinitionAt(r);
+			switch (c) {
+			case 0:
+				switch (def.getStatus()) {
+				case NOT_INSTALLED:
+					return "Not installed";
+				case UPDATE_AVAILABLE:
+					return "Update available";
+				default:
+					return "Installed";
+				}
+			case 1:
+				return def.getName();
+			case 2:
+				String local = def.getLocalVersion();
+				return local == null ? "<N/A>" : local;
+			case 3:
+				String remote = def.getRemoteVersion();
+				return remote == null ? "<Unknown>" : remote;
+			case 4:
+				return def.getShortDescription();
+			default:
+				return def.getAuthor();
+			}
+		}
+
+		public void reload() {
+			definitions.removeAllElements();
+			int c = manager.getPluginCount();
+			for (int i = 0; i < c; i++) {
+				Plugin p = manager.getPluginAt(i);
+				PluginDefinition def = new PluginDefinition(p, manager.getPluginProperties(p), null);
+				Plugin sel = def.getPlugin();
+				Properties selPr = def.getLocalProperties();
+				String selRes = selPr.getProperty(PluginManager.PLUGIN_RESOURCE);
+				if (showBuiltInPlugins || (selRes != null && !selRes.equals(""))) {
+					definitions.addElement(def);
+				}
+			}
+			fireTableDataChanged();
+		}
+
+		public void setRemoteProperties(String name, Properties p) {
+			context.log(PluginHostContext.LOG_INFORMATION, "Looking if " + name + " is already installed");
+			for (int i = 0; i < getRowCount(); i++) {
+				PluginDefinition def = getPluginDefinitionAt(i);
+				context.log(PluginHostContext.LOG_DEBUG, "Found " + def.getName());
+				if (name.equals(def.getName())) {
+					context.log(PluginHostContext.LOG_DEBUG, name + " is installed");
+					def.setRemoteProperties(p);
+					fireTableRowsUpdated(i, i);
+					return;
+				}
+			}
+			context.log(PluginHostContext.LOG_DEBUG, name + " is not installed");
+			int r = getRowCount();
+			definitions.addElement(new PluginDefinition(p));
+			fireTableRowsInserted(r, r);
+		}
+	}
+	// Supporting classes
+	class RemoveAction extends AbstractAction {
+		/**
+		 * Constructor for the DeleteAction object
+		 */
+		RemoveAction() {
+			super();
+			putValue(Action.NAME, "Remove");
+			putValue(Action.SMALL_ICON, REMOVE_ICON);
+			putValue(Action.SHORT_DESCRIPTION, "Remove plugin");
+			putValue(Action.LONG_DESCRIPTION, "Remove the selected plugin");
+			putValue(Action.MNEMONIC_KEY, new Integer('r'));
+			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, InputEvent.CTRL_MASK));
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent evt) {
+			PluginDefinition def = model.getPluginDefinitionAt(table.getSelectedRow());
+			Plugin sel = def.getPlugin();
+			Properties selPr = def.getLocalProperties();
+			String selRes = selPr.getProperty(PluginManager.PLUGIN_RESOURCE);
+			if (selRes == null || selRes.equals("")) {
+				JOptionPane.showMessageDialog(PluginManagerPane.this,
+					"Plugin cannot be removed in this version of " + context.getPluginHostName(), "Error",
+					JOptionPane.ERROR_MESSAGE, LARGE_REMOVE_ICON);
+				return;
+			}
+
+			// Check what other plugins are in the same archive
+			Vector allPlugins = getAllPluginsInResource(selRes);
+			StringBuffer buf = new StringBuffer();
+			if (allPlugins.size() > 1) {
+				buf.append("This plugin is 1 of " + allPlugins.size() + " that are contained in the\n"
+					+ "same archive. Removal of this plugin will also\n" + "cause the removal of ...\n\n");
+				for (int i = 1; i < allPlugins.size(); i++) {
+					buf.append("    ");
+					Plugin p = (Plugin) allPlugins.elementAt(i);
+					Properties pr = manager.getPluginProperties(p);
+					buf.append(pr.getProperty(PluginManager.PLUGIN_SHORT_DESCRIPTION));
+					buf.append("\n");
+				}
+			}
+
+			// Get the jars to remove
+			HashMap removeJars = getJarsToRemove(allPlugins);
+
+			//
+			buf.append("\nThe following files will be removed from your\n");
+			buf.append("plugin directory .. \n\n");
+			for (Iterator i = removeJars.keySet().iterator(); i.hasNext();) {
+				String key = (String) i.next();
+				buf.append("    ");
+				buf.append(key.substring(key.lastIndexOf(File.separator) + 1));
+				buf.append("\n");
+			}
+			buf.append("\n");
+			buf.append("Are you sure you wish to continue?");
+
+			// The jars are not actually removed until the application restarts
+			if (JOptionPane.showConfirmDialog(PluginManagerPane.this, buf.toString(), "Remove plugin", JOptionPane.YES_NO_OPTION,
+				JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+				try {
+					removeJars(removeJars);
+					JOptionPane.showMessageDialog(PluginManagerPane.this, "You should now restart " + context.getPluginHostName(),
+						"Information", JOptionPane.INFORMATION_MESSAGE, LARGE_REMOVE_ICON);
+				} catch (IOException ioe) {
+					JOptionPane.showMessageDialog(PluginManagerPane.this, "Could not create remove list. " + ioe.getMessage(),
+						"Error", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		}
+	}
+	class ToolBarTablePane extends JPanel {
+		ToolBarTablePane(JToolBar toolBar, JTable table) {
+			super(new BorderLayout());
+			setOpaque(false);
+			JPanel t = new JPanel(new BorderLayout());
+			t.setOpaque(false);
+			toolBar.setOpaque(false);
+			t.add(toolBar, BorderLayout.NORTH);
+			JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
+			sep.setOpaque(false);
+			sep.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
+			t.add(sep, BorderLayout.CENTER);
+			JScrollPane scroller = new JScrollPane(table) {
+				@Override
+				public Dimension getPreferredSize() {
+					return new Dimension(super.getPreferredSize().width, 240);
+				}
+			};
+			;
+			scroller.setOpaque(false);
+			scroller.setBorder(BorderFactory.createLineBorder(UIManager.getColor("Label.foreground")));
+			add(t, BorderLayout.NORTH);
+			add(scroller, BorderLayout.CENTER);
+		}
+	};
+	class UpdateAction extends AbstractAction {
+		UpdateAction() {
+			super();
+			putValue(Action.NAME, "Update");
+			putValue(Action.SMALL_ICON, UPDATE_ICON);
+			putValue(Action.SHORT_DESCRIPTION, "Update plugin");
+			putValue(Action.LONG_DESCRIPTION, "Update the selected plugin");
+			putValue(Action.MNEMONIC_KEY, new Integer('u'));
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent evt) {
+			final PluginDefinition def = model.getPluginDefinitionAt(table.getSelectedRow());
+			status1Text.setText("Updating " + def.getName());
+			statusIcon.setIcon(LARGE_UPDATE_ICON);
+			Plugin sel = def.getPlugin();
+			Properties selPr = def.getLocalProperties();
+			String selRes = selPr.getProperty(PluginManager.PLUGIN_RESOURCE);
+			if (selRes.equals("")) {
+				JOptionPane.showMessageDialog(PluginManagerPane.this,
+					"Plugin cannot be updated in this version of " + context.getPluginHostName(), "Error",
+					JOptionPane.ERROR_MESSAGE, LARGE_REMOVE_ICON);
+				return;
+			}
+
+			// Check what other plugins are in the same archive
+			Vector allPlugins = getAllPluginsInResource(selRes);
+			HashMap removeJars = getJarsToRemove(allPlugins);
+
+			try {
+				removeJars(removeJars);
+				install(def);
+			} catch (IOException ioe) {
+				JOptionPane.showMessageDialog(PluginManagerPane.this, "Could not create remove list. " + ioe.getMessage(), "Error",
+					JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
 	public final static Icon ACTIVE_ICON = IconStore.getInstance().getIcon("network-receive", 32);
-	public final static Icon ERROR_ICON = IconStore.getInstance().getIcon("dialog-error", 32);
-	public final static Icon INFORMATION_ICON = IconStore.getInstance().getIcon("dialog-information", 32);;
-	public final static Icon LARGE_INSTALL_ICON = IconStore.getInstance().getIcon("list-add", 48);
-	public final static Icon LARGE_UPDATE_ICON = IconStore.getInstance().getIcon("view-refresh", 48);
-	public final static Icon LARGE_REMOVE_ICON = IconStore.getInstance().getIcon("user-trash", 48);
-	public final static Icon INSTALL_ICON = IconStore.getInstance().getIcon("list-add", 24);
-	public final static Icon UPDATE_ICON = IconStore.getInstance().getIcon("view-refresh", 24);
-	public final static Icon REMOVE_ICON = IconStore.getInstance().getIcon("user-trash", 24);
 	public final static Icon CONFIGURE_ICON = IconStore.getInstance().getIcon("preferences-system", 24);
+	public final static Icon ERROR_ICON = IconStore.getInstance().getIcon("dialog-error", 32);
+	// Icons
+	public final static Icon IDLE_ICON = IconStore.getInstance().getIcon("system-software-update", 32);
+	public final static Icon INFORMATION_ICON = IconStore.getInstance().getIcon("dialog-information", 32);
+	public final static Icon INSTALL_ICON = IconStore.getInstance().getIcon("list-add", 24);
 
 	// Plugin states
 	public final static int INSTALLED = 0;
-	public final static int UPDATE_AVAILABLE = 1;
+	public final static Icon LARGE_INSTALL_ICON = IconStore.getInstance().getIcon("list-add", 48);
+	public final static Icon LARGE_REMOVE_ICON = IconStore.getInstance().getIcon("user-trash", 48);
+
+	public final static Icon LARGE_UPDATE_ICON = IconStore.getInstance().getIcon("view-refresh", 48);
 	public final static int NOT_INSTALLED = 2;
+	public final static String PLUGIN_DOWNLOAD_LOCATION = "downloadLocation";
+	public final static String PROGRESS_DIALOG_GEOMETRY = "pluginManager.progressDialog.geometry";
+	public final static Icon REMOVE_ICON = IconStore.getInstance().getIcon("user-trash", 24);
+	public final static String TABLE_GEOMETRY = "pluginManager.table.geometry";
+	public final static int UPDATE_AVAILABLE = 1;
+	public final static Icon UPDATE_ICON = IconStore.getInstance().getIcon("view-refresh", 24);
+	public static void centerComponent(Component c) {
+		Rectangle r = c.getGraphicsConfiguration().getBounds();
+		c.setLocation(((r.x + r.width) - c.getSize().width) / 2, ((r.y + r.height) - c.getSize().height) / 2);
+	}
+	private static void jGridBagAdd(JComponent parent, JComponent componentToAdd, GridBagConstraints constraints, int pos) {
+		if (!(parent.getLayout() instanceof GridBagLayout))
+			throw new IllegalArgumentException("parent must have a GridBagLayout");
+		GridBagLayout layout = (GridBagLayout) parent.getLayout();
+		constraints.gridwidth = pos;
+		layout.setConstraints(componentToAdd, constraints);
+		parent.add(componentToAdd);
+	}
+	private JButton cancelDownload;
+	private JButton changeMasterPassword;
+	private PluginHostContext context;
+	private JTextArea info;
+	private PluginManager manager;
+	private PluginManagerTableModel model;
+	private JProgressBar progress;
+
+	private JDialog progressDialog;
+
+	private JButton refresh;
 
 	// Private instance variables
 	private Action removeAction, updateAction, installAction, configureAction;
-	private PluginHostContext context;
-	private PluginManagerTable table;
-	private JButton changeMasterPassword;
-	private JTextArea info;
-	private JLabel url;
-	private JLabel status;
-	private JButton refresh;
-	private Thread updateThread;
-	private boolean updating;
-	private PluginManagerTableModel model;
-	private PluginManager manager;
-	private JDialog progressDialog;
-	private JLabel status1Text, status2Text, statusIcon;
-	private JProgressBar progress;
-	private JButton cancelDownload;
+
 	private boolean showBuiltInPlugins;
+
+	private JLabel status;
+
+	private JLabel status1Text, status2Text, statusIcon;
+
+	private PluginManagerTable table;
+
+	private Thread updateThread;
+
+	private boolean updating;
+
+	// private void gotoSelectedURL() {
+	// }
+
+	private JLabel url;
 
 	/**
 	 * Creates a new PluginManagerPane object.
@@ -180,6 +618,7 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 	 * 
 	 * @param manager the plugin mananager
 	 * @param context context
+	 * @param showBuiltInPlugins show built-in plugins
 	 */
 	public PluginManagerPane(PluginManager manager, PluginHostContext context, boolean showBuiltInPlugins) {
 		super(new BorderLayout());
@@ -194,7 +633,7 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		sp.setOpaque(false);
 		sp.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Plugin updates"),
 			BorderFactory.createEmptyBorder(4, 4, 4, 4)));
-		status = new JLabel("Click on Refresh to check for new plugins and updates", JLabel.LEFT);
+		status = new JLabel("Click on Refresh to check for new plugins and updates", SwingConstants.LEFT);
 		status.setIcon(IDLE_ICON);
 		sp.add(status, BorderLayout.CENTER);
 		refresh = new JButton("Refresh");
@@ -214,6 +653,7 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 
 		// Create the text area
 		table = new PluginManagerTable(model = new PluginManagerTableModel()) {
+			@Override
 			public Dimension getPreferredSize() {
 				return new Dimension(super.getPreferredSize().width, 180);
 			}
@@ -227,18 +667,20 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		// ip.setBorder(BorderFactory.createTitledBorder("Information"));
 		ip.add(new JLabel(INFORMATION_ICON), BorderLayout.WEST);
 		JPanel tp = new JPanel(new BorderLayout()) {
+			@Override
 			public Dimension getPreferredSize() {
 				return new Dimension(super.getPreferredSize().width, 72);
 			}
 		};
 		tp.setOpaque(false);
 		tp.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
-		url = new JLabel(" ", JLabel.CENTER);
+		url = new JLabel(" ", SwingConstants.CENTER);
 		url.setFont(url.getFont().deriveFont(Font.BOLD).deriveFont(12f));
 		url.setForeground(Color.blue);
 		url.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		url.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
 		url.addMouseListener(new MouseAdapter() {
+			@Override
 			public void mouseClicked(MouseEvent evt) {
 				try {
 					PluginManagerPane.this.context.openURL(new URL(url.getText()));
@@ -248,6 +690,7 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		});
 		tp.add(url, BorderLayout.SOUTH);
 		info = new JTextArea(" ") {
+			@Override
 			public Dimension getPreferredSize() {
 				return new Dimension(400, 130);
 			}
@@ -263,6 +706,7 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		// Build this
 		add(sp, BorderLayout.NORTH);
 		add(new ToolBarTablePane(toolBar, table) {
+			@Override
 			public Dimension getPreferredSize() {
 				return new Dimension(480, 260);
 			}
@@ -306,18 +750,30 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 	}
 
 	/**
-	 * Save table column positions and sizes. Note, the table must have its auto
-	 * resize mode set to off, i.e.
+	 * DOCUMENT ME!
 	 * 
-	 * @param table
-	 * @param registry prefix
-	 * @param table name
+	 * @param evt DOCUMENT ME!
 	 */
-	private void saveTableMetrics(JTable table, String propertyName) {
-		for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
-			int w = table.getColumnModel().getColumn(i).getWidth();
-			context.putPreference(propertyName + ".column." + i + ".width", String.valueOf(w));
-			context.putPreference(propertyName + ".column." + i + ".position", String.valueOf(table.convertColumnIndexToModel(i)));
+	@Override
+	public void actionPerformed(ActionEvent evt) {
+		if (evt.getSource() == refresh) {
+			refreshUpdates();
+		}
+	}
+
+	/**
+	 * Clean up. This should be called to save dialog positions, table column
+	 * widths etc.
+	 * 
+	 */
+	public void cleanUp() {
+		saveTableMetrics(table, TABLE_GEOMETRY);
+	}
+
+	public synchronized void refreshUpdates() {
+		if (updateThread == null || !updateThread.isAlive()) {
+			updateThread = new Thread(this);
+			updateThread.start();
 		}
 	}
 
@@ -325,10 +781,9 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 	 * Restore table column positions and sizes. Note, the table must have its
 	 * auto resize mode set to off, i.e.
 	 * 
-	 * @param table
-	 * @param registry prefix
-	 * @param table name
-	 * @param default column widths
+	 * @param table table
+	 * @param propertyName registry prefix
+	 * @param defaultWidths default column widths
 	 */
 	public void restoreTableMetrics(JTable table, String propertyName, int[] defaultWidths) {
 		if (table.getAutoResizeMode() != JTable.AUTO_RESIZE_OFF)
@@ -349,24 +804,7 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		}
 	}
 
-	/**
-	 * Clean up. This should be called to save dialog positions, table column
-	 * widths etc.
-	 * 
-	 */
-	public void cleanUp() {
-		saveTableMetrics(table, TABLE_GEOMETRY);
-	}
-
-	private static void jGridBagAdd(JComponent parent, JComponent componentToAdd, GridBagConstraints constraints, int pos) {
-		if (!(parent.getLayout() instanceof GridBagLayout))
-			throw new IllegalArgumentException("parent must have a GridBagLayout");
-		GridBagLayout layout = (GridBagLayout) parent.getLayout();
-		constraints.gridwidth = pos;
-		layout.setConstraints(componentToAdd, constraints);
-		parent.add(componentToAdd);
-	}
-
+	@Override
 	public void run() {
 		status.setIcon(ACTIVE_ICON);
 		updating = true;
@@ -447,27 +885,81 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		setAvailableActions();
 	}
 
-	public synchronized void refreshUpdates() {
-		if (updateThread == null || !updateThread.isAlive()) {
-			updateThread = new Thread(this);
-			updateThread.start();
-		}
-	}
-
-	public static void centerComponent(Component c) {
-		Rectangle r = c.getGraphicsConfiguration().getBounds();
-		c.setLocation(((r.x + r.width) - c.getSize().width) / 2, ((r.y + r.height) - c.getSize().height) / 2);
-	}
-
-	// private void gotoSelectedURL() {
-	// }
-
+	@Override
 	public void valueChanged(ListSelectionEvent evt) {
 		setAvailableActions();
 	}
 
+	/**
+	 * Get a list of all the plugins that are in the same resource (jar?)
+	 * 
+	 * @param selRes the resource
+	 * @return all plugins in the same resource
+	 */
+	private Vector getAllPluginsInResource(String selRes) {
+
+		// First check to see if this plugin is one of many in the same jar
+		Vector allPlugins = new Vector();
+		context.log(PluginHostContext.LOG_INFORMATION, "Looking for  plugins that use " + selRes);
+		for (Enumeration e = manager.plugins(); e.hasMoreElements();) {
+			Plugin p = (Plugin) e.nextElement();
+			Properties pr = manager.getPluginProperties(p);
+			if (pr == null)
+				context.log(PluginHostContext.LOG_ERROR, "No properties found for plugin?");
+			else if (selRes.equals(pr.getProperty(PluginManager.PLUGIN_RESOURCE)))
+				allPlugins.addElement(p);
+		}
+
+		return allPlugins;
+	}
+
+	/**
+	 * Get a list of jars that should be removed when updating or removing a
+	 * plugin. Jars that are shared by other currently installed plugins are not
+	 * remove
+	 * 
+	 * @param allPlugins
+	 */
+	private HashMap getJarsToRemove(Vector allPlugins) {
+
+		// Now determine what other jars should be removed as well
+		HashMap removeJars = new HashMap();
+		for (Enumeration e = allPlugins.elements(); e.hasMoreElements();) {
+			Plugin p = (Plugin) e.nextElement();
+			Properties pr = manager.getPluginProperties(p);
+			String rs = pr.getProperty(PluginManager.PLUGIN_RESOURCE);
+			removeJars.put(rs, rs);
+			String jars = pr.getProperty(PluginManager.PLUGIN_JARS, "");
+			StringTokenizer st = new StringTokenizer(jars, ",");
+			while (st.hasMoreTokens()) {
+				String jar = st.nextToken();
+				removeJars.put(jar, new File(manager.getPluginDirectory(), jar).getAbsolutePath());
+			}
+		}
+
+		// If any plugins that are not being removed require any of the jars
+		// that are going to be removed, dont remove them
+		for (Enumeration e = manager.plugins(); e.hasMoreElements();) {
+			Plugin p = (Plugin) e.nextElement();
+			if (allPlugins.indexOf(p) == -1) {
+				Properties pr = manager.getPluginProperties(p);
+				String jars = pr.getProperty(PluginManager.PLUGIN_JARS, "");
+				StringTokenizer st = new StringTokenizer(jars, ",");
+				while (st.hasMoreTokens()) {
+					String jar = st.nextToken();
+					if (removeJars.containsKey(jar))
+						removeJars.remove(jar);
+				}
+			}
+		}
+
+		return removeJars;
+
+	}
+
 	private void install(final PluginDefinition def) {
 		Thread t = new Thread() {
+			@Override
 			public void run() {
 				InputStream in = null;
 				OutputStream out = null;
@@ -540,40 +1032,6 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 	}
 
 	/**
-	 * DOCUMENT ME!
-	 * 
-	 * @param evt DOCUMENT ME!
-	 */
-	public void actionPerformed(ActionEvent evt) {
-		if (evt.getSource() == refresh) {
-			refreshUpdates();
-		}
-	}
-
-	/**
-	 * Get a list of all the plugins that are in the same resource (jar?)
-	 * 
-	 * @param selRes the resource
-	 * @return all plugins in the same resource
-	 */
-	private Vector getAllPluginsInResource(String selRes) {
-
-		// First check to see if this plugin is one of many in the same jar
-		Vector allPlugins = new Vector();
-		context.log(PluginHostContext.LOG_INFORMATION, "Looking for  plugins that use " + selRes);
-		for (Enumeration e = manager.plugins(); e.hasMoreElements();) {
-			Plugin p = (Plugin) e.nextElement();
-			Properties pr = manager.getPluginProperties(p);
-			if (pr == null)
-				context.log(PluginHostContext.LOG_ERROR, "No properties found for plugin?");
-			else if (selRes.equals(pr.getProperty(PluginManager.PLUGIN_RESOURCE)))
-				allPlugins.addElement(p);
-		}
-
-		return allPlugins;
-	}
-
-	/**
 	 * Mark all of the supplied jars for deletion upon the next startup. Each
 	 * key in the hash map should contain a jar name, with the value being the
 	 * appropriate <code>File</code> object
@@ -603,47 +1061,19 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 	}
 
 	/**
-	 * Get a list of jars that should be removed when updating or removing a
-	 * plugin. Jars that are shared by other currently installed plugins are not
-	 * remove
+	 * Save table column positions and sizes. Note, the table must have its auto
+	 * resize mode set to off, i.e.
 	 * 
-	 * @param allPlugins
+	 * @param table
+	 * @param registry prefix
+	 * @param table name
 	 */
-	private HashMap getJarsToRemove(Vector allPlugins) {
-
-		// Now determine what other jars should be removed as well
-		HashMap removeJars = new HashMap();
-		for (Enumeration e = allPlugins.elements(); e.hasMoreElements();) {
-			Plugin p = (Plugin) e.nextElement();
-			Properties pr = manager.getPluginProperties(p);
-			String rs = pr.getProperty(PluginManager.PLUGIN_RESOURCE);
-			removeJars.put(rs, rs);
-			String jars = pr.getProperty(PluginManager.PLUGIN_JARS, "");
-			StringTokenizer st = new StringTokenizer(jars, ",");
-			while (st.hasMoreTokens()) {
-				String jar = st.nextToken();
-				removeJars.put(jar, new File(manager.getPluginDirectory(), jar).getAbsolutePath());
-			}
+	private void saveTableMetrics(JTable table, String propertyName) {
+		for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
+			int w = table.getColumnModel().getColumn(i).getWidth();
+			context.putPreference(propertyName + ".column." + i + ".width", String.valueOf(w));
+			context.putPreference(propertyName + ".column." + i + ".position", String.valueOf(table.convertColumnIndexToModel(i)));
 		}
-
-		// If any plugins that are not being removed require any of the jars
-		// that are going to be removed, dont remove them
-		for (Enumeration e = manager.plugins(); e.hasMoreElements();) {
-			Plugin p = (Plugin) e.nextElement();
-			if (allPlugins.indexOf(p) == -1) {
-				Properties pr = manager.getPluginProperties(p);
-				String jars = pr.getProperty(PluginManager.PLUGIN_JARS, "");
-				StringTokenizer st = new StringTokenizer(jars, ",");
-				while (st.hasMoreTokens()) {
-					String jar = st.nextToken();
-					if (removeJars.containsKey(jar))
-						removeJars.remove(jar);
-				}
-			}
-		}
-
-		return removeJars;
-
 	}
 
 	/**
@@ -668,406 +1098,6 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 			configureAction.setEnabled(false);
 		}
 		refresh.setEnabled(!updating);
-	}
-
-	// Supporting classes
-	class InstallAction extends AbstractAction {
-		InstallAction() {
-			super();
-			putValue(Action.NAME, "Install");
-			putValue(Action.SMALL_ICON, INSTALL_ICON);
-			putValue(Action.SHORT_DESCRIPTION, "Install plugin");
-			putValue(Action.LONG_DESCRIPTION, "Install the selected plugin");
-			putValue(Action.MNEMONIC_KEY, new Integer('i'));
-		}
-
-		public void actionPerformed(ActionEvent evt) {
-			/** @todo install should warn about dependencies */
-			final PluginDefinition def = model.getPluginDefinitionAt(table.getSelectedRow());
-			status1Text.setText("Installing " + def.getName());
-			statusIcon.setIcon(LARGE_INSTALL_ICON);
-			install(def);
-		}
-	}
-
-	class UpdateAction extends AbstractAction {
-		UpdateAction() {
-			super();
-			putValue(Action.NAME, "Update");
-			putValue(Action.SMALL_ICON, UPDATE_ICON);
-			putValue(Action.SHORT_DESCRIPTION, "Update plugin");
-			putValue(Action.LONG_DESCRIPTION, "Update the selected plugin");
-			putValue(Action.MNEMONIC_KEY, new Integer('u'));
-		}
-
-		public void actionPerformed(ActionEvent evt) {
-			final PluginDefinition def = model.getPluginDefinitionAt(table.getSelectedRow());
-			status1Text.setText("Updating " + def.getName());
-			statusIcon.setIcon(LARGE_UPDATE_ICON);
-			Plugin sel = def.getPlugin();
-			Properties selPr = def.getLocalProperties();
-			String selRes = selPr.getProperty(PluginManager.PLUGIN_RESOURCE);
-			if (selRes.equals("")) {
-				JOptionPane.showMessageDialog(PluginManagerPane.this,
-					"Plugin cannot be updated in this version of " + context.getPluginHostName(), "Error",
-					JOptionPane.ERROR_MESSAGE, LARGE_REMOVE_ICON);
-				return;
-			}
-
-			// Check what other plugins are in the same archive
-			Vector allPlugins = getAllPluginsInResource(selRes);
-			HashMap removeJars = getJarsToRemove(allPlugins);
-
-			try {
-				removeJars(removeJars);
-				install(def);
-			} catch (IOException ioe) {
-				JOptionPane.showMessageDialog(PluginManagerPane.this, "Could not create remove list. " + ioe.getMessage(), "Error",
-					JOptionPane.ERROR_MESSAGE);
-			}
-		}
-	}
-
-	class ConfigureAction extends AbstractAction {
-		ConfigureAction() {
-			super();
-			putValue(Action.NAME, "Configure");
-			putValue(Action.SMALL_ICON, CONFIGURE_ICON);
-			putValue(Action.SHORT_DESCRIPTION, "Configure plugin");
-			putValue(Action.LONG_DESCRIPTION, "Configure the selected plugin");
-			putValue(Action.MNEMONIC_KEY, new Integer('c'));
-		}
-
-		public void actionPerformed(ActionEvent evt) {
-			PluginDefinition def = model.getPluginDefinitionAt(table.getSelectedRow());
-			ConfigurablePlugin sel = (ConfigurablePlugin) def.getPlugin();
-			sel.configure(PluginManagerPane.this);
-		}
-	}
-
-	// Supporting classes
-	class RemoveAction extends AbstractAction {
-		/**
-		 * Constructor for the DeleteAction object
-		 */
-		RemoveAction() {
-			super();
-			putValue(Action.NAME, "Remove");
-			putValue(Action.SMALL_ICON, REMOVE_ICON);
-			putValue(Action.SHORT_DESCRIPTION, "Remove plugin");
-			putValue(Action.LONG_DESCRIPTION, "Remove the selected plugin");
-			putValue(Action.MNEMONIC_KEY, new Integer('r'));
-			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, KeyEvent.CTRL_MASK));
-		}
-
-		public void actionPerformed(ActionEvent evt) {
-			PluginDefinition def = model.getPluginDefinitionAt(table.getSelectedRow());
-			Plugin sel = def.getPlugin();
-			Properties selPr = def.getLocalProperties();
-			String selRes = selPr.getProperty(PluginManager.PLUGIN_RESOURCE);
-			if (selRes == null || selRes.equals("")) {
-				JOptionPane.showMessageDialog(PluginManagerPane.this,
-					"Plugin cannot be removed in this version of " + context.getPluginHostName(), "Error",
-					JOptionPane.ERROR_MESSAGE, LARGE_REMOVE_ICON);
-				return;
-			}
-
-			// Check what other plugins are in the same archive
-			Vector allPlugins = getAllPluginsInResource(selRes);
-			StringBuffer buf = new StringBuffer();
-			if (allPlugins.size() > 1) {
-				buf.append("This plugin is 1 of " + allPlugins.size() + " that are contained in the\n"
-					+ "same archive. Removal of this plugin will also\n" + "cause the removal of ...\n\n");
-				for (int i = 1; i < allPlugins.size(); i++) {
-					buf.append("    ");
-					Plugin p = (Plugin) allPlugins.elementAt(i);
-					Properties pr = manager.getPluginProperties(p);
-					buf.append(pr.getProperty(PluginManager.PLUGIN_SHORT_DESCRIPTION));
-					buf.append("\n");
-				}
-			}
-
-			// Get the jars to remove
-			HashMap removeJars = getJarsToRemove(allPlugins);
-
-			//
-			buf.append("\nThe following files will be removed from your\n");
-			buf.append("plugin directory .. \n\n");
-			for (Iterator i = removeJars.keySet().iterator(); i.hasNext();) {
-				String key = (String) i.next();
-				buf.append("    ");
-				buf.append(key.substring(key.lastIndexOf(File.separator) + 1));
-				buf.append("\n");
-			}
-			buf.append("\n");
-			buf.append("Are you sure you wish to continue?");
-
-			// The jars are not actually removed until the application restarts
-			if (JOptionPane.showConfirmDialog(PluginManagerPane.this, buf.toString(), "Remove plugin", JOptionPane.YES_NO_OPTION,
-				JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
-				try {
-					removeJars(removeJars);
-					JOptionPane.showMessageDialog(PluginManagerPane.this, "You should now restart " + context.getPluginHostName(),
-						"Information", JOptionPane.INFORMATION_MESSAGE, LARGE_REMOVE_ICON);
-				} catch (IOException ioe) {
-					JOptionPane.showMessageDialog(PluginManagerPane.this, "Could not create remove list. " + ioe.getMessage(),
-						"Error", JOptionPane.ERROR_MESSAGE);
-				}
-			}
-		}
-	}
-
-	class PluginManagerTable extends JTable {
-		public PluginManagerTable(PluginManagerTableModel model) {
-			super(model);
-			setShowGrid(false);
-			setAutoResizeMode(0);
-			setRowHeight(18);
-			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			restoreTableMetrics(this, TABLE_GEOMETRY, new int[] { 70, 70, 78, 78, 140, 70 });
-		}
-
-		public boolean getScrollableTracksViewportHeight() {
-			Component parent = getParent();
-
-			if (parent instanceof JViewport)
-				return parent.getHeight() > getPreferredSize().height;
-			return false;
-		}
-	}
-
-	class PluginManagerTableModel extends AbstractTableModel {
-		PluginManagerTableModel() {
-			definitions = new Vector();
-			reload();
-		}
-
-		public void setRemoteProperties(String name, Properties p) {
-			context.log(PluginHostContext.LOG_INFORMATION, "Looking if " + name + " is already installed");
-			for (int i = 0; i < getRowCount(); i++) {
-				PluginDefinition def = getPluginDefinitionAt(i);
-				context.log(PluginHostContext.LOG_DEBUG, "Found " + def.getName());
-				if (name.equals(def.getName())) {
-					context.log(PluginHostContext.LOG_DEBUG, name + " is installed");
-					def.setRemoteProperties(p);
-					fireTableRowsUpdated(i, i);
-					return;
-				}
-			}
-			context.log(PluginHostContext.LOG_DEBUG, name + " is not installed");
-			int r = getRowCount();
-			definitions.addElement(new PluginDefinition(p));
-			fireTableRowsInserted(r, r);
-		}
-
-		public void reload() {
-			definitions.removeAllElements();
-			int c = manager.getPluginCount();
-			for (int i = 0; i < c; i++) {
-				Plugin p = manager.getPluginAt(i);
-				PluginDefinition def = new PluginDefinition(p, manager.getPluginProperties(p), null);
-				Plugin sel = def.getPlugin();
-				Properties selPr = def.getLocalProperties();
-				String selRes = selPr.getProperty(PluginManager.PLUGIN_RESOURCE);
-				if (showBuiltInPlugins || (selRes != null && !selRes.equals(""))) {
-					definitions.addElement(def);
-				}
-			}
-			fireTableDataChanged();
-		}
-
-		public int getRowCount() {
-			return definitions.size();
-		}
-
-		public PluginDefinition getPluginDefinitionAt(int r) {
-			return (PluginDefinition) definitions.elementAt(r);
-		}
-
-		public Object getValueAt(int r, int c) {
-			PluginDefinition def = getPluginDefinitionAt(r);
-			switch (c) {
-			case 0:
-				switch (def.getStatus()) {
-				case NOT_INSTALLED:
-					return "Not installed";
-				case UPDATE_AVAILABLE:
-					return "Update available";
-				default:
-					return "Installed";
-				}
-			case 1:
-				return def.getName();
-			case 2:
-				String local = def.getLocalVersion();
-				return local == null ? "<N/A>" : local;
-			case 3:
-				String remote = def.getRemoteVersion();
-				return remote == null ? "<Unknown>" : remote;
-			case 4:
-				return def.getShortDescription();
-			default:
-				return def.getAuthor();
-			}
-		}
-
-		public int getColumnCount() {
-			return 6;
-		}
-
-		public Class getColumnClass(int c) {
-			switch (c) {
-			default:
-				return String.class;
-			}
-		}
-
-		public String getColumnName(int c) {
-			switch (c) {
-			case 0:
-				return "Status";
-			case 1:
-				return "Name";
-			case 2:
-				return "Version";
-			case 3:
-				return "Available";
-			case 4:
-				return "Description";
-			default:
-				return "Author";
-			}
-		}
-
-		private Vector definitions;
-	}
-
-	class PluginDefinition {
-		PluginDefinition(Plugin plugin, Properties localProperties) {
-			this(plugin, localProperties, null);
-		}
-
-		PluginDefinition(Properties remoteProperties) {
-			this(null, null, remoteProperties);
-		}
-
-		PluginDefinition(Plugin plugin, Properties localProperties, Properties remoteProperties) {
-			this.plugin = plugin;
-			this.localProperties = localProperties;
-			this.remoteProperties = remoteProperties;
-		}
-
-		public String getDownloadLocation() {
-			return getRemoteProperties() != null ? getRemoteProperties().getProperty(PLUGIN_DOWNLOAD_LOCATION) : null;
-		}
-
-		public int getStatus() {
-			if (getRemoteProperties() == null) {
-				return INSTALLED;
-			}
-			if (getLocalProperties() != null) {
-				if (!getLocalProperties().getProperty(PluginManager.PLUGIN_VERSION).equals(
-					getRemoteProperties().getProperty(PluginManager.PLUGIN_VERSION)))
-					return UPDATE_AVAILABLE;
-				return INSTALLED;
-			}
-			return NOT_INSTALLED;
-		}
-
-		public boolean isStandard() {
-			return getPlugin() != null && getLocalProperties() != null
-				&& getPlugin().getClass().getClassLoader() != manager.getPluginClassLoader();
-		}
-
-		public String getName() {
-			return getLocalProperties() != null ? getLocalProperties().getProperty(PluginManager.PLUGIN_NAME, "")
-				: getRemoteProperties().getProperty(PluginManager.PLUGIN_NAME, "");
-		}
-
-		public PluginVersion getRequiredHostVersion() {
-			String ver = getLocalProperties() != null ? getLocalProperties().getProperty(
-				PluginManager.PLUGIN_REQUIRED_HOST_VERSION, "") : getRemoteProperties().getProperty(
-				PluginManager.PLUGIN_REQUIRED_HOST_VERSION, "");
-			try {
-				if (ver.equalsIgnoreCase("any"))
-					return null;
-				return new PluginVersion(ver);
-			} catch (IllegalArgumentException iae) {
-				return null;
-			}
-		}
-
-		public String getLocalVersion() {
-			return getLocalProperties() != null ? getLocalProperties().getProperty(PluginManager.PLUGIN_VERSION) : null;
-		}
-
-		public String getRemoteVersion() {
-			return getRemoteProperties() != null ? getRemoteProperties().getProperty(PluginManager.PLUGIN_VERSION) : null;
-		}
-
-		public String getShortDescription() {
-			return getLocalProperties() != null ? getLocalProperties().getProperty(PluginManager.PLUGIN_SHORT_DESCRIPTION)
-				: getRemoteProperties().getProperty(PluginManager.PLUGIN_SHORT_DESCRIPTION);
-		}
-
-		public String getAuthor() {
-			return getLocalProperties() != null ? getLocalProperties().getProperty(PluginManager.PLUGIN_AUTHOR)
-				: getRemoteProperties().getProperty(PluginManager.PLUGIN_AUTHOR);
-		}
-
-		public String getInformation() {
-			return getLocalProperties() != null ? getLocalProperties().getProperty(PluginManager.PLUGIN_INFORMATION)
-				: getRemoteProperties().getProperty(PluginManager.PLUGIN_INFORMATION);
-		}
-
-		public String getURL() {
-			return getLocalProperties() != null ? getLocalProperties().getProperty(PluginManager.PLUGIN_URL)
-				: getRemoteProperties().getProperty(PluginManager.PLUGIN_URL);
-		}
-
-		Properties getLocalProperties() {
-			return localProperties;
-		}
-
-		Properties getRemoteProperties() {
-			return remoteProperties;
-		}
-
-		void setRemoteProperties(Properties remoteProperties) {
-			this.remoteProperties = remoteProperties;
-		}
-
-		Plugin getPlugin() {
-			return plugin;
-		}
-
-		Properties localProperties, remoteProperties;
-		Plugin plugin;
-	}
-
-	class ToolBarTablePane extends JPanel {
-		ToolBarTablePane(JToolBar toolBar, JTable table) {
-			super(new BorderLayout());
-			setOpaque(false);
-			JPanel t = new JPanel(new BorderLayout());
-			t.setOpaque(false);
-			toolBar.setOpaque(false);
-			t.add(toolBar, BorderLayout.NORTH);
-			JSeparator sep = new JSeparator(JSeparator.HORIZONTAL);
-			sep.setOpaque(false);
-			sep.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
-			t.add(sep, BorderLayout.CENTER);
-			JScrollPane scroller = new JScrollPane(table) {
-				public Dimension getPreferredSize() {
-					return new Dimension(super.getPreferredSize().width, 240);
-				}
-			};
-			;
-			scroller.setOpaque(false);
-			scroller.setBorder(BorderFactory.createLineBorder(UIManager.getColor("Label.foreground")));
-			add(t, BorderLayout.NORTH);
-			add(scroller, BorderLayout.CENTER);
-		}
 	}
 
 }

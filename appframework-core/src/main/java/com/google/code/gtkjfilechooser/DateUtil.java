@@ -1,21 +1,50 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.google.code.gtkjfilechooser;
 
-import static com.google.code.gtkjfilechooser.I18N._;
+import static com.google.code.gtkjfilechooser.I18N.i18n;
 
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
 public class DateUtil {
+
+	/**
+	 * The given date as Julian day number. The Julian day number is the amount
+	 * of day since 1/1/1. Useful to compute days difference.
+	 * 
+	 * @param date
+	 *            The date to convert.
+	 * @return The Julian day number.
+	 */
+	public static long toJulianDayNumber(Date date) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+
+		int Y = cal.get(Calendar.YEAR);
+		int M = cal.get(Calendar.MONTH) + 1; // jan=1, feb=2,...
+		int D = cal.get(Calendar.DAY_OF_MONTH);
+
+		return (1461 * (Y + 4800 + (M - 14) / 12)) / 4
+		+ (367 * (M - 2 - 12 * ((M - 14) / 12))) / 12
+		- (3 * ((Y + 4900 + (M - 14) / 12) / 100)) / 4 + D - 32075;
+	}
 
 	/**
 	 * Format a date in a more human readable way, according the following set
@@ -48,7 +77,7 @@ public class DateUtil {
 
 		if (days_diff == 1) {
 			// Yesterday
-			String mgsstr = _("Yesterday at %H:%M");
+			String mgsstr = i18n("Yesterday at %H:%M");
 			return new Strftime(mgsstr).format(d);
 		}
 
@@ -59,26 +88,5 @@ public class DateUtil {
 
 		// Any other date
 		return DateFormat.getDateInstance(DateFormat.SHORT).format(d);
-	}
-
-	/**
-	 * The given date as Julian day number. The Julian day number is the amount
-	 * of day since 1/1/1. Useful to compute days difference.
-	 * 
-	 * @param date
-	 *            The date to convert.
-	 * @return The Julian day number.
-	 */
-	public static long toJulianDayNumber(Date date) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
-
-		int Y = cal.get(Calendar.YEAR);
-		int M = cal.get(Calendar.MONTH) + 1; // jan=1, feb=2,...
-		int D = cal.get(Calendar.DAY_OF_MONTH);
-
-		return (1461 * (Y + 4800 + (M - 14) / 12)) / 4
-		+ (367 * (M - 2 - 12 * ((M - 14) / 12))) / 12
-		- (3 * ((Y + 4900 + (M - 14) / 12) / 100)) / 4 + D - 32075;
 	}
 }

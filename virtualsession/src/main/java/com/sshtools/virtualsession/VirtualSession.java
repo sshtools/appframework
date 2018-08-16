@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Virtual Session - Framework for a tabbed user interface of connections to some local or remote resources.
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /* HEADER */
 package com.sshtools.virtualsession;
@@ -17,24 +25,21 @@ import com.sshtools.profile.ProfileTransport;
 import com.sshtools.profile.ResourceProfile;
 
 /**
- * <p>
  * A single virtual session provides some kind of <i>display</i> or 'screen' for
  * a single connection to a host. and will usually be added to a
  * {@link VirtualSessionManager} implementation that manages all of the virtual
  * terminals.
- * </p>
  * 
- * @author $Author: brett $
+ * @param <T> type of transport
+ * @param <M> type of session manager
  */
-
-public interface VirtualSession {
-
+public interface VirtualSession<T extends ProfileTransport<?>, M extends VirtualSessionManager<? extends VirtualSession<?, ?>>> {
 	/**
 	 * Reset the session back to its initial state (e.g. clear the scree, clear
 	 * the buffer, reset the cursor etc)
 	 * 
 	 */
-	public void reset();
+	void reset();
 
 	/**
 	 * Return the title of this virtual session. There may be more than one
@@ -42,14 +47,14 @@ public interface VirtualSession {
 	 * 
 	 * @return virtual session title
 	 */
-	public String getSessionTitle();
+	String getSessionTitle();
 
 	/**
 	 * Get if this virtual session is currently connected
 	 * 
 	 * @return connected
 	 */
-	public boolean isConnected();
+	boolean isConnected();
 
 	/**
 	 * Initialise the virtual session. Called after it has been added to the
@@ -58,7 +63,7 @@ public interface VirtualSession {
 	 * @param virtualSessionManager the virtual session manager session has been
 	 *            added to
 	 */
-	public void init(VirtualSessionManager virtualSessionManager);
+	void init(M virtualSessionManager);
 
 	/**
 	 * Get the virtual session manager. Will return <code>null</code> until
@@ -66,7 +71,7 @@ public interface VirtualSession {
 	 * 
 	 * @return the virtual session manager session has been added to
 	 */
-	public VirtualSessionManager getVirtualSessionManager();
+	M getVirtualSessionManager();
 
 	/**
 	 * Disconnect this session from the host it is connected to. If
@@ -76,7 +81,7 @@ public interface VirtualSession {
 	 * @param doDisconnect disconnect the transport
 	 * @param exception cause if any
 	 */
-	public void disconnect(boolean doDisconnect, Throwable exception);
+	void disconnect(boolean doDisconnect, Throwable exception);
 
 	/**
 	 * Add a <code>VirtualSessionListener</code> to the list that should receive
@@ -85,7 +90,7 @@ public interface VirtualSession {
 	 * 
 	 * @param listener listener to add
 	 */
-	public void addVirtualSessionListener(VirtualSessionListener listener);
+	void addVirtualSessionListener(VirtualSessionListener listener);
 
 	/**
 	 * Remove a <code>VirtualSessionListener</code> to the list receiving events
@@ -94,7 +99,7 @@ public interface VirtualSession {
 	 * 
 	 * @param listener listener to remove
 	 */
-	public void removeVirtualSessionListener(VirtualSessionListener listener);
+	void removeVirtualSessionListener(VirtualSessionListener listener);
 
 	/**
 	 * Connect the session to the streams provided by the transport.
@@ -105,7 +110,7 @@ public interface VirtualSession {
 	 * @throws AuthenticationException connecting a session might involve
 	 *             secondary authentication. This will be thrown if that fails
 	 */
-	public void connect(ProfileTransport transport) throws IOException, AuthenticationException;
+	void connect(T transport) throws IOException, AuthenticationException;
 
 	/**
 	 * Get the transport currently in use. This will be set after
@@ -114,7 +119,7 @@ public interface VirtualSession {
 	 * 
 	 * @return transport
 	 */
-	public ProfileTransport getTransport();
+	T getTransport();
 
 	/**
 	 * Prior to connection, and when the user applies connection profiles, this
@@ -125,5 +130,5 @@ public interface VirtualSession {
 	 * 
 	 * @param profile profile to configure virtual session from
 	 */
-	public void setVirtualSessionProperties(ResourceProfile profile);
+	void setVirtualSessionProperties(ResourceProfile<T> profile);
 }

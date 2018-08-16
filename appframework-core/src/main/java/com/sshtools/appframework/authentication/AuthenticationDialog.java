@@ -1,11 +1,19 @@
 /**
- * Appframework
- * Copyright (C) 2003-2016 SSHTOOLS Limited
+ * Maverick Application Framework - Application framework
+ * Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 /* HEADER */
 
@@ -32,6 +40,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 
 import com.sshtools.appframework.ui.IconWrapperPanel;
 import com.sshtools.ui.swing.ResourceIcon;
@@ -53,26 +62,55 @@ public class AuthenticationDialog extends JDialog {
 
 	private static final long serialVersionUID = 1L;
 
-	private JList jListAuths = new JList();
-	private JLabel messageLabel = new JLabel();
+	/**
+	 * Show an authentication dialog given a parent component (to make modal
+	 * against) and a list of supported authentication methods (strings).
+	 * 
+	 * @param parent parent component
+	 * @param authMethods list of authentication methods (strings)
+	 * @return list of selected authentication methods
+	 */
+
+	public static java.util.List<String> showAuthenticationDialog(Component parent, java.util.List<String> authMethods) {
+		return showAuthenticationDialog(parent, authMethods, null);
+	}
+	/**
+	 * Show an authentication dialog given a parent component (to make modal
+	 * against) and a list of supported authentication methods (strings).
+	 * 
+	 * @param parent parent component
+	 * @param authMethods list of authentication methods (strings)
+	 * @param message message
+	 * @return list of selected authentication methods
+	 */
+	public static java.util.List<String> showAuthenticationDialog(Component parent, java.util.List<String> authMethods,
+			String message) {
+
+		Window w = (Window) SwingUtilities.getAncestorOfClass(Window.class, parent);
+		AuthenticationDialog dialog = null;
+		if (w instanceof Frame) {
+			dialog = new AuthenticationDialog((Frame) w);
+		} else if (w instanceof Dialog) {
+			dialog = new AuthenticationDialog((Dialog) w);
+		} else {
+			dialog = new AuthenticationDialog();
+		}
+
+		UIUtil.positionComponent(SwingConstants.CENTER, dialog);
+		return dialog.showAuthenticationMethods(authMethods, message);
+
+	}
 	private boolean cancelled = false;
+
+	private JList jListAuths = new JList();
+
+	private JLabel messageLabel = new JLabel();
 
 	/**
 	 * Creates a new AuthenticationDialog
 	 */
 	private AuthenticationDialog() {
 		super((Frame) null, Messages.getString("AuthenticationDialog.SelectMethod"), true);
-		init();
-	}
-
-	/**
-	 * Creates a new AuthenticationDialog given a parent frame to make the
-	 * dialog modal to
-	 * 
-	 * @param frame parent frame
-	 */
-	private AuthenticationDialog(Frame frame) {
-		super(frame, Messages.getString("AuthenticationDialog.SelectMethod"), true);
 		init();
 	}
 
@@ -88,17 +126,21 @@ public class AuthenticationDialog extends JDialog {
 		init();
 	}
 
-	private void setMethodList(java.util.List<String> methods) {
-		jListAuths.setListData(methods.toArray());
-		if (methods.size() > 0) {
-			jListAuths.setSelectedIndex(0);
-		}
+	/**
+	 * Creates a new AuthenticationDialog given a parent frame to make the
+	 * dialog modal to
+	 * 
+	 * @param frame parent frame
+	 */
+	private AuthenticationDialog(Frame frame) {
+		super(frame, Messages.getString("AuthenticationDialog.SelectMethod"), true);
+		init();
 	}
 
 	private void init() {
-		setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		messageLabel.setForeground(Color.red);
-		messageLabel.setHorizontalAlignment(JLabel.CENTER);
+		messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
 		jListAuths = new JList();
 		jListAuths.setVisibleRowCount(5);
@@ -121,6 +163,7 @@ public class AuthenticationDialog extends JDialog {
 		proceed.setDefaultCapable(true);
 		proceed.addActionListener(new ActionListener() {
 
+			@Override
 			public void actionPerformed(ActionEvent evt) {
 				setVisible(false);
 			}
@@ -131,6 +174,7 @@ public class AuthenticationDialog extends JDialog {
 		JButton cancel = new JButton(Messages.getString("AuthenticationDialog.Cancel"));
 		cancel.setMnemonic('c');
 		cancel.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent evt) {
 				cancelled = true;
 				setVisible(false);
@@ -163,44 +207,11 @@ public class AuthenticationDialog extends JDialog {
 
 	}
 
-	/**
-	 * Show an authentication dialog given a parent component (to make modal
-	 * against) and a list of supported authentication methods (strings).
-	 * 
-	 * @param parent parent component
-	 * @param authMethods list of authentication methods (strings)
-	 * @return list of selected authentication methods
-	 */
-
-	public static java.util.List<String> showAuthenticationDialog(Component parent, java.util.List<String> authMethods) {
-		return showAuthenticationDialog(parent, authMethods, null);
-	}
-
-	/**
-	 * Show an authentication dialog given a parent component (to make modal
-	 * against) and a list of supported authentication methods (strings).
-	 * 
-	 * @param parent parent component
-	 * @param authMethods list of authentication methods (strings)
-	 * @param message message
-	 * @return list of selected authentication methods
-	 */
-	public static java.util.List<String> showAuthenticationDialog(Component parent, java.util.List<String> authMethods,
-			String message) {
-
-		Window w = (Window) SwingUtilities.getAncestorOfClass(Window.class, parent);
-		AuthenticationDialog dialog = null;
-		if (w instanceof Frame) {
-			dialog = new AuthenticationDialog((Frame) w);
-		} else if (w instanceof Dialog) {
-			dialog = new AuthenticationDialog((Dialog) w);
-		} else {
-			dialog = new AuthenticationDialog();
+	private void setMethodList(java.util.List<String> methods) {
+		jListAuths.setListData(methods.toArray());
+		if (methods.size() > 0) {
+			jListAuths.setSelectedIndex(0);
 		}
-
-		UIUtil.positionComponent(SwingConstants.CENTER, dialog);
-		return dialog.showAuthenticationMethods(authMethods, message);
-
 	}
 
 	private java.util.List<String> showAuthenticationMethods(java.util.List<String> supported, String message) {
