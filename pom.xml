@@ -30,7 +30,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.sshtools</groupId>
 	<artifactId>appframework</artifactId>
-	<version>3.0.0</version>
+	<version>3.0.1</version>
 	<name>Appframework</name>
 	<description>Parent project for appframework, consisting of a Swing framework for applications and
 	modules that are used across a number of projects.</description>
@@ -76,8 +76,8 @@
 		</license>
 	</licenses>
 	<scm>
-		<url>https://github.com/sshtools/jfreedesktop</url>
-		<connection>https://github.com/sshtools/jfreedesktop.git</connection>
+		<url>https://github.com/sshtools/appframework</url>
+		<connection>https://github.com/sshtools/appframework.git</connection>
 	</scm>
 	<developers>
 		<developer>
