@@ -1,24 +1,16 @@
-<!--
-
-    Appframework - Parent project for appframework, consisting of a Swing framework for applications and
-    	modules that are used across a number of projects.
-    Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com)
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program. If not, see <http://www.gnu.org/licenses/>.
-
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<!-- Appframework - Parent project for appframework, consisting of a Swing 
+	framework for applications and modules that are used across a number of projects. 
+	Copyright © ${project.inceptionYear} SSHTOOLS Limited (support@sshtools.com) 
+	This program is free software: you can redistribute it and/or modify it under 
+	the terms of the GNU General Public License as published by the Free Software 
+	Foundation, either version 3 of the License, or (at your option) any later 
+	version. This program is distributed in the hope that it will be useful, 
+	but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
+	or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for 
+	more details. You should have received a copy of the GNU General Public License 
+	along with this program. If not, see <http://www.gnu.org/licenses/>. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<properties>
@@ -37,17 +29,11 @@
 	<url>http://www.sshtools.com</url>
 	<packaging>pom</packaging>
 
-	<!-- <distributionManagement>
-		<snapshotRepository>
-			<id>ossrh-sshtools</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>ossrh-sshtools</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement> -->
-	
+	<!-- <distributionManagement> <snapshotRepository> <id>ossrh-sshtools</id> 
+		<url>https://oss.sonatype.org/content/repositories/snapshots</url> </snapshotRepository> 
+		<repository> <id>ossrh-sshtools</id> <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url> 
+		</repository> </distributionManagement> -->
+
 	<distributionManagement>
 		<snapshotRepository>
 			<uniqueVersion>true</uniqueVersion>
@@ -102,6 +88,18 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>opensource-snapshots</id>
+			<name>SSHTOOLS Opensource Snapshots</name>
+			<url>http://artifactory.javassh.com/opensource-snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots/>
+		</repository>
+	</repositories>
 
 	<profiles>
 		<profile>
