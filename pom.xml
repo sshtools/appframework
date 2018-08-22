@@ -62,8 +62,8 @@
 		</license>
 	</licenses>
 	<scm>
-		<url>https://github.com/sshtools/jfreedesktop</url>
-		<connection>https://github.com/sshtools/jfreedesktop.git</connection>
+		<url>https://github.com/sshtools/appframework</url>
+		<connection>https://github.com/sshtools/appframework.git</connection>
 	</scm>
 	<developers>
 		<developer>

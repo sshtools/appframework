@@ -6,12 +6,12 @@ package com.sshtools.appframework.ui;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.UIManager;
 
-public class LookAndFeelModel extends DefaultComboBoxModel {
+public class LookAndFeelModel extends DefaultComboBoxModel<UIManager.LookAndFeelInfo> {
+	private static final long serialVersionUID = 1L;
 
 	public LookAndFeelModel() {
 		addElement(new UIManager.LookAndFeelInfo("Automatic", "automatic"));
-		for (UIManager.LookAndFeelInfo info : SshToolsApplication
-			.getAllLookAndFeelInfo()) {
+		for (UIManager.LookAndFeelInfo info : SshToolsApplication.getAllLookAndFeelInfo()) {
 			addElement(info);
 		}
 	}

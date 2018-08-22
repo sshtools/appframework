@@ -1,15 +1,8 @@
 /* HEADER */
 package com.sshtools.appframework.ui;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -17,8 +10,11 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 
-import com.sshtools.ui.swing.UIUtil;
+import com.sshtools.ui.swing.ComboBoxRenderer;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Swing component implementation of a {@link OptionsTab} that can be used to
@@ -33,62 +29,37 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 	private static final long serialVersionUID = 1L;
 	private SshToolsApplication application;
 	// Private instance variables.
-	private JComboBox lafChooser;
+	private JComboBox<UIManager.LookAndFeelInfo> lafChooser;
 	private JCheckBox stayRunning = new JCheckBox("Stay running on closing last window");
 	private JCheckBox toolBarShowSelectiveText = new JCheckBox(Messages.getString("GlobalOptionsTab.SelectiveText"));
 	private JCheckBox toolBarSmallIcons = new JCheckBox(Messages.getString("GlobalOptionsTab.SmallIcons"));
 	private JCheckBox useSystemIconTheme = new JCheckBox(Messages.getString("GlobalOptionsTab.UseSystemIconTheme"));
 	private JCheckBox wrapToolBar = new JCheckBox("Wrap tool bar icons");
 
-	/**
-	 * Creates a new GlobalOptionsTab object.
-	 * 
-	 * @param application applicationapplication
-	 */
 	public GlobalOptionsTab(SshToolsApplication application) {
 		super();
 		this.application = application;
-		Insets ins = new Insets(2, 2, 2, 2);
-		Insets ins2 = new Insets(2, 40, 2, 2);
-		JPanel s = new JPanel(new GridBagLayout());
-		GridBagConstraints gbc1 = new GridBagConstraints();
-		gbc1.weighty = 1.0;
-		gbc1.insets = ins;
-		gbc1.anchor = GridBagConstraints.WEST;
-		gbc1.fill = GridBagConstraints.HORIZONTAL;
-		gbc1.weightx = 0.0;
-		UIUtil.jGridBagAdd(s, new JLabel(Messages.getString("GlobalOptionsTab.LAF")), gbc1, GridBagConstraints.RELATIVE);
-		gbc1.weightx = 1.0;
-		lafChooser = new JComboBox(new LookAndFeelModel());
-		lafChooser.setRenderer(new DefaultListCellRenderer() {
-			private static final long serialVersionUID = 1L;
-
+		setLayout(new MigLayout("wrap 2, fillx", "[][grow]", "[][][][][][]"));
+		add(new JLabel(Messages.getString("GlobalOptionsTab.LAF")));
+		lafChooser = new JComboBox<UIManager.LookAndFeelInfo>(new LookAndFeelModel());
+		lafChooser.setRenderer(new ComboBoxRenderer<UIManager.LookAndFeelInfo>(lafChooser) {
 			@Override
-			public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
-					boolean cellHasFocus) {
-				super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-				setText(((UIManager.LookAndFeelInfo) value).getName());
-				return this;
+			protected void decorate(JLabel label, JList<? extends LookAndFeelInfo> list, LookAndFeelInfo value, int index,
+					boolean isSelected, boolean cellHasFocus) {
+				label.setText(value.getName());
 			}
 		});
-		UIUtil.jGridBagAdd(s, lafChooser, gbc1, GridBagConstraints.REMAINDER);
-		gbc1.weightx = 2.0;
-		UIUtil.jGridBagAdd(s, Box.createVerticalStrut(12), gbc1, GridBagConstraints.REMAINDER);
-		gbc1.insets = ins2;
+		add(lafChooser, "growx");
 		toolBarSmallIcons.setMnemonic('i');
-		UIUtil.jGridBagAdd(s, toolBarSmallIcons, gbc1, GridBagConstraints.REMAINDER);
+		add(toolBarSmallIcons, "span 2, gapleft 32");
 		useSystemIconTheme.setMnemonic('y');
-		UIUtil.jGridBagAdd(s, useSystemIconTheme, gbc1, GridBagConstraints.REMAINDER);
+		add(useSystemIconTheme, "span 2, gapleft 32");
 		toolBarShowSelectiveText.setMnemonic('s');
-		UIUtil.jGridBagAdd(s, toolBarShowSelectiveText, gbc1, GridBagConstraints.REMAINDER);
+		add(toolBarShowSelectiveText, "span 2, gapleft 32");
 		wrapToolBar.setMnemonic('w');
-		UIUtil.jGridBagAdd(s, wrapToolBar, gbc1, GridBagConstraints.REMAINDER);
+		add(wrapToolBar, "span 2, gapleft 32");
 		stayRunning.setMnemonic('r');
-		UIUtil.jGridBagAdd(s, stayRunning, gbc1, GridBagConstraints.REMAINDER);
-		// This tab
-		setLayout(new BorderLayout());
-		add(s, BorderLayout.NORTH);
-		setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+		add(stayRunning, "span 2, gapleft 32");
 		reset();
 	}
 

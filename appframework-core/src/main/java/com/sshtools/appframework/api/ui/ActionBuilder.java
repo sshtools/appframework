@@ -44,39 +44,30 @@ import com.sshtools.ui.swing.AppAction;
 import com.sshtools.ui.swing.MenuAction;
 
 public abstract class ActionBuilder extends ToolsBuilder<ActionToolBar> {
-
 	class ContextActionComparator implements Comparator<AppAction> {
 		@Override
 		public int compare(AppAction o1, AppAction o2) {
 			int i = ((Integer) o1.getValue(AppAction.CONTEXT_MENU_GROUP))
-					.compareTo((Integer) o2
-							.getValue(AppAction.CONTEXT_MENU_GROUP));
-			return (i == 0) ? ((Integer) o1
-					.getValue(AppAction.CONTEXT_MENU_WEIGHT))
-					.compareTo((Integer) o2
-							.getValue(AppAction.CONTEXT_MENU_WEIGHT)) : i;
+					.compareTo((Integer) o2.getValue(AppAction.CONTEXT_MENU_GROUP));
+			return (i == 0) ? ((Integer) o1.getValue(AppAction.CONTEXT_MENU_WEIGHT))
+					.compareTo((Integer) o2.getValue(AppAction.CONTEXT_MENU_WEIGHT)) : i;
 		}
 	}
 
 	class MenuItemActionComparator implements Comparator<AppAction> {
 		@Override
 		public int compare(AppAction o1, AppAction o2) {
-			int i = ((Integer) o1.getValue(AppAction.MENU_ITEM_GROUP))
-					.compareTo((Integer) o2.getValue(AppAction.MENU_ITEM_GROUP));
-			return (i == 0) ? ((Integer) o1
-					.getValue(AppAction.MENU_ITEM_WEIGHT))
-					.compareTo((Integer) o2
-							.getValue(AppAction.MENU_ITEM_WEIGHT)) : i;
+			int i = ((Integer) o1.getValue(AppAction.MENU_ITEM_GROUP)).compareTo((Integer) o2.getValue(AppAction.MENU_ITEM_GROUP));
+			return (i == 0) ? ((Integer) o1.getValue(AppAction.MENU_ITEM_WEIGHT))
+					.compareTo((Integer) o2.getValue(AppAction.MENU_ITEM_WEIGHT)) : i;
 		}
 	}
 
 	final static Logger log = LoggerFactory.getLogger(ActionBuilder.class);
 	protected JPopupMenu contextMenu;
-
 	protected JMenuBar menuBar;
 
-	public ActionBuilder(JMenuBar menuBar, ActionToolBar toolBar,
-			JPopupMenu contextMenu) {
+	public ActionBuilder(JMenuBar menuBar, ActionToolBar toolBar, JPopupMenu contextMenu) {
 		super(toolBar);
 		this.menuBar = menuBar;
 		this.contextMenu = contextMenu;
@@ -86,14 +77,12 @@ public abstract class ActionBuilder extends ToolsBuilder<ActionToolBar> {
 
 	@Override
 	protected void rebuildContainer(Collection<AppAction> enabledActions) {
-		getContainer().setWrap(PreferencesStore.getBoolean(
-				SshToolsApplication.PREF_TOOLBAR_WRAP, false));
+		getContainer().setWrap(PreferencesStore.getBoolean(SshToolsApplication.PREF_TOOLBAR_WRAP, false));
 		super.rebuildContainer(enabledActions);
 	}
 
 	protected void rebuildContextMenu(Collection<AppAction> enabledActions) {
 		contextMenu.invalidate();
-
 		// Build the context menu action list
 		List<AppAction> contextMenuActions = new ArrayList<AppAction>();
 		contextMenu.removeAll();
@@ -102,33 +91,26 @@ public abstract class ActionBuilder extends ToolsBuilder<ActionToolBar> {
 				contextMenuActions.add(action);
 			}
 		}
-		log.debug("There are " + contextMenuActions.size()
-				+ " on the context menu");
+		log.debug("There are " + contextMenuActions.size() + " on the context menu");
 		Collections.sort(contextMenuActions, new ContextActionComparator());
-
 		// Build the context menu
 		Integer grp = null;
 		for (AppAction action : contextMenuActions) {
-			if ((grp != null)
-					&& !grp.equals(action
-							.getValue(AppAction.CONTEXT_MENU_GROUP))) {
+			if ((grp != null) && !grp.equals(action.getValue(AppAction.CONTEXT_MENU_GROUP))) {
 				contextMenu.addSeparator();
 			}
-			if (Boolean.TRUE
-					.equals(action.getValue(AppAction.IS_TOGGLE_BUTTON))) {
-				final JCheckBoxMenuItem item = new JCheckBoxMenuItem(action);
+			if (Boolean.TRUE.equals(action.getValue(AppAction.IS_TOGGLE_BUTTON))) {
+				final JCheckBoxMenuItem item = ActionJCheckboxMenuItem.fixLAF(new JCheckBoxMenuItem(action));
 				action.addPropertyChangeListener(new PropertyChangeListener() {
 					@Override
 					public void propertyChange(PropertyChangeEvent evt) {
 						if (evt.getPropertyName().equals(AppAction.IS_SELECTED)) {
-							item.setSelected(((Boolean) evt.getNewValue())
-									.booleanValue());
+							item.setSelected(((Boolean) evt.getNewValue()).booleanValue());
 						}
 					}
 				});
 				contextMenu.add(item);
-				item.setSelected(Boolean.TRUE.equals(action
-						.getValue(AppAction.IS_SELECTED)));
+				item.setSelected(Boolean.TRUE.equals(action.getValue(AppAction.IS_SELECTED)));
 			} else {
 				contextMenu.add(action);
 			}
@@ -151,7 +133,6 @@ public abstract class ActionBuilder extends ToolsBuilder<ActionToolBar> {
 
 	protected void rebuildMenuBar(Collection<AppAction> enabledActions) {
 		menuBar.invalidate();
-
 		// Build the menu bar action list
 		menuBar.removeAll();
 		List<AppAction> menuBarActions = new ArrayList<AppAction>();
@@ -161,7 +142,6 @@ public abstract class ActionBuilder extends ToolsBuilder<ActionToolBar> {
 			}
 		}
 		log.debug("There are " + menuBarActions.size() + " on the menubar");
-
 		// Build the menu bar
 		List<ActionMenu> menus = new ArrayList<ActionMenu>(listActionMenus());
 		Collections.sort(menus);
@@ -183,7 +163,6 @@ public abstract class ActionBuilder extends ToolsBuilder<ActionToolBar> {
 				}
 			}
 		}
-
 		// Create the menu components
 		for (ActionMenu m : menus) {
 			List<AppAction> x = map.get(m.getName());
@@ -202,8 +181,7 @@ public abstract class ActionBuilder extends ToolsBuilder<ActionToolBar> {
 						JMenu mnu = (JMenu) a.getValue(MenuAction.MENU);
 						menu.add(mnu);
 					} else {
-						if (Boolean.TRUE.equals(a
-								.getValue(AppAction.IS_TOGGLE_BUTTON))) {
+						if (Boolean.TRUE.equals(a.getValue(AppAction.IS_TOGGLE_BUTTON))) {
 							menu.add(new ActionJCheckboxMenuItem(a));
 						} else {
 							JMenuItem item = new JMenuItem(a);
@@ -218,8 +196,7 @@ public abstract class ActionBuilder extends ToolsBuilder<ActionToolBar> {
 		menuBar.repaint();
 	}
 
-	private ActionMenu getActionMenu(Iterator<ActionMenu> actions,
-			String actionMenuName) {
+	private ActionMenu getActionMenu(Iterator<ActionMenu> actions, String actionMenuName) {
 		while (actions.hasNext()) {
 			ActionMenu a = actions.next();
 			if (a.getName().equals(actionMenuName)) {
