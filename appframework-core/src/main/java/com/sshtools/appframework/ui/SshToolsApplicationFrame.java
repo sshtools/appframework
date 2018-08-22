@@ -39,8 +39,8 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sshtools.appframework.actions.AboutAction;
 import com.sshtools.appframework.actions.ExitAction;
@@ -56,7 +56,7 @@ public class SshToolsApplicationFrame extends JFrame implements SshToolsApplicat
 	// Preference names
 	/**  */
 	public final static String PREF_LAST_FRAME_GEOMETRY = "application.lastFrameGeometry";
-	final static Log log = LogFactory.getLog(SshToolsApplicationContainer.class);
+	final static Logger log = LoggerFactory.getLogger(SshToolsApplicationContainer.class);
 	/**  */
 	protected AppAction aboutAction;
 	/**  */

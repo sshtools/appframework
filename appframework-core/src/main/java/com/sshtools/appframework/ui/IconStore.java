@@ -4,8 +4,12 @@ import java.awt.Image;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,12 +19,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
 import org.apache.commons.lang.SystemUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.FileType;
-import org.apache.commons.vfs2.VFS;
 import org.freedesktop.icons.DefaultIconService;
 import org.freedesktop.icons.IconService;
 import org.freedesktop.icons.LinuxIconService;
@@ -37,9 +36,14 @@ import org.freedesktop.mime.LinuxMagicService;
 import org.freedesktop.mime.MIMEEntry;
 import org.freedesktop.mime.MIMEService;
 import org.freedesktop.swing.SVGIcon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sshtools.appframework.util.IOUtil;
 
 public class IconStore {
-	final static Log LOG = LogFactory.getLog(IconStore.class);
+
+	final static Logger LOG = LoggerFactory.getLogger(IconStore.class);
 
 	private static Properties fixes = new Properties();
 
@@ -74,7 +78,7 @@ public class IconStore {
 	private DefaultIconService iconService;
 	private DefaultMagicService magicService;
 
-	private LimitedCache<FileObject, MIMEEntry> mimeCache = new LimitedCache<FileObject, MIMEEntry>();
+	private LimitedCache<Path, MIMEEntry> mimeCache = new LimitedCache<Path, MIMEEntry>();
 
 	private MIMEService mimeService;
 
@@ -124,27 +128,55 @@ public class IconStore {
 	}
 
 	public void addThemeJar(String themeName) throws IOException {
-		FileObject obj = null;
-		try {
-			obj = VFS.getManager().resolveFile("res:" + themeName + "/index.theme");
-		} catch (Exception e) {
-			URL loc = getClass().getClassLoader().getResource(themeName + "/index.theme");
-			try {
-				String sloc = loc.toURI().toString();
-				if (sloc.startsWith("jar:file:/") || !sloc.startsWith("jar:file://")) {
-					sloc = "jar:jar:/" + System.getProperty("user.dir") + sloc.substring(9);
-					FileObject resolveFile = VFS.getManager().resolveFile(System.getProperty("user.dir"));
-					obj = VFS.getManager().resolveFile(resolveFile, sloc);
-				} else {
-					obj = VFS.getManager().resolveFile(sloc);
+//		FileObject obj = null;
+//		try {
+//			
+//			obj = VFS.getManager().resolveFile("res:" + themeName + "/index.theme");
+//		} catch (Exception e) {
+//			URL loc = getClass().getClassLoader().getResource(themeName + "/index.theme");
+//			try {
+//				String sloc = loc.toURI().toString();
+//				if (sloc.startsWith("jar:file:/") || !sloc.startsWith("jar:file://")) {
+//					sloc = "jar:jar:/" + System.getProperty("user.dir") + sloc.substring(9);
+//					FileObject resolveFile = VFS.getManager().resolveFile(System.getProperty("user.dir"));
+//					obj = VFS.getManager().resolveFile(resolveFile, sloc);
+//				} else {
+//					obj = VFS.getManager().resolveFile(sloc);
+//
+//				}
+//			} catch (URISyntaxException e1) {
+//				e1.printStackTrace();
+//			}
+//		}
+		
 
-				}
-			} catch (URISyntaxException e1) {
-				e1.printStackTrace();
+		URL loc = getClass().getClassLoader().getResource(themeName + "/index.theme");
+		Path obj = null;
+		if(loc != null) {
+			try {
+				LOG.info(String.format("Adding theme resource %s", loc));
+				obj =  IOUtil.resourceToPath(loc);
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
 			}
 		}
+//		try {
+//			String sloc = loc.toURI().toString();
+//			if (sloc.startsWith("jar:file:/") || !sloc.startsWith("jar:file://")) {
+//				sloc = "jar:jar:/" + System.getProperty("user.dir") + sloc.substring(9);
+//				FileObject resolveFile = VFS.getManager().resolveFile(System.getProperty("user.dir"));
+//				obj = VFS.getManager().resolveFile(resolveFile, sloc);
+//			} else {
+//				obj = VFS.getManager().resolveFile(sloc);
+//
+//			}
+			
+//		} catch (URISyntaxException e1) {
+//			e1.printStackTrace();
+//		}
+		
 		if (obj != null) {
-			iconService.addBase(obj.getParent().getParent());
+			iconService.addBase(obj.getParent());
 		}
 	}
 
@@ -164,7 +196,7 @@ public class IconStore {
 		}
 		Icon icon = null;
 		try {
-			FileObject file = iconService.findIcon(name, 48);
+			Path file = iconService.findIcon(name, 48);
 			if (file != null) {
 
 				icon = get(name, size, cacheKey, file);
@@ -186,17 +218,17 @@ public class IconStore {
 		return icon;
 	}
 
-	public Icon getIconForFile(FileObject file) {
+	public Icon getIconForFile(Path file) {
 		return getIconForFile(file, 48);
 	}
 
-	public Icon getIconForFile(FileObject file, int size) {
+	public Icon getIconForFile(Path file, int size) {
 		return getIconForFile(file, size, true);
 	}
 
-	public Icon getIconForFile(FileObject file, int size, boolean useMagic) {
+	public Icon getIconForFile(Path file, int size, boolean useMagic) {
 		try {
-			if (file.getType().equals(FileType.FILE)) {
+			if (Files.isRegularFile(file)) {
 				MIMEEntry mime = mimeCache.get(file);
 				if (mime == null) {
 					mime = mimeService.getMimeTypeForFile(file, useMagic);
@@ -230,9 +262,9 @@ public class IconStore {
 				}
 
 				return getIcon("text-x-generic", size);
-			} else if (file.getType().equals(FileType.FOLDER)) {
+			} else if (Files.isDirectory(file)) {
 				return getIcon("folder", size);
-			} else if (file.getType().equals(FileType.IMAGINARY)) {
+			} else if (!Files.isReadable(file)) {
 				return getIcon("emblem-unreadable", size);
 			} else {
 				return getIcon("text-x-generic", size);
@@ -243,9 +275,9 @@ public class IconStore {
 		}
 	}
 
-	public MIMEEntry getMIMEEntryForFile(FileObject file, boolean useMagic) {
+	public MIMEEntry getMIMEEntryForFile(Path file, boolean useMagic) {
 		try {
-			if (file.getType().equals(FileType.FILE) || file.getType().equals(FileType.FOLDER)) {
+			if (Files.isRegularFile(file) || Files.isDirectory(file)) {
 				MIMEEntry mime = mimeCache.get(file);
 				if (mime == null) {
 					mime = mimeService.getMimeTypeForFile(file, useMagic);
@@ -273,19 +305,19 @@ public class IconStore {
 		iconService.setDefaultThemeName(defaultThemeName);
 	}
 
-	private Icon get(String name, int size, String cacheKey, FileObject file) throws FileSystemException, IOException {
+	private Icon get(String name, int size, String cacheKey, Path file) throws FileSystemException, IOException {
 		Icon icon;
-		if (file.getName().getBaseName().toLowerCase().endsWith(".svg")) {
-			InputStream in = file.getContent().getInputStream();
+		if (file.getFileName().toString().toLowerCase().endsWith(".svg")) {
+			InputStream in = Files.newInputStream(file);
 			try {
 				icon = new SVGIcon(name + "-" + size, in, size, size);
 			} finally {
 				in.close();
 			}
 		} else {
-			DataInputStream din = new DataInputStream(file.getContent().getInputStream());
+			DataInputStream din = new DataInputStream(Files.newInputStream(file));
 			try {
-				byte[] imgData = new byte[(int) file.getContent().getSize()];
+				byte[] imgData = new byte[(int) Files.size(file)];
 				din.readFully(imgData);
 				icon = new ImageIcon(imgData);
 			} finally {

@@ -234,7 +234,6 @@ public abstract class AbstractSshToolsApplicationClientPanel<S extends VirtualSe
 	}
 
 	public void open(File f) {
-		log.info("Opening file " + f);
 		// Make sure a connection is not already open
 		if (isConnected()) {
 			Option optNew = new Option(Messages.getString("AbstractSshToolsApplicationClientPanel.New"),

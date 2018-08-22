@@ -53,12 +53,12 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sshtools.appframework.api.SshToolsApplicationException;
 import com.sshtools.appframework.api.ui.MultilineLabel;
@@ -89,7 +89,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	public final static String PREF_TOOLBAR_SMALL_ICONS = "apps.toolBar.smallIcons";
 	public static final String PREF_TOOLBAR_WRAP = "apps.toolBar.wrap";
 	public final static String PREF_USE_SYSTEM_ICON_THEME = "apps.toolBar.useSystemIconTheme";
-	final static Log log = LogFactory.getLog(SshToolsApplication.class);
+	final static Logger log = LoggerFactory.getLogger(IconStore.class);
 	private static List<SshToolsApplicationContainer> containers = new ArrayList<SshToolsApplicationContainer>();
 	private static FileSystemManager fsManager;
 	private static SshToolsApplication instance;
@@ -424,7 +424,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 			log(PluginHostContext.LOG_ERROR, "Failed to initialise plugin manager.", e1);
 		}
 		CommandLineParser parser1 = new PosixParser();
-		CommandLine commandLine1;
+		CommandLine commandLine1 = null;
 		try {
 			// parse the command line arguments
 			commandLine1 = parser1.parse(options1, args);
@@ -436,6 +436,13 @@ public abstract class SshToolsApplication implements PluginHostContext {
 			}
 		} catch (Exception e) {
 			// Don't care at the moment
+		}
+		try {
+			parsed(commandLine1);
+		} catch (SshToolsApplicationException ae) {
+			throw ae;
+		} catch (Exception e) {
+			throw new SshToolsApplicationException("Failed to parse application properties.", e);
 		}
 		// Try and message the reuse daemon if possible - saves starting another
 		// instance
@@ -575,6 +582,9 @@ public abstract class SshToolsApplication implements PluginHostContext {
 			t.setDaemon(true);
 			t.start();
 		}
+	}
+
+	protected void parsed(CommandLine commandLine) throws Exception {
 	}
 
 	/**

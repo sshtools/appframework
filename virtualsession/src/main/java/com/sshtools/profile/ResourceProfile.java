@@ -373,6 +373,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 					schemeOptions.put(sopts.getClass(), sopts);
 				} catch (Throwable t) {
 					System.err.println("Could not create scheme specific options for " + uri.getScheme());
+					t.printStackTrace();
 				}
 			} else {
 				extensions.put(el.getName(), el);
