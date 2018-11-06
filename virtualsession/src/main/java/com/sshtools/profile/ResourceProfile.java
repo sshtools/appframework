@@ -122,6 +122,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	 * Construct a new empty profile.
 	 */
 	public ResourceProfile() {
+		this((URI)null);
 	}
 
 	/**
@@ -140,8 +141,11 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	 * @param uri uri
 	 */
 	public ResourceProfile(String name, URI uri) {
-		this();
-		setURI(uri);
+		try {
+			setURI(uri == null ? new URI("null://") :  uri);
+		} catch (MalformedURIException e) {
+			throw new IllegalArgumentException("Invalid URI.", e);
+		}
 		setName(name);
 	}
 

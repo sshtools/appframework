@@ -19,17 +19,12 @@
 package com.sshtools.appframework.ui;
 
 import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -40,25 +35,22 @@ import com.sshtools.profile.ResourceProfile;
 import com.sshtools.profile.SchemeOptions;
 import com.sshtools.profile.URI;
 import com.sshtools.profile.URI.MalformedURIException;
-import com.sshtools.ui.swing.UIUtil;
+import com.sshtools.ui.swing.TabValidationException;
 import com.sshtools.ui.swing.XTextField;
+
+import net.miginfocom.swing.MigLayout;
 
 public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends JPanel implements SshToolsConnectionTab<T> {
 	public static final Icon CONNECT_ICON = IconStore.getInstance().getIcon("network-server", 24);
-
 	public static final Icon LARGE_CONNECT_ICON = IconStore.getInstance().getIcon("network-server", 32);
 	public final static int OMIT = 0;
 	public final static int OPTIONAL = 2;
-
 	public final static int REQUIRED = 1;
 	private static final long serialVersionUID = 1L;
-
 	// Private instance variables
 	protected XTextField hostnameField = new XTextField();
-	protected JPanel mainConnectionDetailsPanel;
 	protected XTextField pathField = new XTextField();
 	protected NumericTextField portField = new NumericTextField(new Integer(0), new Integer(65535), new Integer(0));
-
 	protected JTextField userField = new XTextField();
 	private String category;
 	private String defaultPath;
@@ -74,7 +66,6 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 	private int showUser;
 	private Icon smallIcon;
 	private String title;
-
 	private String toolTipText;
 
 	/**
@@ -123,35 +114,17 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 		this.showPath = showPath;
 		this.showUser = showUser;
 		this.scheme = scheme;
-		// Create the main connection details panel
-		mainConnectionDetailsPanel = new JPanel(new GridBagLayout());
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.fill = GridBagConstraints.BOTH;
-		gbc.anchor = GridBagConstraints.NORTHWEST;
-		gbc.insets = new Insets(0, 2, 2, 2);
-		gbc.weightx = 1.0;
+		setLayout(new MigLayout("wrap 1", "14[fill, grow]", "[]"));
 		// Host name
-		addHostnameField(showHost, gbc);
+		addHostnameField(showHost);
 		// Port
-		addPortField(showPort, gbc);
+		addPortField(showPort);
 		// Path
-		addPathField(showPath, gbc);
+		addPathField(showPath);
 		// User
-		addUserField(showUser, gbc);
+		addUserField(showUser);
 		//
-		gbc.weighty = 1.0;
-		UIUtil.jGridBagAdd(mainConnectionDetailsPanel, createAdditionalComponent(), gbc, GridBagConstraints.REMAINDER);
-		//
-		// This panel
-		setLayout(new GridBagLayout());
-		setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-		gbc = new GridBagConstraints();
-		gbc.fill = GridBagConstraints.BOTH;
-		gbc.anchor = GridBagConstraints.WEST;
-		gbc.insets = new Insets(2, 2, 2, 2);
-		gbc.weighty = 1.0;
-		gbc.weightx = 1.0;
-		UIUtil.jGridBagAdd(this, mainConnectionDetailsPanel, gbc, GridBagConstraints.REMAINDER);
+		add(createAdditionalComponent());
 	}
 
 	@Override
@@ -165,8 +138,6 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 			URI uri = getURIForSettings();
 			profile.setURI(uri);
 			setupProfile(profile);
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, e.getMessage());
 		} finally {
 			setAvailable();
 		}
@@ -270,45 +241,45 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 	@Override
 	public boolean validateTab() {
 		// Validate that we have enough information
-		if ((showHost == REQUIRED && hostnameField.getText().trim().equals(""))
-				|| (showPort == REQUIRED && portField.getValue().intValue() == 0)
-				|| (showPath == REQUIRED && pathField.getText().trim().equals(""))
-				|| (showUser == REQUIRED && getUserValue().equals(""))) {
-			JOptionPane.showMessageDialog(this, "Please enter all details!", "Connect", JOptionPane.OK_OPTION);
-			return false;
-		}
+		if (showHost == REQUIRED && hostnameField.getText().trim().equals(""))
+			throw new TabValidationException(this, hostnameField);
+		if (showPort == REQUIRED && portField.getValue().intValue() == 0)
+			throw new TabValidationException(this, portField);
+		if (showPath == REQUIRED && pathField.getText().trim().equals(""))
+			throw new TabValidationException(this, pathField);
+		if (showUser == REQUIRED && getUserValue().equals(""))
+			throw new TabValidationException(this, userField);
 		return true;
 	}
 
-	protected void addHostnameField(int showHost, GridBagConstraints gbc) {
+	protected void addHostnameField(int showHost) {
 		if (showHost != OMIT) {
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getHostnameText()), gbc, GridBagConstraints.REMAINDER);
-			gbc.fill = GridBagConstraints.HORIZONTAL;
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, hostnameField, gbc, GridBagConstraints.REMAINDER);
+			add(new JLabel(getHostnameText()));
+			add(hostnameField);
 			focusOn(hostnameField);
 		}
 	}
 
-	protected void addPathField(int showPath, GridBagConstraints gbc) {
+	protected void addPathField(int showPath) {
 		if (showPath != OMIT) {
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getPathText()), gbc, GridBagConstraints.REMAINDER);
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, pathField, gbc, GridBagConstraints.REMAINDER);
+			add(new JLabel(getPathText()));
+			add(pathField);
 			focusOn(pathField);
 		}
 	}
 
-	protected void addPortField(int showPort, GridBagConstraints gbc) {
+	protected void addPortField(int showPort) {
 		if (showPort != OMIT) {
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getPortText()), gbc, GridBagConstraints.REMAINDER);
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, portField, gbc, GridBagConstraints.REMAINDER);
+			add(new JLabel(getPortText()));
+			add(portField);
 			focusOn(portField);
 		}
 	}
 
-	protected void addUserField(int showUser, GridBagConstraints gbc) {
+	protected void addUserField(int showUser) {
 		if (showUser != OMIT) {
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, new JLabel(getUserText()), gbc, GridBagConstraints.REMAINDER);
-			UIUtil.jGridBagAdd(mainConnectionDetailsPanel, userField, gbc, GridBagConstraints.REMAINDER);
+			add(new JLabel(getUserText()));
+			add(userField);
 			focusOn(userField);
 		}
 	}
@@ -343,12 +314,29 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 		return "Port";
 	}
 
-	protected URI getURIForSettings() throws MalformedURIException {
-		URI uri = new URI(scheme + "://");
-		processHostUriPortion(uri);
-		processPortUriPortion(uri);
-		processPathUriPortion(uri);
-		processUserUriPortion(uri);
+	protected URI getURIForSettings() throws TabValidationException {
+		URI uri;
+		try {
+			uri = new URI(scheme + "://");
+			processHostUriPortion(uri);
+		} catch (MalformedURIException e) {
+			throw new TabValidationException(this, hostnameField);
+		}
+		try {
+			processPortUriPortion(uri);
+		} catch (MalformedURIException e) {
+			throw new TabValidationException(this, portField);
+		}
+		try {
+			processPathUriPortion(uri);
+		} catch (MalformedURIException e) {
+			throw new TabValidationException(this, pathField);
+		}
+		try {
+			processUserUriPortion(uri);
+		} catch (MalformedURIException e) {
+			throw new TabValidationException(this, userField);
+		}
 		return uri;
 	}
 
@@ -377,7 +365,8 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 	}
 
 	protected void processPortUriPortion(URI uri) throws MalformedURIException {
-		if (hostnameField.getText().trim().length() > 0 && ( showPort == REQUIRED || (showPort == OPTIONAL && portField.getValue().intValue() > 0))) {
+		if (hostnameField.getText().trim().length() > 0
+				&& (showPort == REQUIRED || (showPort == OPTIONAL && portField.getValue().intValue() > 0))) {
 			int portValue = Integer.valueOf(portField.getText()).intValue();
 			if (portValue == defaultPort) {
 				uri.setPort(-1);
@@ -405,8 +394,9 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 					: profile.getURI().getHost());
 		}
 		if (showPort != OMIT) {
-			portField.setText(String.valueOf(profile == null || profile.getURI() == null || profile.getURI().getPort() == -1
-					? defaultPort : profile.getURI().getPort()));
+			portField.setText(
+					String.valueOf(profile == null || profile.getURI() == null || profile.getURI().getPort() == -1 ? defaultPort
+							: profile.getURI().getPort()));
 		}
 		if (showPath != OMIT) {
 			String path = getPathValue(profile);
@@ -416,8 +406,7 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 			userField.setText(profile == null || profile.getUsername() == null ? "" : profile.getUsername());
 		}
 	}
-	
-	protected void setupProfile(ResourceProfile<T> profile) throws Exception {
-	}
 
+	protected void setupProfile(ResourceProfile<T> profile) throws TabValidationException {
+	}
 }

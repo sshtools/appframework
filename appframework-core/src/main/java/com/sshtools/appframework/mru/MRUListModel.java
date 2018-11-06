@@ -41,11 +41,11 @@ public class MRUListModel extends AbstractListModel {
 				mru.remove(i);
 			}
 		}
-		if (mru.size() > 15) {
-			for (int i = mru.size() - 1; i >= 15; i--) {
-				mru.remove(i);
-			}
-		}
+//		if (mru.size() > 15) {
+//			for (int i = mru.size() - 1; i >= 15; i--) {
+//				mru.remove(i);
+//			}
+//		}
 		fireContentsChanged(this, 0, getSize() - 1);
 
 	}

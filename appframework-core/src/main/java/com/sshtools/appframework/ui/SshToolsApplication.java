@@ -87,6 +87,7 @@ import com.sshtools.appframework.prefs.FilePreferencesFactory;
 import com.sshtools.appframework.util.GeneralUtil;
 import com.sshtools.appframework.util.IOUtil;
 import com.sshtools.ui.swing.EmptyIcon;
+import com.sshtools.ui.swing.OptionDialog;
 import com.sshtools.ui.swing.UIUtil;
 
 import plugspud.PluginException;
@@ -131,6 +132,16 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		addLAF(new UIManager.LookAndFeelInfo("Metal", "javax.swing.plaf.metal.MetalLookAndFeel"));
 		addLAF(new UIManager.LookAndFeelInfo("Native", UIManager.getSystemLookAndFeelClassName()));
 		addLAF(new UIManager.LookAndFeelInfo("Cross Platform", UIManager.getCrossPlatformLookAndFeelClassName()));
+		OptionDialog.setIconLoader((option) -> {
+			if(option.equals(com.sshtools.ui.Option.CHOICE_CANCEL))
+				return IconStore.getInstance().getIcon("process-stop", 24);
+			else if(option.equals(com.sshtools.ui.Option.CHOICE_CLOSE))
+				return IconStore.getInstance().getIcon("window-close", 24);
+			else if(option.equals(com.sshtools.ui.Option.CHOICE_SAVE))
+				return IconStore.getInstance().getIcon("document-save", 24);
+			else
+				return new EmptyIcon(1, 24);
+		});
 	}
 
 	public static void addLAF(UIManager.LookAndFeelInfo laf) {
@@ -827,7 +838,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	}
 
 	@SuppressWarnings("serial")
-	private void loadMRU() {
+	protected void loadMRU() {
 		try {
 			if (System.getSecurityManager() != null) {
 				AccessController.checkPermission(new FilePermission("<<ALL FILES>>", "write"));

@@ -36,6 +36,7 @@ public abstract class SshToolsSchemeHandler<T extends ProfileTransport<?>> exten
 	private Icon icon;
 	private boolean internal;
 	private int weight;
+	private Icon largeIcon;
 
 	/**
 	 * Construct a new SchemeHandler
@@ -73,6 +74,20 @@ public abstract class SshToolsSchemeHandler<T extends ProfileTransport<?>> exten
 	 */
 	public Icon getIcon() {
 		return icon;
+	}
+
+
+	/**
+	 * Get the large icon for the scheme
+	 * 
+	 * @return large scheme icon
+	 */
+	public Icon getLargeIcon() {
+		return largeIcon;
+	}
+
+	protected void setLargeIcon(Icon largeIcon) {
+		this.largeIcon = largeIcon;
 	}
 
 	/**
