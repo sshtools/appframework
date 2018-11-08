@@ -340,7 +340,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 	class SchemeSettings {
 		SshToolsSchemeHandler<ProfileTransport<?>> handler;
 		Map<Class<? extends SchemeOptions>, SchemeOptions> options = new HashMap<Class<? extends SchemeOptions>, SchemeOptions>();
-		List<SshToolsConnectionTab<? extends ProfileTransport<?>>> tabs;
+		List<SshToolsConnectionTab<ProfileTransport<?>>> tabs;
 		URI uri;
 
 		@SuppressWarnings("unchecked")
@@ -362,7 +362,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 			return options;
 		}
 
-		public List<SshToolsConnectionTab<? extends ProfileTransport<?>>> getTabs() {
+		public List<SshToolsConnectionTab<ProfileTransport<?>>> getTabs() {
 			checkLoaded();
 			return tabs;
 		}
@@ -569,7 +569,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 	private SideBarTabber tabber;
 	private JPanel container;
 	private JPanel content;
-	private SshToolsConnectionTab<? extends ProfileTransport<?>> singleTab;
+	private SshToolsConnectionTab<ProfileTransport<?>> singleTab;
 	private TabValidationHelper tabValidationHelper = new TabValidationHelper();
 
 	/**
@@ -813,7 +813,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 			if (profile != null) {
 				if (selected != null && selected.getTabs() != null) {
 					profile.setURI(selected.uri);
-					List<SshToolsConnectionTab<? extends ProfileTransport<?>>> stabs = selected.getTabs();
+					List<SshToolsConnectionTab<ProfileTransport<?>>> stabs = selected.getTabs();
 					if (!stabs.isEmpty()) {
 						singleTab = stabs.get(0);
 						container.add(singleTab.getTabComponent());

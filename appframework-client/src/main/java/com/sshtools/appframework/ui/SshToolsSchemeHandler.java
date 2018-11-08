@@ -56,7 +56,7 @@ public abstract class SshToolsSchemeHandler<T extends ProfileTransport<?>> exten
 		this.internal = internal;
 	}
 
-	public abstract List<SshToolsConnectionTab<? extends ProfileTransport<?>>> createTabs();
+	public abstract List<SshToolsConnectionTab<ProfileTransport<?>>> createTabs();
 
 	/**
 	 * Get the category of scheme.
