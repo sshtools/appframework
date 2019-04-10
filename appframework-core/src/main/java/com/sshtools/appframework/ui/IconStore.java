@@ -21,6 +21,7 @@ import java.awt.Image;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -190,7 +191,17 @@ public class IconStore {
 		// e1.printStackTrace();
 		// }
 		if (obj != null) {
-			iconService.addBase(obj.getParent());
+			URI uri = obj.toUri();
+			if(uri.getScheme().equals("jar")) {
+				for(Path r : obj.getFileSystem().getRootDirectories()) {
+					LOG.info(String.format("Adding theme base %s", r));
+					iconService.addBase(r);
+				}
+			}
+			else if(uri.getScheme().equals("file")) {
+				LOG.info(String.format("Adding theme base %s", obj.getParent().getParent()));
+				iconService.addBase(obj.getParent().getParent());
+			}
 		}
 	}
 
