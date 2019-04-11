@@ -139,31 +139,6 @@ public class IconStore {
 	}
 
 	public void addThemeJar(String themeName) throws IOException {
-		// FileObject obj = null;
-		// try {
-		//
-		// obj = VFS.getManager().resolveFile("res:" + themeName +
-		// "/index.theme");
-		// } catch (Exception e) {
-		// URL loc = getClass().getClassLoader().getResource(themeName +
-		// "/index.theme");
-		// try {
-		// String sloc = loc.toURI().toString();
-		// if (sloc.startsWith("jar:file:/") || !sloc.startsWith("jar:file://"))
-		// {
-		// sloc = "jar:jar:/" + System.getProperty("user.dir") +
-		// sloc.substring(9);
-		// FileObject resolveFile =
-		// VFS.getManager().resolveFile(System.getProperty("user.dir"));
-		// obj = VFS.getManager().resolveFile(resolveFile, sloc);
-		// } else {
-		// obj = VFS.getManager().resolveFile(sloc);
-		//
-		// }
-		// } catch (URISyntaxException e1) {
-		// e1.printStackTrace();
-		// }
-		// }
 		URL loc = getClass().getClassLoader().getResource(themeName + "/index.theme");
 		Path obj = null;
 		if (loc != null) {
@@ -174,31 +149,14 @@ public class IconStore {
 				e.printStackTrace();
 			}
 		}
-		// try {
-		// String sloc = loc.toURI().toString();
-		// if (sloc.startsWith("jar:file:/") || !sloc.startsWith("jar:file://"))
-		// {
-		// sloc = "jar:jar:/" + System.getProperty("user.dir") +
-		// sloc.substring(9);
-		// FileObject resolveFile =
-		// VFS.getManager().resolveFile(System.getProperty("user.dir"));
-		// obj = VFS.getManager().resolveFile(resolveFile, sloc);
-		// } else {
-		// obj = VFS.getManager().resolveFile(sloc);
-		//
-		// }
-		// } catch (URISyntaxException e1) {
-		// e1.printStackTrace();
-		// }
 		if (obj != null) {
 			URI uri = obj.toUri();
-			if(uri.getScheme().equals("jar")) {
-				for(Path r : obj.getFileSystem().getRootDirectories()) {
+			if (uri.getScheme().equals("jar")) {
+				for (Path r : obj.getFileSystem().getRootDirectories()) {
 					LOG.info(String.format("Adding theme base %s", r));
 					iconService.addBase(r);
 				}
-			}
-			else if(uri.getScheme().equals("file")) {
+			} else if (uri.getScheme().equals("file")) {
 				LOG.info(String.format("Adding theme base %s", obj.getParent().getParent()));
 				iconService.addBase(obj.getParent().getParent());
 			}
@@ -366,5 +324,9 @@ public class IconStore {
 		}
 		cache.put(cacheKey, icon);
 		return icon;
+	}
+
+	public void addGlobalFallbackTheme(String theme) {
+		iconService.addGlobalFallbackTheme(theme);
 	}
 }

@@ -191,15 +191,18 @@ public abstract class AbstractSshToolsApplicationClientPanel<S extends VirtualSe
 				return false;
 			}
 		};
-		final JCheckBox advanced = new JCheckBox(Messages.getString("Advanced"));
-		advanced.setOpaque(false);
-		advanced.setMnemonic('a');
-		advanced.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				panel.setAdvanced(!panel.isAdvanced());
-			}
-		});
+		JCheckBox advanced = null;
+		if (panel.getTabsForSelected().size() > 1) {
+			advanced = new JCheckBox(Messages.getString("Advanced"));
+			advanced.setOpaque(false);
+			advanced.setMnemonic('a');
+			advanced.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					panel.setAdvanced(!panel.isAdvanced());
+				}
+			});
+		}
 		Option opt = OptionDialog.prompt(AbstractSshToolsApplicationClientPanel.this, OptionChooser.UNCATEGORISED,
 				Messages.getString("AbstractSshToolsApplicationClientPanel.ConnSettings"), panel, Option.CHOICES_SAVE_CANCEL,
 				Option.CHOICE_SAVE, callback, advanced, null, true, SshToolsConnectionPanel.DEFAULT_SIZE);

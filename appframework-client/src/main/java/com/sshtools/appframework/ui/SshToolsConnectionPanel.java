@@ -490,11 +490,11 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 				}
 			}
 		});
-		final JCheckBox advanced = new JCheckBox(Messages.getString("Advanced"));
+		JCheckBox advancedSelect = new JCheckBox(Messages.getString("Advanced"));
 		final JButton setDefault = new JButton(Messages.getString("SetDefault"), new EmptyIcon(1, 24));
-		advanced.setOpaque(false);
-		advanced.setMnemonic('a');
-		advanced.addActionListener(new ActionListener() {
+		advancedSelect.setOpaque(false);
+		advancedSelect.setMnemonic('a');
+		advancedSelect.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				conx.setAdvanced(!conx.isAdvanced());
@@ -535,7 +535,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 		});
 		dialog.getRootPane().setDefaultButton(connect);
 		JPanel buttonPanel = new JPanel(new MigLayout("", "[fill, grow][][][]", "[]"));
-		buttonPanel.add(advanced, "growx");
+		buttonPanel.add(advancedSelect, "growx");
 		buttonPanel.add(setDefault);
 		buttonPanel.add(cancel);
 		buttonPanel.add(save);
@@ -695,9 +695,27 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 		this.advanced = advanced;
 		resetPanel();
 	}
-
+	
 	public boolean isAdvanced() {
 		return advanced;
+	}
+	
+	public List<SshToolsConnectionTab<? extends ProfileTransport<?>>> getTabsForSelected() {
+
+		SchemeSettings selected = getSelectedSchemeSettings();
+		List<SshToolsConnectionTab<? extends ProfileTransport<?>>> tabs = new ArrayList<>();
+		if (selected != null && selected.getTabs() != null) {
+			profile.setURI(selected.uri);
+			for (SshToolsConnectionTab<?> tab : selected.getTabs()) {
+				tabs.add(tab);
+			}
+		}
+		if (optionalTabs != null) {
+			for (SshToolsConnectionTab<ProfileTransport<?>> tab : optionalTabs) {
+				tabs.add(tab);
+			}
+		}
+		return tabs;
 	}
 
 	void resetPanel() {
@@ -709,6 +727,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 				container.removeAll();
 			if (tabber == null) {
 				tabber = new SideBarTabber(false);
+				tabber.setButtonMode(ButtonMode.VISIBILITY_AND_SIZE);
 			}
 			JPanel p = new JPanel(new GridLayout());
 			p.add(tabber.getComponent());
@@ -786,22 +805,9 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 		if (advanced) {
 			tabber.removeAllTabs();
 			if (profile != null) {
-				List<SshToolsConnectionTab<? extends ProfileTransport<?>>> tabs = new ArrayList<>();
-				if (selected != null && selected.getTabs() != null) {
-					profile.setURI(selected.uri);
-					for (SshToolsConnectionTab<?> tab : selected.getTabs()) {
-						tabs.add(tab);
-						tabber.addTab(tab);
-					}
-				}
-				if (optionalTabs != null) {
-					for (SshToolsConnectionTab<ProfileTransport<?>> tab : optionalTabs) {
-						tabs.add(tab);
-						tabber.addTab(tab);
-					}
-				}
 				for (@SuppressWarnings("rawtypes")
-				SshToolsConnectionTab t : tabs) {
+				SshToolsConnectionTab t : getTabsForSelected()) {
+					tabber.addTab(t);
 					t.setConnectionProfile(profile);
 				}
 				if (tabber.getTabCount() > 0) {
