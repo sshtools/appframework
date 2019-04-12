@@ -73,8 +73,13 @@ public class TellMeAgainPane
         t.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
         //  Show the dialog
-        return OptionDialog.prompt(parent, OptionChooser.QUESTION, title, 
-        		t, options, options[0], null, icon);
+        try {
+	        return OptionDialog.prompt(parent, OptionChooser.QUESTION, title, 
+	        		t, options, options[0], null, icon);
+        }
+        finally {
+        	PreferencesStore.putBoolean(property, t.tellMeAgainCheckBox.isSelected());
+        }
     }
     /**
      * Show a 'Tell me again' dialog. <code>null</code> may be passed for
