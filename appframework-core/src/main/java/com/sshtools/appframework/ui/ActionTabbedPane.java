@@ -21,14 +21,15 @@ import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.Icon;
@@ -51,9 +52,9 @@ import com.sshtools.ui.swing.TabDraggedListener;
  * 
  * @author $Author: brett $
  */
+@SuppressWarnings("serial")
 public class ActionTabbedPane extends DnDTabbedPane {
 	class CloseTabAction extends AppAction {
-
 		private TabHeader header;
 
 		public CloseTabAction(TabHeader header) {
@@ -65,10 +66,8 @@ public class ActionTabbedPane extends DnDTabbedPane {
 			// putValue(SMALL_ICON, new
 			// ImageIcon(getClass().getResource("tab-close.png")));
 			Icon icon = UIManager.getIcon("InternalFrame.closeIcon");
-			if (icon == null
-					|| icon.getClass().getName().endsWith("$EmptyFrameIcon")) {
-				putValue(SMALL_ICON,
-						new ImageIcon(getClass().getResource("tab-close.png")));
+			if (icon == null || icon.getClass().getName().endsWith("$EmptyFrameIcon")) {
+				putValue(SMALL_ICON, new ImageIcon(getClass().getResource("tab-close.png")));
 			} else {
 				putValue(SMALL_ICON, icon);
 			}
@@ -87,15 +86,12 @@ public class ActionTabbedPane extends DnDTabbedPane {
 			}
 		}
 	}
+
 	class CloseTabIcon implements Icon {
 		private Icon fileIcon;
-
 		private int height;
-
 		private int width;
-
 		private int x_pos;
-
 		private int y_pos;
 
 		public CloseTabIcon(Icon fileIcon) {
@@ -127,8 +123,8 @@ public class ActionTabbedPane extends DnDTabbedPane {
 			}
 		}
 	}
-	class TabHeader extends JPanel {
 
+	class TabHeader extends JPanel {
 		private ActionButton closeTabButton;
 		private JLabel label;
 
@@ -137,15 +133,12 @@ public class ActionTabbedPane extends DnDTabbedPane {
 			setOpaque(false);
 			label = new JLabel(text, icon, SwingConstants.CENTER);
 			label.setBorder(null);
-//			label.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
 			label.setFocusable(false);
 			setBorder(null);
 			MouseAdapter listener = new MouseAdapter() {
-
 				@Override
 				public void mouseClicked(MouseEvent e) {
-					if (closeTabButton.isVisible()
-							&& (e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK) {
+					if (closeTabButton.isVisible() && (e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK) {
 						selectIfRequired();
 						showPopup(TabHeader.this);
 					} else if ((e.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK) {
@@ -159,18 +152,20 @@ public class ActionTabbedPane extends DnDTabbedPane {
 						setSelectedIndex(thisTabIndex);
 					}
 				}
-
 			};
 			addMouseListener(listener);
 			// label.addMouseListener(listener);
-
-			enableEvents(AWTEvent.FOCUS_EVENT_MASK | AWTEvent.ACTION_EVENT_MASK
-					| AWTEvent.MOUSE_MOTION_EVENT_MASK
+			enableEvents(AWTEvent.FOCUS_EVENT_MASK | AWTEvent.ACTION_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK
 					| AWTEvent.MOUSE_EVENT_MASK);
 			enableEvents(AWTEvent.KEY_EVENT_MASK);
 			setFocusable(true);
 			add(label, BorderLayout.CENTER);
-			closeTabButton = new ActionButton(new CloseTabAction(this));
+			closeTabButton = new ActionButton(new CloseTabAction(this)) {
+				@Override
+				public Insets getMargin() {
+					return new Insets(1, 1, 1, 1);
+				}
+			};
 			closeTabButton.setHideText(true);
 			add(closeTabButton, BorderLayout.EAST);
 		}
@@ -179,12 +174,10 @@ public class ActionTabbedPane extends DnDTabbedPane {
 			closeTabButton.setVisible(canClose);
 		}
 	}
-	private Vector actions;
 
+	private List<Action> actions;
 	private AppAction closeAction;
-
 	private boolean dragging;
-
 	private JPopupMenu popup;
 
 	public ActionTabbedPane() {
@@ -209,8 +202,7 @@ public class ActionTabbedPane extends DnDTabbedPane {
 
 	public void addTab(String title, Component component, Icon extraIcon) {
 		int idx = getTabCount();
-		super.addTab(title, extraIcon == null ? null : new CloseTabIcon(
-				extraIcon), component);
+		super.addTab(title, extraIcon == null ? null : new CloseTabIcon(extraIcon), component);
 		if (!dragging) {
 			TabHeader header = new TabHeader(title, extraIcon);
 			doSetTabComponentAt(idx, header);
@@ -218,21 +210,17 @@ public class ActionTabbedPane extends DnDTabbedPane {
 	}
 
 	@Override
-	public void addTab(String title, Icon extraIcon, Component component,
-			String toolTip) {
+	public void addTab(String title, Icon extraIcon, Component component, String toolTip) {
 		int idx = getTabCount();
-		super.addTab(title, extraIcon == null ? null : new CloseTabIcon(
-				extraIcon), component, toolTip);
+		super.addTab(title, extraIcon == null ? null : new CloseTabIcon(extraIcon), component, toolTip);
 		if (!dragging) {
 			TabHeader header = new TabHeader(title, extraIcon);
 			doSetTabComponentAt(idx, header);
 		}
 	}
 
-	public void insertTab(String title, Component component, Icon extraIcon,
-			int idx) {
-		super.insertTab(title, extraIcon == null ? null : new CloseTabIcon(
-				extraIcon), component, null, idx);
+	public void insertTab(String title, Component component, Icon extraIcon, int idx) {
+		super.insertTab(title, extraIcon == null ? null : new CloseTabIcon(extraIcon), component, null, idx);
 		if (!dragging) {
 			TabHeader header = new TabHeader(title, extraIcon);
 			doSetTabComponentAt(idx, header);
@@ -245,19 +233,19 @@ public class ActionTabbedPane extends DnDTabbedPane {
 
 	@Override
 	public void insertTab(String title, Icon icon, Component component, String tip, int index) {
-    	super.insertTab(title, icon, component, tip, index);
+		super.insertTab(title, icon, component, tip, index);
 		if (!dragging) {
 			TabHeader header = new TabHeader(title, icon);
 			doSetTabComponentAt(index, header);
 		}
-    }
+	}
 
 	public void removeAction(Action action) {
 		actions.remove(action);
 	}
 
 	public void removeAllActions() {
-		actions.removeAllElements();
+		actions.clear();
 	}
 
 	@Override
@@ -265,13 +253,11 @@ public class ActionTabbedPane extends DnDTabbedPane {
 		super.removeTabAt(index);
 	}
 
-    public void setCanClose(int idx, boolean canClose) {
+	public void setCanClose(int idx, boolean canClose) {
 		try {
-			Object th = getClass().getMethod("getTabComponentAt", int.class)
-					.invoke(this, idx);
-			if(th != null)
-				th.getClass().getMethod("setCanClose", boolean.class)
-					.invoke(th, canClose);
+			Object th = getClass().getMethod("getTabComponentAt", int.class).invoke(this, idx);
+			if (th != null)
+				th.getClass().getMethod("setCanClose", boolean.class).invoke(th, canClose);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -294,57 +280,54 @@ public class ActionTabbedPane extends DnDTabbedPane {
 		getTabHeader(index).label.setText(title);
 	}
 
-//	public void mouseEntered(MouseEvent e) {
-//	}
-//
-//	public void mouseExited(MouseEvent e) {
-//	}
-//
-//	public void mousePressed(MouseEvent e) {
-//	}
-//
-//	public void mouseReleased(MouseEvent e) {
-//	}
-
+	// public void mouseEntered(MouseEvent e) {
+	// }
+	//
+	// public void mouseExited(MouseEvent e) {
+	// }
+	//
+	// public void mousePressed(MouseEvent e) {
+	// }
+	//
+	// public void mouseReleased(MouseEvent e) {
+	// }
 	TabHeader getTabHeader(int index) {
 		return (TabHeader) getTabComponentAt(index);
-//		for(int i = 0 ; i < getTabCount(); i++) {
-//			Component c = getTabComponentAt(index);
-//		}
-//		return null;
+		// for(int i = 0 ; i < getTabCount(); i++) {
+		// Component c = getTabComponentAt(index);
+		// }
+		// return null;
 	}
-	
+
 	int getTabIndex(TabHeader header) {
-		for(int i = 0 ; i < getTabCount(); i++) {
-			if(getTabComponentAt(i) == header) {
+		for (int i = 0; i < getTabCount(); i++) {
+			if (getTabComponentAt(i) == header) {
 				return i;
-			};
+			}
+			;
 		}
 		return -1;
 	}
-	
+
 	private void doSetTabComponentAt(int idx, TabHeader header) {
 		try {
-			getClass().getMethod("setTabComponentAt", int.class,
-					Component.class).invoke(this, idx, header);
+			getClass().getMethod("setTabComponentAt", int.class, Component.class).invoke(this, idx, header);
 		} catch (Exception e) {
 		}
 	}
 
 	private void init() {
-		actions = new Vector();
-
+		actions = new ArrayList<>();
 		addTabDraggedListener(new TabDraggedListener() {
-
 			@Override
 			public void tabbedMoved(int oldIndex, int newIndex) {
 				dragging = false;
-//				TabHeader oh = headers.remove(oldIndex);
-//				if (oldIndex < newIndex) {
-//					headers.add(newIndex - 1, oh);
-//				} else {
-//					headers.add(newIndex, oh);
-//				}
+				// TabHeader oh = headers.remove(oldIndex);
+				// if (oldIndex < newIndex) {
+				// headers.add(newIndex - 1, oh);
+				// } else {
+				// headers.add(newIndex, oh);
+				// }
 			}
 
 			@Override
@@ -366,11 +349,9 @@ public class ActionTabbedPane extends DnDTabbedPane {
 			popup.setLabel(getTitleAt(getSelectedIndex()));
 			popup.invalidate();
 			popup.removeAll();
-			Action action;
-			for (Enumeration en = actions.elements(); en.hasMoreElements();) {
-				action = (Action) en.nextElement();
-				if (action != null)
-					popup.add(action);
+			for (Action a : actions) {
+				if (a != null)
+					popup.add(a);
 			}
 			popup.validate();
 			popup.show(c, 10, 10);

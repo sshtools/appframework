@@ -109,15 +109,12 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	public final static String PREF_USE_SYSTEM_ICON_THEME = "apps.toolBar.useSystemIconTheme";
 	final static Logger log = LoggerFactory.getLogger(IconStore.class);
 	private static List<SshToolsApplicationContainer> containers = new ArrayList<SshToolsApplicationContainer>();
-	private static FileSystemManager fsManager;
 	private static SshToolsApplication instance;
 	// Private statics
 	private final static List<UIManager.LookAndFeelInfo> LAFS = new ArrayList<UIManager.LookAndFeelInfo>();
 	private static MRUListModel mruModel;
 	private static FileSystemManager vfs;
 	static {
-		// System.setProperty("java.util.prefs.PreferencesFactory",
-		// FilePreferencesFactory.class.getName());
 		// Add the LAFS already known to Java
 		addLAF(new UIManager.LookAndFeelInfo("Default", UIManager.getLookAndFeel().getClass().getName()));
 		UIManager.LookAndFeelInfo[] i;
@@ -129,6 +126,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		for (int j = 0; j < i.length; j++) {
 			addLAF(i[j]);
 		}
+		addLAF(new UIManager.LookAndFeelInfo("Darcula", "com.bulenkov.darcula.DarculaLaf"));
 		addLAF(new UIManager.LookAndFeelInfo("Metal", "javax.swing.plaf.metal.MetalLookAndFeel"));
 		addLAF(new UIManager.LookAndFeelInfo("Native", UIManager.getSystemLookAndFeelClassName()));
 		addLAF(new UIManager.LookAndFeelInfo("Cross Platform", UIManager.getCrossPlatformLookAndFeelClassName()));
