@@ -604,10 +604,18 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	 * @return username
 	 */
 	public String getUsername() {
-		if (uri == null || uri.getUserinfo() == null) {
+		if (uri == null) {
 			return null;
 		}
 		String userinfo = uri.getUserinfo();
+		if(userinfo == null) {
+			String reginfo = uri.getRegBasedAuthority();
+			if(reginfo != null && reginfo.endsWith("@")) {
+				userinfo = reginfo.substring(0, reginfo.length() - 1);
+			}
+		}
+		if(userinfo == null)
+			return null;
 		int idx = userinfo.indexOf(':');
 		if (idx == -1) {
 			idx = userinfo.length();

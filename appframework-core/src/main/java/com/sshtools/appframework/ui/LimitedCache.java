@@ -43,6 +43,10 @@ public class LimitedCache<K, V> {
 		values.add(value);
 		map.put(key, value);
 	}
+	
+	public int size() {
+		return map.size();
+	}
 
 	public boolean containsKey(K key) {
 		return map.containsKey(key);

@@ -173,7 +173,7 @@ public class IconStore {
 			throw new IllegalStateException("configure() not yet called.");
 		}
 		String cacheKey = name + "/" + size;
-		if (cache.containsKey(name)) {
+		if (cache.containsKey(cacheKey)) {
 			return cache.get(cacheKey);
 		}
 		Icon icon = null;
@@ -188,13 +188,11 @@ public class IconStore {
 						icon = get(name, size, cacheKey, file);
 					}
 				}
-				// if(file == null) {
-				// System.err.println("Cannot find icon " + name);
-				// }
 			}
 		} catch (Exception e) {
 			LOG.error("Failed to load icon " + name + " at size " + size + ".", e);
 		}
+		cache.put(cacheKey, icon);
 		return icon;
 	}
 
@@ -322,7 +320,6 @@ public class IconStore {
 			img = img.getScaledInstance(size, size, Image.SCALE_SMOOTH);
 			icon = new ImageIcon(img);
 		}
-		cache.put(cacheKey, icon);
 		return icon;
 	}
 
