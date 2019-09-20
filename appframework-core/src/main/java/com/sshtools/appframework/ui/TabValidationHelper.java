@@ -17,6 +17,7 @@
  */
 package com.sshtools.appframework.ui;
 
+
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Point;
@@ -31,8 +32,8 @@ import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 import com.maverick.di.InfoBubble;
 import com.sshtools.ui.swing.TabValidationException;
@@ -83,7 +84,7 @@ public class TabValidationHelper {
 	void showInfoBox(TabValidationException tve) {
 		if (bubble != null)
 			hideBubble();
-		bubble = new InfoBubble("<html>" + StringEscapeUtils.escapeHtml(getMessageText(tve)) + "</html>",
+		bubble = new InfoBubble("<html>" + StringEscapeUtils.escapeHtml4(getMessageText(tve)) + "</html>",
 				IconStore.getInstance().getIcon("process-stop", 48), tve.getComponent(), new Point(0, 0));
 		bubble.show();
 		bubbleTimer = new Timer(10000, new ActionListener() {

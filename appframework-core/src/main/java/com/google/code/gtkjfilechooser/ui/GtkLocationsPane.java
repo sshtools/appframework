@@ -17,8 +17,8 @@
  */
 package com.google.code.gtkjfilechooser.ui;
 
-import static com.google.code.gtkjfilechooser.I18N.i18n;
 import static com.google.code.gtkjfilechooser.I18N.getMnemonic;
+import static com.google.code.gtkjfilechooser.I18N.i18n;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -52,11 +52,11 @@ import javax.swing.table.TableModel;
 import com.google.code.gtkjfilechooser.ActionPath;
 import com.google.code.gtkjfilechooser.BasicPath;
 import com.google.code.gtkjfilechooser.BookmarkManager;
+import com.google.code.gtkjfilechooser.BookmarkManager.GtkBookmark;
 import com.google.code.gtkjfilechooser.FreeDesktopUtil;
 import com.google.code.gtkjfilechooser.GtkStockIcon;
-import com.google.code.gtkjfilechooser.Path;
-import com.google.code.gtkjfilechooser.BookmarkManager.GtkBookmark;
 import com.google.code.gtkjfilechooser.GtkStockIcon.Size;
+import com.google.code.gtkjfilechooser.Path;
 
 public class GtkLocationsPane extends JPanel {
 	/**

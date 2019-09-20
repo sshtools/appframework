@@ -30,10 +30,10 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.UIResource;
 
-import com.google.code.gtkjfilechooser.GtkStockIcon;
-import com.google.code.gtkjfilechooser.Path;
 import com.google.code.gtkjfilechooser.BookmarkManager.GtkBookmark;
+import com.google.code.gtkjfilechooser.GtkStockIcon;
 import com.google.code.gtkjfilechooser.GtkStockIcon.Size;
+import com.google.code.gtkjfilechooser.Path;
 
 
 public class FileComboBoxRenderer extends JLabel implements ListCellRenderer, UIResource {

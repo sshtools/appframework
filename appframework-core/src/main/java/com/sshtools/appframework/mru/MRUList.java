@@ -27,9 +27,9 @@ import java.util.Iterator;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import nanoxml.XMLElement;
-
 import org.xml.sax.SAXException;
+
+import nanoxml.XMLElement;
 
 @SuppressWarnings("serial")
 public class MRUList extends ArrayList<File> {

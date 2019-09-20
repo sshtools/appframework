@@ -454,11 +454,19 @@ public class PluginManager {
 				v.copyInto(urls);
 			}
 			URL[] urls = v.toArray(new URL[v.size()]);
-			classLoader = new URLClassLoader(urls, parentClassLoader == null ? getClass().getClassLoader() : parentClassLoader);
+			classLoader = parentClassLoader;
+			if(classLoader == null) {
+				classLoader = Thread.currentThread().getContextClassLoader();
+				if(classLoader == null) {
+					classLoader = getClass().getClassLoader();
+				}
+			}
+			classLoader = new URLClassLoader(urls, classLoader);
 			((URLClassLoader) classLoader).getURLs();
 			// Add the standard plugins
 			URL url = context.getStandardPluginsResource();
 			if (url != null) {
+				context.log(PluginHostContext.LOG_INFORMATION, "Loading only standard plugins from  " + url.toExternalForm());
 				try {
 					loadPlugins(url, classLoader, true);
 				} catch (PluginException pe) {
@@ -466,6 +474,7 @@ public class PluginManager {
 				}
 			} else {
 				// Add the plugins
+				context.log(PluginHostContext.LOG_INFORMATION, "Looking for plugin jars");
 				for (Enumeration<URL> e = classLoader.getResources("plugins.properties"); e.hasMoreElements();) {
 					URL resource = e.nextElement();
 					context.log(PluginHostContext.LOG_DEBUG, "Found plugins.properties in " + resource.toExternalForm());
@@ -713,6 +722,7 @@ public class PluginManager {
 		for (Iterator i = plugins.iterator(); i.hasNext();) {
 			PluginWrapper w = (PluginWrapper) i.next();
 			try {
+				context.log(PluginHostContext.LOG_INFORMATION, "Starting plugin " + w.getName() + " [" + w.plugin.getClass() + "]");
 				w.plugin.startPlugin(context);
 				w.status.status = STATUS_STARTED;
 				startedPlugins.add(w);
