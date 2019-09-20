@@ -59,13 +59,23 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.googlecode.vfsjfilechooser2</groupId>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-vfs2</artifactId>
+			<version>2.4.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.fracpete</groupId>
 			<artifactId>vfsjfilechooser2</artifactId>
-			<version>0.2.5</version>
+			<version>0.2.8</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-logging</groupId>
 					<artifactId>commons-logging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.commons</groupId>
+					<artifactId>commons-vfs2</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
