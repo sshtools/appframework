@@ -67,7 +67,7 @@ import java.util.StringTokenizer;
  * of a major version number and option minor, micro and other elements. Each
  * numeric element of the version cannot have a value of more than 1000.
  */
-public class PluginVersion implements Comparable {
+public class PluginVersion implements Comparable<PluginVersion> {
 	// Private instance variables
 	private int major, minor, micro;
 
@@ -170,11 +170,10 @@ public class PluginVersion implements Comparable {
 	 * @throws IllegalArgumentException if the two version cannot be compared
 	 */
 	@Override
-	public int compareTo(Object o) {
-		PluginVersion v2 = (PluginVersion) o;
+	public int compareTo(PluginVersion v2) {
 		if (getElementCount() < 4 && v2.getElementCount() < 4 && getElementCount() != v2.getElementCount())
 			throw new IllegalArgumentException(
-					"Version numbers " + toString() + " and " + o.toString() + " are incompatible and cannot be compared");
+					"Version numbers " + toString() + " and " + v2.toString() + " are incompatible and cannot be compared");
 		long l1 = getMajorVersion() * 10000000;
 		if (getMinorVersion() != -1)
 			l1 += getMinorVersion() * 10000;

@@ -79,17 +79,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.cli.Options;
+import org.apache.commons.lang3.StringUtils;
 
-public class PluginManager {
+public class PluginManager<T extends PluginHostContext> {
 	public class MutableURLClassLoader extends URLClassLoader {
 		public MutableURLClassLoader(URL[] arg0) {
 			super(arg0);
@@ -100,6 +108,7 @@ public class PluginManager {
 			super.addURL(arg0);
 		}
 	}
+
 	public class PluginStatus {
 		Throwable exception;
 		int status;
@@ -115,15 +124,16 @@ public class PluginManager {
 			return status;
 		}
 	}
+
 	//
-	public class PluginWrapper implements Comparable {
+	public class PluginWrapper<P extends Plugin<T>> implements Comparable<PluginWrapper<P>> {
 		int order;
-		Plugin plugin;
+		P plugin;
 		Properties properties;
 		PluginStatus status = null;
 		PluginVersion version;
 
-		PluginWrapper(Plugin plugin, Properties properties) {
+		PluginWrapper(P plugin, Properties properties) {
 			this.plugin = plugin;
 			status = new PluginStatus();
 			this.properties = properties;
@@ -136,8 +146,8 @@ public class PluginManager {
 		}
 
 		@Override
-		public int compareTo(Object arg0) {
-			return new Integer(getOrder()).compareTo(new Integer(((PluginWrapper) arg0).getOrder()));
+		public int compareTo(PluginWrapper<P> arg0) {
+			return new Integer(getOrder()).compareTo(new Integer((arg0).getOrder()));
 		}
 
 		public String getName() {
@@ -162,9 +172,10 @@ public class PluginManager {
 					+ ", version=" + version + "]";
 		}
 	}
+
 	public final static String PLUGIN_AUTHOR = "author";
 	public final static String PLUGIN_CLASSNAME = "className";
-	public final static String PLUGIN_DEPENDENCIES = "dependencies";
+	public final static String PLUGIN_DEPENDENCIES = "dependsOn";
 	public final static String PLUGIN_INFORMATION = "information";
 	public final static String PLUGIN_JARS = "jars";
 	public final static String PLUGIN_NAME = "name";
@@ -178,34 +189,54 @@ public class PluginManager {
 	public final static int STATUS_ERRORED = 3;
 	public final static int STATUS_STARTED = 1;
 	public final static int STATUS_STOPPED = 2;
+	public final static int STATUS_ACTIVATED = 4;
 	// Plugin statis
 	public final static int STATUS_UNINITIALIZED = 0;
+	private Set<PluginWrapper<Plugin<T>>> activatedPlugins;
 	private ClassLoader classLoader;
-	private PluginHostContext context;
+	private T context;
 	private boolean initialised;
+	private ScheduledExecutorService loadQueue;
+	private Object lock = new Object();
+	private Map<String, Set<PluginWrapper<Plugin<T>>>> onLoad;
 	private ClassLoader parentClassLoader;
 	// Private instance variables
 	private File pluginDir;
-	private HashMap<String, PluginWrapper> pluginMap;
-
-	private HashMap pluginProperties;
-
-	private Vector<PluginWrapper> plugins;
-
-	private Vector<PluginWrapper> startedPlugins;
+	private HashMap<String, PluginWrapper<Plugin<T>>> pluginMap;
+	private List<PluginWrapper<Plugin<T>>> plugins;
+	private Set<PluginWrapper<Plugin<T>>> processedPlugins;
+	private Set<PluginWrapper<Plugin<T>>> startedPlugins;
 
 	/**
 	 * Activate all plugins
 	 */
 	public void activate() {
-		for (PluginWrapper w : startedPlugins) {
-			try {
-				w.plugin.activatePlugin(context);
-			} catch (PluginException pe) {
-				w.status.exception = pe;
-				w.status.status = STATUS_ERRORED;
-				context.log(PluginHostContext.LOG_ERROR, "Failed to start plugin " + w.properties.getProperty(PLUGIN_NAME), pe);
+		processedPlugins.clear();
+		buildDependencyTree();
+		/*
+		 * First start all plugins that do not have any dependencies, these can
+		 * all be started in their own thread (well as many as are available)
+		 */
+		int started = 0;
+		for (PluginWrapper<Plugin<T>> w : plugins) {
+			String deps = w.properties.getProperty(PLUGIN_DEPENDENCIES);
+			if (StringUtils.isBlank(deps)) {
+				started++;
+				context.log(PluginHostContext.LOG_DEBUG,
+						"Activating root plugin " + w.getName() + " [" + w.plugin.getClass() + "]");
+				synchronized (lock) {
+					loadQueue.execute(() -> activatePlugin(w));
+				}
 			}
+		}
+		if (plugins.size() > 0 && started == 0) {
+			context.log(PluginHostContext.LOG_ERROR,
+					"While there are plugins to load, a circular dependency configuration was discovered preventing any being used. Please contact the developer.");
+		}
+		try {
+			waitForPlugins();
+		} catch (InterruptedException ie) {
+			context.log(PluginHostContext.LOG_ERROR, "Interrupted activating plugins", ie);
 		}
 	}
 
@@ -215,15 +246,14 @@ public class PluginManager {
 	 * @param plugin plugin
 	 * @param properties properties
 	 */
-	public void addPlugin(Plugin plugin, Properties properties) {
-		PluginWrapper w = new PluginWrapper(plugin, properties);
-		plugins.addElement(w);
+	public void addPlugin(Plugin<T> plugin, Properties properties) {
+		PluginWrapper<Plugin<T>> w = new PluginWrapper<Plugin<T>>(plugin, properties);
+		plugins.add(w);
 		pluginMap.put(w.getName(), w);
 	}
 
 	public void buildCLIOptions(Options options1) {
-		for (Iterator i = plugins.iterator(); i.hasNext();) {
-			PluginWrapper w = (PluginWrapper) i.next();
+		for (PluginWrapper<Plugin<T>> w : plugins) {
 			w.plugin.buildCLIOptions(options1);
 		}
 	}
@@ -234,7 +264,7 @@ public class PluginManager {
 	 * @return can stop
 	 */
 	public boolean canStop() {
-		for (PluginWrapper w : startedPlugins) {
+		for (PluginWrapper<Plugin<T>> w : startedPlugins) {
 			if (!w.plugin.canStopPlugin())
 				return false;
 		}
@@ -248,8 +278,9 @@ public class PluginManager {
 	 * @param <P> type of plugin
 	 * @return plugin
 	 */
+	@SuppressWarnings("unchecked")
 	public <P extends Plugin<?>> P getPlugin(Class<P> clazz) {
-		PluginWrapper wrapper = getPluginWrapper(clazz);
+		PluginWrapper<Plugin<T>> wrapper = getPluginWrapper(clazz);
 		return (wrapper == null) ? null : (P) wrapper.plugin;
 	}
 
@@ -261,8 +292,8 @@ public class PluginManager {
 	 * 
 	 * @return plugin
 	 */
-	public Plugin getPlugin(String name) {
-		PluginWrapper wrapper = getPluginWrapper(name);
+	public Plugin<T> getPlugin(String name) {
+		PluginWrapper<Plugin<T>> wrapper = getPluginWrapper(name);
 		return (wrapper == null) ? null : wrapper.plugin;
 	}
 
@@ -272,8 +303,8 @@ public class PluginManager {
 	 * @param r index of plugin
 	 * @return plugin
 	 */
-	public Plugin getPluginAt(int r) {
-		return plugins.elementAt(r).plugin;
+	public Plugin<T> getPluginAt(int r) {
+		return plugins.get(r).plugin;
 	}
 
 	/**
@@ -310,7 +341,7 @@ public class PluginManager {
 	 * 
 	 * @return properties
 	 */
-	public Properties getPluginProperties(Plugin plugin) {
+	public Properties getPluginProperties(Plugin<T> plugin) {
 		return getPluginWrapper(plugin).properties;
 	}
 
@@ -323,7 +354,7 @@ public class PluginManager {
 	 * @return properties
 	 */
 	public Properties getPluginProperties(String name) {
-		PluginWrapper w = getPluginWrapper(name);
+		PluginWrapper<Plugin<T>> w = getPluginWrapper(name);
 		return (w == null) ? null : w.properties;
 	}
 
@@ -334,20 +365,18 @@ public class PluginManager {
 	 * 
 	 * @return DOCUMENT ME!
 	 */
-	public Plugin[] getPluginsOfClass(Class pluginClass) {
-		Vector v = new Vector();
-		for (Iterator i = plugins.iterator(); i.hasNext();) {
-			PluginWrapper w = (PluginWrapper) i.next();
+	@SuppressWarnings("unchecked")
+	public Plugin<T>[] getPluginsOfClass(Class<? extends Plugin<T>> pluginClass) {
+		List<Plugin<T>> v = new ArrayList<>();
+		for (PluginWrapper<Plugin<T>> w : plugins) {
 			if (pluginClass.isAssignableFrom(w.plugin.getClass()))
-				v.addElement(w.plugin);
+				v.add(w.plugin);
 		}
-		Plugin[] p = new Plugin[v.size()];
-		v.copyInto(p);
-		return p;
+		return v.toArray(new Plugin[0]);
 	}
 
-	public PluginWrapper getPluginWrapper(Class<? extends Plugin<?>> clazz) {
-		for (PluginWrapper w : pluginMap.values()) {
+	public PluginWrapper<Plugin<T>> getPluginWrapper(Class<? extends Plugin<?>> clazz) {
+		for (PluginWrapper<Plugin<T>> w : plugins) {
 			if (w.plugin.getClass().equals(clazz)) {
 				return w;
 			}
@@ -355,16 +384,15 @@ public class PluginManager {
 		return null;
 	}
 
-	public PluginWrapper getPluginWrapper(Plugin plugin) {
-		for (Enumeration e = plugins.elements(); e.hasMoreElements();) {
-			PluginWrapper w = (PluginWrapper) e.nextElement();
+	public PluginWrapper<Plugin<T>> getPluginWrapper(Plugin<T> plugin) {
+		for (PluginWrapper<Plugin<T>> w : plugins) {
 			if (w.plugin == plugin)
 				return w;
 		}
 		return null;
 	}
 
-	public PluginWrapper getPluginWrapper(String name) {
+	public PluginWrapper<Plugin<T>> getPluginWrapper(String name) {
 		return pluginMap.get(name);
 	}
 
@@ -375,11 +403,15 @@ public class PluginManager {
 	 * 
 	 * @throws PluginException on any errors
 	 */
-	public void init(PluginHostContext context) throws PluginException {
+	public void init(T context) throws PluginException {
 		this.context = context;
-		pluginMap = new HashMap<String, PluginManager.PluginWrapper>();
-		plugins = new Vector<PluginWrapper>();
-		startedPlugins = new Vector<PluginWrapper>();
+		loadQueue = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+		pluginMap = new HashMap<String, PluginWrapper<Plugin<T>>>();
+		plugins = new ArrayList<PluginWrapper<Plugin<T>>>();
+		startedPlugins = new HashSet<PluginWrapper<Plugin<T>>>();
+		activatedPlugins = new HashSet<PluginWrapper<Plugin<T>>>();
+		processedPlugins = new HashSet<PluginWrapper<Plugin<T>>>();
+		onLoad = new HashMap<String, Set<PluginWrapper<Plugin<T>>>>();
 		// Create the plugin directory if it doesn't exist
 		pluginDir = context.getPluginDirectory();
 		if (pluginDir == null) {
@@ -390,10 +422,7 @@ public class PluginManager {
 			// First remove any plugins jars that are no longer required
 			File removeFile = new File(pluginDir, "ros.list");
 			if (removeFile.exists() && removeFile.canRead()) {
-				InputStream rin = null;
-				try {
-					rin = new FileInputStream(removeFile);
-					BufferedReader reader = new BufferedReader(new InputStreamReader(rin));
+				try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(removeFile)))) {
 					String line = null;
 					while ((line = reader.readLine()) != null) {
 						File z = new File(line);
@@ -405,12 +434,6 @@ public class PluginManager {
 					context.log(PluginHostContext.LOG_ERROR,
 							"Failed to read remove-on-startup list file " + removeFile.getAbsolutePath());
 				} finally {
-					if (rin != null) {
-						try {
-							rin.close();
-						} catch (IOException ioe) {
-						}
-					}
 					if (!removeFile.delete()) {
 						context.log(PluginHostContext.LOG_ERROR, "Failed to remove remove-on-startup list file "
 								+ removeFile.getAbsolutePath() + ". Further errors may appear.");
@@ -455,9 +478,9 @@ public class PluginManager {
 			}
 			URL[] urls = v.toArray(new URL[v.size()]);
 			classLoader = parentClassLoader;
-			if(classLoader == null) {
+			if (classLoader == null) {
 				classLoader = Thread.currentThread().getContextClassLoader();
-				if(classLoader == null) {
+				if (classLoader == null) {
 					classLoader = getClass().getClassLoader();
 				}
 			}
@@ -498,8 +521,8 @@ public class PluginManager {
 	 * @return class
 	 * @throws ClassNotFoundException if class cannot be loaded
 	 */
-	public Class loadClass(String plugin, String className) throws ClassNotFoundException {
-		Plugin p = getPlugin(plugin);
+	public Class<?> loadClass(String plugin, String className) throws ClassNotFoundException {
+		Plugin<T> p = getPlugin(plugin);
 		if (p == null) {
 			throw new ClassNotFoundException("The plugin " + plugin + " could not be located.");
 		}
@@ -514,14 +537,14 @@ public class PluginManager {
 	 * @return <code>HashMap</code> of properties
 	 * @throws PluginException on error
 	 */
-	public HashMap loadPluginProperties(URL url) throws PluginException {
-		HashMap props = new HashMap();
+	public HashMap<String, Properties> loadPluginProperties(URL url) throws PluginException {
+		HashMap<String, Properties> props = new HashMap<>();
 		InputStream in = null;
 		try {
 			in = url.openStream();
 			Properties p = new Properties();
 			p.load(in);
-			for (Enumeration e = p.keys(); e.hasMoreElements();) {
+			for (Enumeration<Object> e = p.keys(); e.hasMoreElements();) {
 				String key = (String) e.nextElement();
 				int idx = key.indexOf('.');
 				if (idx == -1)
@@ -532,7 +555,7 @@ public class PluginManager {
 				if (property.length() == 0)
 					throw new PluginException(
 							"Invalid property name in " + url.toExternalForm() + ". Must be " + "<pluginName>.<property>=<value>");
-				Properties h = (Properties) props.get(name);
+				Properties h = props.get(name);
 				if (h == null) {
 					h = new Properties();
 					props.put(name, h);
@@ -561,10 +584,9 @@ public class PluginManager {
 		InputStream in = null;
 		try {
 			context.log(PluginHostContext.LOG_INFORMATION, "Loading plugins from " + url.toExternalForm());
-			HashMap props = loadPluginProperties(url);
-			for (Iterator i = props.keySet().iterator(); i.hasNext();) {
-				String key = (String) i.next();
-				Properties properties = (Properties) props.get(key);
+			HashMap<String, Properties> props = loadPluginProperties(url);
+			for (Map.Entry<String, Properties> en : props.entrySet()) {
+				Properties properties = en.getValue();
 				String name = properties.getProperty(PLUGIN_NAME);
 				if (name == null)
 					throw new PluginException("<pluginName>.name property " + "not specified in " + url.toExternalForm());
@@ -592,10 +614,9 @@ public class PluginManager {
 				String pluginURL = properties.getProperty(PLUGIN_URL);
 				String author = properties.getProperty(PLUGIN_AUTHOR);
 				String information = properties.getProperty(PLUGIN_INFORMATION);
-				List<PluginWrapper> found = new ArrayList<PluginWrapper>();
+				List<PluginWrapper<Plugin<T>>> found = new ArrayList<>();
 				context.log(PluginHostContext.LOG_DEBUG, "Looking for plugin " + name);
-				for (Iterator z = plugins.iterator(); z.hasNext();) {
-					PluginWrapper pw = (PluginWrapper) z.next();
+				for (PluginWrapper<Plugin<T>> pw : plugins) {
 					context.log(PluginHostContext.LOG_DEBUG, "   Testing againts " + pw.properties.getProperty(PLUGIN_NAME, ""));
 					if (pw.properties.getProperty(PLUGIN_NAME, "").equals(name))
 						found.add(pw);
@@ -622,7 +643,8 @@ public class PluginManager {
 												+ reqVersion.toString() + ". The plugin host is current at version "
 												+ context.getPluginHostVersion().getVersionString());
 						}
-						Plugin plugin = (Plugin) Class.forName(className, true, classLoader).newInstance();
+						@SuppressWarnings("unchecked")
+						Plugin<T> plugin = (Plugin<T>) Class.forName(className, true, classLoader).newInstance();
 						String resn = plugin.getClass().getName().replace('.', '/') + ".class";
 						context.log(PluginHostContext.LOG_DEBUG, "Looking for resource " + resn);
 						URL res = plugin.getClass().getClassLoader().getResource(resn);
@@ -680,12 +702,12 @@ public class PluginManager {
 	 * 
 	 * @return enumeration of plugins
 	 */
-	public Enumeration<Plugin> plugins() {
-		Vector<Plugin> v = new Vector<Plugin>();
-		for (Enumeration<PluginWrapper> e = plugins.elements(); e.hasMoreElements();) {
-			v.addElement(e.nextElement().plugin);
+	public List<Plugin<T>> plugins() {
+		List<Plugin<T>> v = new ArrayList<>();
+		for (PluginWrapper<Plugin<T>> w : plugins) {
+			v.add(w.plugin);
 		}
-		return v.elements();
+		return v;
 	}
 
 	/**
@@ -695,8 +717,8 @@ public class PluginManager {
 	 * 
 	 * @param plugin plugin to remove
 	 */
-	public void removePlugin(Plugin plugin) {
-		PluginWrapper w = getPluginWrapper(plugin);
+	public void removePlugin(Plugin<T> plugin) {
+		PluginWrapper<Plugin<T>> w = getPluginWrapper(plugin);
 		plugins.remove(w);
 		pluginMap.remove(w.getName());
 	}
@@ -719,18 +741,38 @@ public class PluginManager {
 	 * Start all plugins
 	 */
 	public void start() {
-		for (Iterator i = plugins.iterator(); i.hasNext();) {
-			PluginWrapper w = (PluginWrapper) i.next();
-			try {
-				context.log(PluginHostContext.LOG_INFORMATION, "Starting plugin " + w.getName() + " [" + w.plugin.getClass() + "]");
-				w.plugin.startPlugin(context);
-				w.status.status = STATUS_STARTED;
-				startedPlugins.add(w);
-			} catch (Exception pe) {
-				w.status.exception = pe;
-				w.status.status = STATUS_ERRORED;
-				context.log(PluginHostContext.LOG_ERROR, "Failed to start plugin " + w.properties.getProperty(PLUGIN_NAME), pe);
+		context.log(PluginHostContext.LOG_DEBUG, "Plugins :-");
+		int i = 1;
+		for(PluginWrapper<Plugin<T>> plugin : plugins) {
+			context.log(PluginHostContext.LOG_DEBUG, String.format("    %2d : %s", i++, plugin.getName()));
+		}
+		
+		processedPlugins.clear();
+		buildDependencyTree();
+		/*
+		 * First start all plugins that do not have any dependencies, these can
+		 * all be started in their own thread (well as many as are available)
+		 */
+		int started = 0;
+		for (PluginWrapper<Plugin<T>> w : plugins) {
+			String deps = w.properties.getProperty(PLUGIN_DEPENDENCIES);
+			if (StringUtils.isBlank(deps)) {
+				started++;
+				context.log(PluginHostContext.LOG_DEBUG,
+						"Starting root plugin " + w.getName() + " [" + w.plugin.getClass() + "]");
+				synchronized (lock) {
+					loadQueue.execute(() -> startPlugin(w));
+				}
 			}
+		}
+		if (plugins.size() > 0 && started == 0) {
+			context.log(PluginHostContext.LOG_ERROR,
+					"While there are plugins to load, a circular dependency configuration was discovered preventing any being used. Please contact the developer.");
+		}
+		try {
+			waitForPlugins();
+		} catch (InterruptedException ie) {
+			context.log(PluginHostContext.LOG_ERROR, "Interrupted starting plugins", ie);
 		}
 	}
 
@@ -738,7 +780,7 @@ public class PluginManager {
 	 * Stop all plugins
 	 */
 	public void stop() {
-		for (PluginWrapper w : startedPlugins) {
+		for (PluginWrapper<Plugin<T>> w : plugins) {
 			try {
 				w.plugin.stopPlugin();
 				w.status.status = STATUS_STOPPED;
@@ -781,10 +823,77 @@ public class PluginManager {
 		}
 	}
 
+	private void activatePlugin(PluginWrapper<Plugin<T>> w) {
+		try {
+			context.log(PluginHostContext.LOG_DEBUG, String.format("Activating plugin %2d : %s [%s]", activatedPlugins.size() + 1, w.getName(), w.plugin.getClass()));
+			w.plugin.activatePlugin(context);
+			context.log(PluginHostContext.LOG_DEBUG, String.format("Activated plugin %2d : %s [%s]", activatedPlugins.size() + 1, w.getName(), w.plugin.getClass()));
+			w.status.status = STATUS_ACTIVATED;
+			synchronized (lock) {
+				processedPlugins.add(w);
+				activatedPlugins.add(w);
+				for (PluginWrapper<Plugin<T>> en : plugins) {
+					if (en != w) {
+						String pname = en.properties.getProperty(PLUGIN_NAME);
+						Set<PluginWrapper<Plugin<T>>> l = onLoad.get(pname);
+						if (l != null) {
+							for (PluginWrapper<Plugin<T>> p : new ArrayList<>(l)) {
+								if (!activatedPlugins.contains(p)) {
+									if (areAllDepsReady(p)) {
+										removeFromPlan(p);
+										loadQueue.execute(() -> activatePlugin(p));
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception pe) {
+			w.status.exception = pe;
+			w.status.status = STATUS_ERRORED;
+			context.log(PluginHostContext.LOG_ERROR, "Failed to activate plugin " + w.properties.getProperty(PLUGIN_NAME), pe);
+		} finally {
+			processedPlugins.add(w);
+		}
+	}
+
+	private boolean areAllDepsReady(PluginWrapper<Plugin<T>> p) {
+		boolean allDeps = true;
+		String[] deps = p.properties.getProperty(PLUGIN_DEPENDENCIES).split(",");
+		if (StringUtils.isNoneBlank(deps)) {
+			for (String dep : deps) {
+				PluginWrapper<Plugin<T>> depPlugin = getPluginWrapper(dep);
+				if (!processedPlugins.contains(depPlugin)) {
+					allDeps = false;
+				}
+			}
+		}
+		return allDeps;
+	}
+
+	private void buildDependencyTree() {
+		onLoad.clear();
+		for (PluginWrapper<Plugin<T>> w : plugins) {
+			String deps = w.properties.getProperty(PLUGIN_DEPENDENCIES);
+			if (StringUtils.isNotBlank(deps)) {
+				synchronized (startedPlugins) {
+					for (String dep : deps.split(",")) {
+						dep = dep.trim();
+						Set<PluginWrapper<Plugin<T>>> l = onLoad.get(dep);
+						if (l == null)
+							l = new LinkedHashSet<>();
+						l.add(w);
+						onLoad.put(dep, l);
+					}
+				}
+			}
+		}
+	}
+
 	private void checkDependencies() {
-		List toRemove = new ArrayList();
-		for (Iterator i = plugins.iterator(); i.hasNext();) {
-			PluginWrapper w = (PluginWrapper) i.next();
+		List<PluginWrapper<Plugin<T>>> toRemove = new ArrayList<>();
+		for (PluginWrapper<Plugin<T>> w : plugins) {
 			context.log(PluginHostContext.LOG_INFORMATION,
 					"Checking dependencies for " + w.getName() + " (order " + w.getOrder() + ")");
 			String deps = w.properties.getProperty(PLUGIN_DEPENDENCIES);
@@ -803,7 +912,7 @@ public class PluginManager {
 						depName = depName.substring(0, idx);
 					}
 					// First check the plugin exists
-					PluginWrapper dep = getPluginWrapper(depName);
+					PluginWrapper<Plugin<T>> dep = getPluginWrapper(depName);
 					if (dep == null) {
 						context.log(PluginHostContext.LOG_ERROR,
 								"Plugin " + w.getName() + " depends on " + depName + " "
@@ -826,11 +935,21 @@ public class PluginManager {
 				}
 			}
 		}
-		for (Iterator i = toRemove.iterator(); i.hasNext();) {
-			PluginWrapper w = (PluginWrapper) i.next();
+		for (PluginWrapper<Plugin<T>> w : toRemove) {
 			plugins.remove(w);
 			pluginMap.remove(w.getName());
 		}
+	}
+
+	private String debugPlist(Set<PluginManager<T>.PluginWrapper<Plugin<T>>> value, String key) {
+		StringBuilder b = new StringBuilder();
+		b.append(key);
+		b.append("=");
+		for (PluginWrapper<Plugin<T>> pl : value) {
+			b.append(pl.getName());
+			b.append(",");
+		}
+		return b.toString();
 	}
 
 	private void findJars(File dir, Vector<URL> list) {
@@ -845,10 +964,75 @@ public class PluginManager {
 				findJars(f[i], list);
 			} else {
 				try {
-					list.addElement(f[i].toURL());
+					list.addElement(f[i].toURI().toURL());
 				} catch (MalformedURLException e) {
 				}
 			}
+		}
+	}
+
+	private void removeFromPlan(PluginWrapper<Plugin<T>> p) {
+		/*
+		 * Remove this plugin from all the other onload triggers too
+		 */
+		for (Iterator<String> it = onLoad.keySet().iterator(); it.hasNext();) {
+			String k = it.next();
+			Set<PluginWrapper<Plugin<T>>> ll = onLoad.get(k);
+			ll.remove(p);
+			if (ll.isEmpty())
+				it.remove();
+		}
+	}
+
+	private void startPlugin(PluginWrapper<Plugin<T>> w) {
+		try {
+			context.log(PluginHostContext.LOG_DEBUG, String.format("Starting plugin %2d : %s [%s]", startedPlugins.size() + 1, w.getName(), w.plugin.getClass()));
+			w.plugin.startPlugin(context);
+			context.log(PluginHostContext.LOG_DEBUG, String.format("Started plugin %2d : %s [%s]", startedPlugins.size() + 1, w.getName(), w.plugin.getClass()));
+			w.status.status = STATUS_STARTED;
+			synchronized (lock) {
+				processedPlugins.add(w);
+				startedPlugins.add(w);
+				for (PluginWrapper<Plugin<T>> en : plugins) {
+					if (en != w) {
+						String pname = en.properties.getProperty(PLUGIN_NAME);
+						Set<PluginWrapper<Plugin<T>>> l = onLoad.get(pname);
+						if (l != null) {
+							for (PluginWrapper<Plugin<T>> p : new ArrayList<>(l)) {
+								if (!startedPlugins.contains(p)) {
+									if (areAllDepsReady(p)) {
+										removeFromPlan(p);
+										loadQueue.execute(() -> startPlugin(p));
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception pe) {
+			w.status.exception = pe;
+			w.status.status = STATUS_ERRORED;
+			context.log(PluginHostContext.LOG_ERROR, "Failed to start plugin " + w.properties.getProperty(PLUGIN_NAME), pe);
+		} finally {
+			processedPlugins.add(w);
+		}
+	}
+
+	private void waitForPlugins() throws InterruptedException {
+		do {
+			List<PluginWrapper<Plugin<T>>> pp = new ArrayList<>(plugins);
+			pp.removeAll(processedPlugins);
+			//loadQueue.awaitTermination(50, TimeUnit.MILLISECONDS);
+			loadQueue.awaitTermination(50, TimeUnit.MILLISECONDS);
+		} while (processedPlugins.size() != plugins.size());
+		if (!onLoad.isEmpty()) {
+			StringBuilder b = new StringBuilder();
+			for (Map.Entry<String, Set<PluginWrapper<Plugin<T>>>> en : onLoad.entrySet()) {
+				b.append(debugPlist(en.getValue(), en.getKey()));
+				b.append("\n");
+			}
+			context.log(PluginHostContext.LOG_ERROR, "There were unsatisfied dependencies. " + b.toString());
 		}
 	}
 }

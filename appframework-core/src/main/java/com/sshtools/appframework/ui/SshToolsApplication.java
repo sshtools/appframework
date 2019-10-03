@@ -401,7 +401,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		return new PluginVersion(GeneralUtil.getVersionString(getApplicationName(), getClass()));
 	}
 
-	public PluginManager getPluginManager() {
+	public PluginManager<?> getPluginManager() {
 		return pluginManager;
 	}
 

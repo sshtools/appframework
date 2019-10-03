@@ -26,14 +26,13 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
-import javax.swing.border.Border;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
 public class SortableHeaderRenderer extends JLabel implements TableCellRenderer {
-	private Border border;
+	private static final long serialVersionUID = 1L;
+	
 	private Icon downSortIcon;
-	private Dimension lastSize;
 	private TableColumnModel model;
 	private boolean showSortIcons;
 	private int[] sorts;

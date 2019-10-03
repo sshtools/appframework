@@ -72,6 +72,7 @@ import javax.swing.JButton;
  * An extension of <code>JButton</code> that looks nicer on the tool bar
  * </p>
  */
+@SuppressWarnings("serial")
 public class ToolButton extends JButton {
 	//
 	private final static Insets INSETS = new Insets(0, 0, 0, 0);

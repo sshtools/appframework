@@ -90,9 +90,9 @@ import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -128,12 +128,13 @@ import com.sshtools.appframework.ui.IconStore;
 
 /**
  * UI component to allow maintenance of installed plugins
- * 
- * @author magicthize
  */
-public class PluginManagerPane extends JPanel implements ActionListener, ListSelectionListener, Runnable {
+public class PluginManagerPane<C extends PluginHostContext> extends JPanel implements ActionListener, ListSelectionListener, Runnable {
+	private static final long serialVersionUID = 1L;
 
 	class ConfigureAction extends AbstractAction {
+		private static final long serialVersionUID = 1L;
+
 		ConfigureAction() {
 			super();
 			putValue(Action.NAME, "Configure");
@@ -146,12 +147,13 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		@Override
 		public void actionPerformed(ActionEvent evt) {
 			PluginDefinition def = model.getPluginDefinitionAt(table.getSelectedRow());
-			ConfigurablePlugin sel = (ConfigurablePlugin) def.getPlugin();
+			ConfigurablePlugin<?> sel = (ConfigurablePlugin<?>) def.getPlugin();
 			sel.configure(PluginManagerPane.this);
 		}
 	}
 
 	// Supporting classes
+	@SuppressWarnings("serial")
 	class InstallAction extends AbstractAction {
 		InstallAction() {
 			super();
@@ -171,16 +173,16 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 			install(def);
 		}
 	}
+
 	class PluginDefinition {
 		Properties localProperties, remoteProperties;
+		Plugin<?> plugin;
 
-		Plugin plugin;
-
-		PluginDefinition(Plugin plugin, Properties localProperties) {
+		PluginDefinition(Plugin<?> plugin, Properties localProperties) {
 			this(plugin, localProperties, null);
 		}
 
-		PluginDefinition(Plugin plugin, Properties localProperties, Properties remoteProperties) {
+		PluginDefinition(Plugin<?> plugin, Properties localProperties, Properties remoteProperties) {
 			this.plugin = plugin;
 			this.localProperties = localProperties;
 			this.remoteProperties = remoteProperties;
@@ -192,7 +194,7 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 
 		public String getAuthor() {
 			return getLocalProperties() != null ? getLocalProperties().getProperty(PluginManager.PLUGIN_AUTHOR)
-				: getRemoteProperties().getProperty(PluginManager.PLUGIN_AUTHOR);
+					: getRemoteProperties().getProperty(PluginManager.PLUGIN_AUTHOR);
 		}
 
 		public String getDownloadLocation() {
@@ -201,7 +203,7 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 
 		public String getInformation() {
 			return getLocalProperties() != null ? getLocalProperties().getProperty(PluginManager.PLUGIN_INFORMATION)
-				: getRemoteProperties().getProperty(PluginManager.PLUGIN_INFORMATION);
+					: getRemoteProperties().getProperty(PluginManager.PLUGIN_INFORMATION);
 		}
 
 		public String getLocalVersion() {
@@ -210,7 +212,7 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 
 		public String getName() {
 			return getLocalProperties() != null ? getLocalProperties().getProperty(PluginManager.PLUGIN_NAME, "")
-				: getRemoteProperties().getProperty(PluginManager.PLUGIN_NAME, "");
+					: getRemoteProperties().getProperty(PluginManager.PLUGIN_NAME, "");
 		}
 
 		public String getRemoteVersion() {
@@ -218,9 +220,9 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		}
 
 		public PluginVersion getRequiredHostVersion() {
-			String ver = getLocalProperties() != null ? getLocalProperties().getProperty(
-				PluginManager.PLUGIN_REQUIRED_HOST_VERSION, "") : getRemoteProperties().getProperty(
-				PluginManager.PLUGIN_REQUIRED_HOST_VERSION, "");
+			String ver = getLocalProperties() != null
+					? getLocalProperties().getProperty(PluginManager.PLUGIN_REQUIRED_HOST_VERSION, "")
+					: getRemoteProperties().getProperty(PluginManager.PLUGIN_REQUIRED_HOST_VERSION, "");
 			try {
 				if (ver.equalsIgnoreCase("any"))
 					return null;
@@ -232,7 +234,7 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 
 		public String getShortDescription() {
 			return getLocalProperties() != null ? getLocalProperties().getProperty(PluginManager.PLUGIN_SHORT_DESCRIPTION)
-				: getRemoteProperties().getProperty(PluginManager.PLUGIN_SHORT_DESCRIPTION);
+					: getRemoteProperties().getProperty(PluginManager.PLUGIN_SHORT_DESCRIPTION);
 		}
 
 		public int getStatus() {
@@ -240,8 +242,8 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 				return INSTALLED;
 			}
 			if (getLocalProperties() != null) {
-				if (!getLocalProperties().getProperty(PluginManager.PLUGIN_VERSION).equals(
-					getRemoteProperties().getProperty(PluginManager.PLUGIN_VERSION)))
+				if (!getLocalProperties().getProperty(PluginManager.PLUGIN_VERSION)
+						.equals(getRemoteProperties().getProperty(PluginManager.PLUGIN_VERSION)))
 					return UPDATE_AVAILABLE;
 				return INSTALLED;
 			}
@@ -250,31 +252,34 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 
 		public String getURL() {
 			return getLocalProperties() != null ? getLocalProperties().getProperty(PluginManager.PLUGIN_URL)
-				: getRemoteProperties().getProperty(PluginManager.PLUGIN_URL);
+					: getRemoteProperties().getProperty(PluginManager.PLUGIN_URL);
 		}
 
 		public boolean isStandard() {
 			return getPlugin() != null && getLocalProperties() != null
-				&& getPlugin().getClass().getClassLoader() != manager.getPluginClassLoader();
+					&& getPlugin().getClass().getClassLoader() != manager.getPluginClassLoader();
 		}
 
 		Properties getLocalProperties() {
 			return localProperties;
 		}
 
-		Plugin getPlugin() {
+		Plugin<?> getPlugin() {
 			return plugin;
 		}
 
 		Properties getRemoteProperties() {
 			return remoteProperties;
 		}
+
 		void setRemoteProperties(Properties remoteProperties) {
 			this.remoteProperties = remoteProperties;
 		}
 	}
 
 	class PluginManagerTable extends JTable {
+		private static final long serialVersionUID = 1L;
+
 		public PluginManagerTable(PluginManagerTableModel model) {
 			super(model);
 			setShowGrid(false);
@@ -287,22 +292,23 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		@Override
 		public boolean getScrollableTracksViewportHeight() {
 			Component parent = getParent();
-
 			if (parent instanceof JViewport)
 				return parent.getHeight() > getPreferredSize().height;
 			return false;
 		}
 	};
+
 	class PluginManagerTableModel extends AbstractTableModel {
-		private Vector definitions;
+		private static final long serialVersionUID = 1L;
+		private Vector<PluginDefinition> definitions;
 
 		PluginManagerTableModel() {
-			definitions = new Vector();
+			definitions = new Vector<>();
 			reload();
 		}
 
 		@Override
-		public Class getColumnClass(int c) {
+		public Class<?> getColumnClass(int c) {
 			switch (c) {
 			default:
 				return String.class;
@@ -333,7 +339,7 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		}
 
 		public PluginDefinition getPluginDefinitionAt(int r) {
-			return (PluginDefinition) definitions.elementAt(r);
+			return definitions.elementAt(r);
 		}
 
 		@Override
@@ -373,9 +379,8 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 			definitions.removeAllElements();
 			int c = manager.getPluginCount();
 			for (int i = 0; i < c; i++) {
-				Plugin p = manager.getPluginAt(i);
+				Plugin<C> p = manager.getPluginAt(i);
 				PluginDefinition def = new PluginDefinition(p, manager.getPluginProperties(p), null);
-				Plugin sel = def.getPlugin();
 				Properties selPr = def.getLocalProperties();
 				String selRes = selPr.getProperty(PluginManager.PLUGIN_RESOURCE);
 				if (showBuiltInPlugins || (selRes != null && !selRes.equals(""))) {
@@ -403,8 +408,11 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 			fireTableRowsInserted(r, r);
 		}
 	}
+
 	// Supporting classes
 	class RemoveAction extends AbstractAction {
+		private static final long serialVersionUID = 1L;
+
 		/**
 		 * Constructor for the DeleteAction object
 		 */
@@ -421,60 +429,57 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		@Override
 		public void actionPerformed(ActionEvent evt) {
 			PluginDefinition def = model.getPluginDefinitionAt(table.getSelectedRow());
-			Plugin sel = def.getPlugin();
 			Properties selPr = def.getLocalProperties();
 			String selRes = selPr.getProperty(PluginManager.PLUGIN_RESOURCE);
 			if (selRes == null || selRes.equals("")) {
 				JOptionPane.showMessageDialog(PluginManagerPane.this,
-					"Plugin cannot be removed in this version of " + context.getPluginHostName(), "Error",
-					JOptionPane.ERROR_MESSAGE, LARGE_REMOVE_ICON);
+						"Plugin cannot be removed in this version of " + context.getPluginHostName(), "Error",
+						JOptionPane.ERROR_MESSAGE, LARGE_REMOVE_ICON);
 				return;
 			}
-
 			// Check what other plugins are in the same archive
-			Vector allPlugins = getAllPluginsInResource(selRes);
+			Vector<Plugin<C>> allPlugins = getAllPluginsInResource(selRes);
 			StringBuffer buf = new StringBuffer();
 			if (allPlugins.size() > 1) {
 				buf.append("This plugin is 1 of " + allPlugins.size() + " that are contained in the\n"
-					+ "same archive. Removal of this plugin will also\n" + "cause the removal of ...\n\n");
+						+ "same archive. Removal of this plugin will also\n" + "cause the removal of ...\n\n");
 				for (int i = 1; i < allPlugins.size(); i++) {
 					buf.append("    ");
-					Plugin p = (Plugin) allPlugins.elementAt(i);
+					Plugin<C> p = allPlugins.elementAt(i);
 					Properties pr = manager.getPluginProperties(p);
 					buf.append(pr.getProperty(PluginManager.PLUGIN_SHORT_DESCRIPTION));
 					buf.append("\n");
 				}
 			}
-
 			// Get the jars to remove
-			HashMap removeJars = getJarsToRemove(allPlugins);
-
+			HashMap<String, String> removeJars = getJarsToRemove(allPlugins);
 			//
 			buf.append("\nThe following files will be removed from your\n");
 			buf.append("plugin directory .. \n\n");
-			for (Iterator i = removeJars.keySet().iterator(); i.hasNext();) {
-				String key = (String) i.next();
+			for (Iterator<String> i = removeJars.keySet().iterator(); i.hasNext();) {
+				String key = i.next();
 				buf.append("    ");
 				buf.append(key.substring(key.lastIndexOf(File.separator) + 1));
 				buf.append("\n");
 			}
 			buf.append("\n");
 			buf.append("Are you sure you wish to continue?");
-
 			// The jars are not actually removed until the application restarts
 			if (JOptionPane.showConfirmDialog(PluginManagerPane.this, buf.toString(), "Remove plugin", JOptionPane.YES_NO_OPTION,
-				JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+					JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
 				try {
 					removeJars(removeJars);
 					JOptionPane.showMessageDialog(PluginManagerPane.this, "You should now restart " + context.getPluginHostName(),
-						"Information", JOptionPane.INFORMATION_MESSAGE, LARGE_REMOVE_ICON);
+							"Information", JOptionPane.INFORMATION_MESSAGE, LARGE_REMOVE_ICON);
 				} catch (IOException ioe) {
 					JOptionPane.showMessageDialog(PluginManagerPane.this, "Could not create remove list. " + ioe.getMessage(),
-						"Error", JOptionPane.ERROR_MESSAGE);
+							"Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		}
 	}
+
+	@SuppressWarnings("serial")
 	class ToolBarTablePane extends JPanel {
 		ToolBarTablePane(JToolBar toolBar, JTable table) {
 			super(new BorderLayout());
@@ -500,7 +505,10 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 			add(scroller, BorderLayout.CENTER);
 		}
 	};
+
 	class UpdateAction extends AbstractAction {
+		private static final long serialVersionUID = 1L;
+
 		UpdateAction() {
 			super();
 			putValue(Action.NAME, "Update");
@@ -515,29 +523,27 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 			final PluginDefinition def = model.getPluginDefinitionAt(table.getSelectedRow());
 			status1Text.setText("Updating " + def.getName());
 			statusIcon.setIcon(LARGE_UPDATE_ICON);
-			Plugin sel = def.getPlugin();
 			Properties selPr = def.getLocalProperties();
 			String selRes = selPr.getProperty(PluginManager.PLUGIN_RESOURCE);
 			if (selRes.equals("")) {
 				JOptionPane.showMessageDialog(PluginManagerPane.this,
-					"Plugin cannot be updated in this version of " + context.getPluginHostName(), "Error",
-					JOptionPane.ERROR_MESSAGE, LARGE_REMOVE_ICON);
+						"Plugin cannot be updated in this version of " + context.getPluginHostName(), "Error",
+						JOptionPane.ERROR_MESSAGE, LARGE_REMOVE_ICON);
 				return;
 			}
-
 			// Check what other plugins are in the same archive
-			Vector allPlugins = getAllPluginsInResource(selRes);
-			HashMap removeJars = getJarsToRemove(allPlugins);
-
+			Vector<Plugin<C>> allPlugins = getAllPluginsInResource(selRes);
+			HashMap<String, String> removeJars = getJarsToRemove(allPlugins);
 			try {
 				removeJars(removeJars);
 				install(def);
 			} catch (IOException ioe) {
 				JOptionPane.showMessageDialog(PluginManagerPane.this, "Could not create remove list. " + ioe.getMessage(), "Error",
-					JOptionPane.ERROR_MESSAGE);
+						JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
+
 	public final static Icon ACTIVE_ICON = IconStore.getInstance().getIcon("network-receive", 32);
 	public final static Icon CONFIGURE_ICON = IconStore.getInstance().getIcon("preferences-system", 24);
 	public final static Icon ERROR_ICON = IconStore.getInstance().getIcon("dialog-error", 32);
@@ -545,12 +551,10 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 	public final static Icon IDLE_ICON = IconStore.getInstance().getIcon("system-software-update", 32);
 	public final static Icon INFORMATION_ICON = IconStore.getInstance().getIcon("dialog-information", 32);
 	public final static Icon INSTALL_ICON = IconStore.getInstance().getIcon("list-add", 24);
-
 	// Plugin states
 	public final static int INSTALLED = 0;
 	public final static Icon LARGE_INSTALL_ICON = IconStore.getInstance().getIcon("list-add", 48);
 	public final static Icon LARGE_REMOVE_ICON = IconStore.getInstance().getIcon("user-trash", 48);
-
 	public final static Icon LARGE_UPDATE_ICON = IconStore.getInstance().getIcon("view-refresh", 48);
 	public final static int NOT_INSTALLED = 2;
 	public final static String PLUGIN_DOWNLOAD_LOCATION = "downloadLocation";
@@ -559,10 +563,12 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 	public final static String TABLE_GEOMETRY = "pluginManager.table.geometry";
 	public final static int UPDATE_AVAILABLE = 1;
 	public final static Icon UPDATE_ICON = IconStore.getInstance().getIcon("view-refresh", 24);
+
 	public static void centerComponent(Component c) {
 		Rectangle r = c.getGraphicsConfiguration().getBounds();
 		c.setLocation(((r.x + r.width) - c.getSize().width) / 2, ((r.y + r.height) - c.getSize().height) / 2);
 	}
+
 	private static void jGridBagAdd(JComponent parent, JComponent componentToAdd, GridBagConstraints constraints, int pos) {
 		if (!(parent.getLayout() instanceof GridBagLayout))
 			throw new IllegalArgumentException("parent must have a GridBagLayout");
@@ -571,36 +577,25 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		layout.setConstraints(componentToAdd, constraints);
 		parent.add(componentToAdd);
 	}
+
 	private JButton cancelDownload;
-	private JButton changeMasterPassword;
 	private PluginHostContext context;
 	private JTextArea info;
-	private PluginManager manager;
+	private PluginManager<C> manager;
 	private PluginManagerTableModel model;
 	private JProgressBar progress;
-
 	private JDialog progressDialog;
-
 	private JButton refresh;
-
 	// Private instance variables
 	private Action removeAction, updateAction, installAction, configureAction;
-
 	private boolean showBuiltInPlugins;
-
 	private JLabel status;
-
 	private JLabel status1Text, status2Text, statusIcon;
-
 	private PluginManagerTable table;
-
 	private Thread updateThread;
-
 	private boolean updating;
-
 	// private void gotoSelectedURL() {
 	// }
-
 	private JLabel url;
 
 	/**
@@ -609,7 +604,7 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 	 * @param manager the plugin mananager
 	 * @param context context
 	 */
-	public PluginManagerPane(PluginManager manager, PluginHostContext context) {
+	public PluginManagerPane(PluginManager<C> manager, PluginHostContext context) {
 		this(manager, context, true);
 	}
 
@@ -620,19 +615,18 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 	 * @param context context
 	 * @param showBuiltInPlugins show built-in plugins
 	 */
-	public PluginManagerPane(PluginManager manager, PluginHostContext context, boolean showBuiltInPlugins) {
+	@SuppressWarnings("serial")
+	public PluginManagerPane(PluginManager<C> manager, PluginHostContext context, boolean showBuiltInPlugins) {
 		super(new BorderLayout());
-
 		// Initialise
 		this.context = context;
 		this.showBuiltInPlugins = showBuiltInPlugins;
 		this.manager = manager;
-
 		// Connection state
 		JPanel sp = new JPanel(new BorderLayout());
 		sp.setOpaque(false);
 		sp.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Plugin updates"),
-			BorderFactory.createEmptyBorder(4, 4, 4, 4)));
+				BorderFactory.createEmptyBorder(4, 4, 4, 4)));
 		status = new JLabel("Click on Refresh to check for new plugins and updates", SwingConstants.LEFT);
 		status.setIcon(IDLE_ICON);
 		sp.add(status, BorderLayout.CENTER);
@@ -640,7 +634,6 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		refresh.setMnemonic('r');
 		refresh.addActionListener(this);
 		sp.add(refresh, BorderLayout.EAST);
-
 		// Create the toolbar
 		JToolBar toolBar = new JToolBar("Plugin manager tools");
 		toolBar.putClientProperty("JToolBar.isRollover", Boolean.TRUE);
@@ -650,7 +643,6 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		toolBar.add(new ToolButton(updateAction = new UpdateAction(), false));
 		toolBar.add(new ToolButton(removeAction = new RemoveAction(), false));
 		toolBar.add(new ToolButton(configureAction = new ConfigureAction(), false));
-
 		// Create the text area
 		table = new PluginManagerTable(model = new PluginManagerTableModel()) {
 			@Override
@@ -660,7 +652,6 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		};
 		table.setBorder(null);
 		table.getSelectionModel().addListSelectionListener(this);
-
 		// Information panel
 		JPanel ip = new JPanel(new BorderLayout());
 		ip.setOpaque(false);
@@ -702,7 +693,6 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		info.setFont(UIManager.getFont("Label.font"));
 		tp.add(info, BorderLayout.CENTER);
 		ip.add(tp, BorderLayout.CENTER);
-
 		// Build this
 		add(sp, BorderLayout.NORTH);
 		add(new ToolBarTablePane(toolBar, table) {
@@ -712,7 +702,6 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 			}
 		}, BorderLayout.CENTER);
 		add(ip, BorderLayout.SOUTH);
-
 		// Create the progress dialog
 		JPanel progressPanel = new JPanel(new BorderLayout());
 		progressPanel.setOpaque(false);
@@ -744,7 +733,6 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		progressDialog.setSize(220, 160);
 		progressDialog.setResizable(false);
 		centerComponent(progressDialog);
-
 		// Set the intially available actions
 		setAvailableActions();
 	}
@@ -791,13 +779,11 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
 			try {
 				table.moveColumn(
-					table.convertColumnIndexToView(Integer.parseInt(context.getPreference(propertyName + ".column." + i
-						+ ".position", String.valueOf(i)))), i);
-
-				int w = Integer
-					.parseInt(context.getPreference(propertyName + ".column." + i + ".width", String
-						.valueOf((defaultWidths == null) ? table.getColumnModel().getColumn(i).getPreferredWidth()
-							: defaultWidths[i])));
+						table.convertColumnIndexToView(Integer
+								.parseInt(context.getPreference(propertyName + ".column." + i + ".position", String.valueOf(i)))),
+						i);
+				int w = Integer.parseInt(context.getPreference(propertyName + ".column." + i + ".width", String.valueOf(
+						(defaultWidths == null) ? table.getColumnModel().getColumn(i).getPreferredWidth() : defaultWidths[i])));
 				table.getColumnModel().getColumn(i).setPreferredWidth(w);
 			} catch (NumberFormatException nfe) {
 			}
@@ -818,27 +804,27 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 			status.setText("Downloading list of available plugins");
 			Properties pluginList = new Properties();
 			pluginList.load(in);
-			HashMap plugins = new HashMap();
-			for (Iterator i = pluginList.keySet().iterator(); i.hasNext();) {
+			HashMap<String, String> plugins = new HashMap<>();
+			for (Iterator<Object> i = pluginList.keySet().iterator(); i.hasNext();) {
 				String key = (String) i.next();
 				int idx = key.indexOf('.');
 				if (idx != -1) {
 					String n = key.substring(0, idx);
 					plugins.put(n, n);
 				} else
-					throw new PluginException("pluginlist.properties is in incorrect format. Please "
-						+ "contact site administrator.");
+					throw new PluginException(
+							"pluginlist.properties is in incorrect format. Please " + "contact site administrator.");
 			}
-			for (Iterator i = plugins.keySet().iterator(); i.hasNext();) {
+			for (Iterator<String> i = plugins.keySet().iterator(); i.hasNext();) {
 				String plugin = (String) i.next();
 				String propertiesLocation = pluginList.getProperty(plugin + ".properties", "");
 				if (propertiesLocation.length() == 0)
 					throw new PluginException("Each plugin in pluginlist.properties must have an entry "
-						+ "<plugin-name>.properties specifying the location of the " + "properties file.");
+							+ "<plugin-name>.properties specifying the location of the " + "properties file.");
 				String archiveLocation = pluginList.getProperty(plugin + ".archive", "");
 				if (archiveLocation.length() == 0)
 					throw new PluginException("Each plugin in pluginlist.properties must have an entry "
-						+ "<plugin-name>.archive specifying the location of the " + "archive file.");
+							+ "<plugin-name>.archive specifying the location of the " + "archive file.");
 				context.log(PluginHostContext.LOG_INFORMATION, "Found plugin " + plugin);
 				URL propURL = null;
 				try {
@@ -856,16 +842,13 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 				context.log(PluginHostContext.LOG_DEBUG, "Archive location is " + archiveURL.toExternalForm());
 				try {
 					status.setText("Loading properties for archive " + plugin);
-					HashMap props = manager.loadPluginProperties(propURL);
+					HashMap<String, Properties> props = manager.loadPluginProperties(propURL);
 					status.setText("Checking plugin archive " + plugin);
-					for (Iterator j = props.keySet().iterator(); j.hasNext();) {
-						String name = (String) j.next();
-						status.setText(" Found plugin " + name);
-						Properties p = (Properties) props.get(name);
-						p.setProperty(PLUGIN_DOWNLOAD_LOCATION, archiveURL.toExternalForm());
-						model.setRemoteProperties(name, p);
+					for (Map.Entry<String, Properties> en : props.entrySet()) {
+						status.setText(" Found plugin " + en.getKey());
+						en.getValue().setProperty(PLUGIN_DOWNLOAD_LOCATION, archiveURL.toExternalForm());
+						model.setRemoteProperties(en.getKey(), en.getValue());
 					}
-
 				} catch (PluginException pe) {
 					context.log(PluginHostContext.LOG_ERROR, "Could not load plugin.properties for " + plugin, pe);
 				}
@@ -896,20 +879,17 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 	 * @param selRes the resource
 	 * @return all plugins in the same resource
 	 */
-	private Vector getAllPluginsInResource(String selRes) {
-
+	private Vector<Plugin<C>> getAllPluginsInResource(String selRes) {
 		// First check to see if this plugin is one of many in the same jar
-		Vector allPlugins = new Vector();
+		Vector<Plugin<C>> allPlugins = new Vector<>();
 		context.log(PluginHostContext.LOG_INFORMATION, "Looking for  plugins that use " + selRes);
-		for (Enumeration e = manager.plugins(); e.hasMoreElements();) {
-			Plugin p = (Plugin) e.nextElement();
+		for (Plugin<C> p : manager.plugins()) {
 			Properties pr = manager.getPluginProperties(p);
 			if (pr == null)
 				context.log(PluginHostContext.LOG_ERROR, "No properties found for plugin?");
 			else if (selRes.equals(pr.getProperty(PluginManager.PLUGIN_RESOURCE)))
 				allPlugins.addElement(p);
 		}
-
 		return allPlugins;
 	}
 
@@ -920,12 +900,10 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 	 * 
 	 * @param allPlugins
 	 */
-	private HashMap getJarsToRemove(Vector allPlugins) {
-
+	private HashMap<String, String> getJarsToRemove(Vector<Plugin<C>> allPlugins) {
 		// Now determine what other jars should be removed as well
-		HashMap removeJars = new HashMap();
-		for (Enumeration e = allPlugins.elements(); e.hasMoreElements();) {
-			Plugin p = (Plugin) e.nextElement();
+		HashMap<String, String> removeJars = new HashMap<>();
+		for (Plugin<C> p : allPlugins) {
 			Properties pr = manager.getPluginProperties(p);
 			String rs = pr.getProperty(PluginManager.PLUGIN_RESOURCE);
 			removeJars.put(rs, rs);
@@ -936,11 +914,9 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 				removeJars.put(jar, new File(manager.getPluginDirectory(), jar).getAbsolutePath());
 			}
 		}
-
 		// If any plugins that are not being removed require any of the jars
 		// that are going to be removed, dont remove them
-		for (Enumeration e = manager.plugins(); e.hasMoreElements();) {
-			Plugin p = (Plugin) e.nextElement();
+		for (Plugin<C> p : manager.plugins()) {
 			if (allPlugins.indexOf(p) == -1) {
 				Properties pr = manager.getPluginProperties(p);
 				String jars = pr.getProperty(PluginManager.PLUGIN_JARS, "");
@@ -952,9 +928,7 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 				}
 			}
 		}
-
 		return removeJars;
-
 	}
 
 	private void install(final PluginDefinition def) {
@@ -967,13 +941,13 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 				try {
 					PluginVersion version = def.getRequiredHostVersion();
 					if (version == null)
-						context.log(PluginHostContext.LOG_WARNING,
-							"This plugin has not supplied the version of " + context.getPluginHostName()
-								+ " it requires. Please contact " + "the plugin author.");
+						context.log(PluginHostContext.LOG_WARNING, "This plugin has not supplied the version of "
+								+ context.getPluginHostName() + " it requires. Please contact " + "the plugin author.");
 					if (version != null && context.getPluginHostVersion() != null
-						&& version.compareTo(context.getPluginHostVersion()) > 0)
-						throw new IOException("This plugin requires at least version " + version.toString() + " of "
-							+ context.getPluginHostName() + ". You " + "currently have version " + context.getPluginHostVersion());
+							&& version.compareTo(context.getPluginHostVersion()) > 0)
+						throw new IOException(
+								"This plugin requires at least version " + version.toString() + " of " + context.getPluginHostName()
+										+ ". You " + "currently have version " + context.getPluginHostVersion());
 					URL location = new URL(def.getDownloadLocation());
 					context.log(PluginHostContext.LOG_INFORMATION, "Downloading plugin from " + location.toExternalForm());
 					status2Text.setText("Connecting");
@@ -1015,9 +989,10 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 					PluginUtil.closeStream(in);
 					PluginUtil.closeStream(out);
 					progressDialog.setVisible(false);
-					JOptionPane.showMessageDialog(PluginManagerPane.this, "Plugin downloaded and installed, you\n"
-						+ "will now need to restart " + context.getPluginHostName() + " for\nthe new plugin to be activated.",
-						"Information", JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(
+							PluginManagerPane.this, "Plugin downloaded and installed, you\n" + "will now need to restart "
+									+ context.getPluginHostName() + " for\nthe new plugin to be activated.",
+							"Information", JOptionPane.INFORMATION_MESSAGE);
 				} catch (Exception e) {
 					PluginUtil.closeStream(in);
 					PluginUtil.closeStream(out);
@@ -1038,17 +1013,14 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 	 * 
 	 * @param jars the jars to remove
 	 */
-	private void removeJars(HashMap removeJars) throws IOException {
+	private void removeJars(HashMap<String, String> removeJars) throws IOException {
 		FileOutputStream out = null;
 		File removeFile = new File(context.getPluginDirectory(), "ros.list");
 		try {
 			out = new FileOutputStream(removeFile, true);
 			PrintWriter w = new PrintWriter(out, true);
-			for (Iterator i = removeJars.keySet().iterator(); i.hasNext();) {
-				String n = (String) i.next();
-				String v = (String) removeJars.get(n);
-				File f = new File(v);
-				w.println(f.getAbsolutePath());
+			for (Map.Entry<String, String> en : removeJars.entrySet()) {
+				w.println(new File(en.getValue()).getAbsolutePath());
 			}
 			out.close();
 		} finally {
@@ -1099,5 +1071,4 @@ public class PluginManagerPane extends JPanel implements ActionListener, ListSel
 		}
 		refresh.setEnabled(!updating);
 	}
-
 }
