@@ -165,7 +165,7 @@ public class PluginVersion implements Comparable<PluginVersion> {
 	/**
 	 * Compare two version
 	 * 
-	 * @param o version to compare this version against
+	 * @param v2 version to compare this version against
 	 * @return comparison
 	 * @throws IllegalArgumentException if the two version cannot be compared
 	 */
