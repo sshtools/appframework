@@ -753,13 +753,13 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 		}
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	void doSetProfile(ResourceProfile<? extends ProfileTransport<?>> profile2) {
 		tabValidationHelper.clearErrors();
 		List<SchemeSettings> v = new ArrayList<SchemeSettings>();
 		sel = null;
 		if (newProfile) {
 			for (int i = 0; i < mgr.getSchemeHandlerCount(); i++) {
-				@SuppressWarnings("unchecked")
 				SchemeHandler<ProfileTransport<?>> handler = (SchemeHandler<ProfileTransport<?>>) mgr.getSchemeHandler(i);
 				if (!(handler instanceof SshToolsSchemeHandler)) {
 					/* DEBUG */System.err
@@ -787,7 +787,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 			schemeSelector.changed();
 		}
 		if (optionalTabs != null) {
-			for (SshToolsConnectionTab<? extends ProfileTransport<?>> t : optionalTabs)
+			for (SshToolsConnectionTab t : optionalTabs)
 				t.setConnectionProfile(profile);
 		}
 	}
