@@ -144,7 +144,7 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 		toolBarSmallIcons.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_TOOLBAR_SMALL_ICONS, false));
 		useSystemIconTheme.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_USE_SYSTEM_ICON_THEME, true));
 		wrapToolBar.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_TOOLBAR_WRAP, false));
-		stayRunning.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_STAY_RUNNING, false));
+		stayRunning.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_STAY_RUNNING, application.getStayRunningDefault()));
 	}
 
 	@Override

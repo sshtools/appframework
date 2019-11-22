@@ -102,7 +102,7 @@ import plugspud.PluginVersion;
 public abstract class SshToolsApplication implements PluginHostContext {
 	public final static String PREF_LAF = "apps.laf";
 	public final static String PREF_SKIN = "apps.skin";
-	public final static String PREF_STAY_RUNNING = "apps.stayRunning";
+	public final static String PREF_STAY_RUNNING = "apps.stayRunningOnLastWindowClose";
 	public final static String PREF_TOOLBAR_SHOW_SELECTIVE_TEXT = "apps.toolBar.showSelectiveText";
 	public final static String PREF_TOOLBAR_SMALL_ICONS = "apps.toolBar.smallIcons";
 	public static final String PREF_TOOLBAR_WRAP = "apps.toolBar.wrap";
@@ -161,8 +161,9 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		return i;
 	}
 
-	public static SshToolsApplication getInstance() {
-		return instance;
+	@SuppressWarnings("unchecked")
+	public static <T extends SshToolsApplication> T getInstance() {
+		return (T)instance;
 	}
 
 	public static UIManager.LookAndFeelInfo getLAF(String className) {
@@ -212,6 +213,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	protected PluginManager pluginManager;
 	protected int reusePort = -1;
 	protected ServerSocket reuseServerSocket;
+	private boolean stayRunningDefault;
 
 	public SshToolsApplication(Class<? extends SshToolsApplicationPanel> panelClass,
 			Class<? extends SshToolsApplicationContainer> defaultContainerClass) throws IOException, ParseException {
@@ -879,5 +881,13 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	private void printHelp(Options options) {
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.printHelp(getClass().getName(), options, true);
+	}
+
+	protected boolean getStayRunningDefault() {
+		return stayRunningDefault;
+	}
+
+	protected void setStayRunningDefault(boolean stayRunningDefault) {
+		this.stayRunningDefault = stayRunningDefault;
 	}
 }

@@ -18,8 +18,6 @@
 package com.sshtools.appframework.api.ui;
 
 import java.awt.LayoutManager;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -192,17 +190,7 @@ public abstract class AbstractSshToolsApplicationClientPanel<S extends VirtualSe
 			}
 		};
 		JCheckBox advanced = null;
-		if (panel.getTabsForSelected().size() > 1) {
-			advanced = new JCheckBox(Messages.getString("Advanced"));
-			advanced.setOpaque(false);
-			advanced.setMnemonic('a');
-			advanced.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					panel.setAdvanced(!panel.isAdvanced());
-				}
-			});
-		}
+		panel.setAdvanced(true);
 		Option opt = OptionDialog.prompt(AbstractSshToolsApplicationClientPanel.this, OptionChooser.UNCATEGORISED,
 				Messages.getString("AbstractSshToolsApplicationClientPanel.ConnSettings"), panel, Option.CHOICES_SAVE_CANCEL,
 				Option.CHOICE_SAVE, callback, advanced, null, true, SshToolsConnectionPanel.DEFAULT_SIZE);
@@ -212,7 +200,7 @@ public abstract class AbstractSshToolsApplicationClientPanel<S extends VirtualSe
 		return false;
 	}
 
-	public abstract List<SshToolsConnectionTab<ProfileTransport<?>>> getAdditionalConnectionTabs();
+	public abstract List<SshToolsConnectionTab<? extends ProfileTransport<?>>> getAdditionalConnectionTabs();
 
 	public abstract File getCurrentFile();
 

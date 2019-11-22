@@ -232,7 +232,7 @@ public abstract class SshToolsApplicationClientPanel extends SshToolsApplication
 	 * 
 	 * @return tabs
 	 */
-	public abstract List<SshToolsConnectionTab<ProfileTransport<?>>> getAdditionalConnectionTabs();
+	public abstract List<SshToolsConnectionTab<? extends ProfileTransport<?>>> getAdditionalConnectionTabs();
 
 	public abstract File getCurrentFile();
 

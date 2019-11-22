@@ -1011,6 +1011,7 @@ public class PluginManager<T extends PluginHostContext> {
 				}
 			}
 		} catch (Exception pe) {
+			processedPlugins.add(w);
 			w.status.exception = pe;
 			w.status.status = STATUS_ERRORED;
 			context.log(PluginHostContext.LOG_ERROR, "Failed to start plugin " + w.properties.getProperty(PLUGIN_NAME), pe);
@@ -1025,6 +1026,12 @@ public class PluginManager<T extends PluginHostContext> {
 			pp.removeAll(processedPlugins);
 			//loadQueue.awaitTermination(50, TimeUnit.MILLISECONDS);
 			loadQueue.awaitTermination(50, TimeUnit.MILLISECONDS);
+
+//			System.out.println("------------------------");
+//			List<PluginWrapper<Plugin<T>>> nl = new ArrayList<>(plugins);
+//			nl.removeAll(processedPlugins);
+//			System.out.println(nl);
+			
 		} while (processedPlugins.size() != plugins.size());
 		if (!onLoad.isEmpty()) {
 			StringBuilder b = new StringBuilder();

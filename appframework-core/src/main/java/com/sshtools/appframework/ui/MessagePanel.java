@@ -187,6 +187,8 @@ public class MessagePanel extends GradientPanel {
 	private Thread updateThread;
 
 	private BlockingQueue waitQueue;
+	private Type type;
+	private AppAction[] actions;
 
 	public MessagePanel() {
 		this(Type.hidden);
@@ -252,10 +254,15 @@ public class MessagePanel extends GradientPanel {
 	public void removeListener(Listener listener) {
 		listeners.remove(listener);
 	}
+	
+	public AppAction[] getActions() {
+		return actions;
+	}
 
 	public void setActions(AppAction[] actions) {
 		invalidate();
 		actionsPanel.removeAll();
+		this.actions = actions;
 		if (actions != null) {
 			for (AppAction action : actions) {
 				JButton button = new JButton(action);
@@ -277,6 +284,10 @@ public class MessagePanel extends GradientPanel {
 		this.message.setText(message);
 	}
 
+	public String getMessage() {
+		return message.getText();
+	}
+
 	public void setProgressMaximum(int max) {
 		progressBar.setMaximum(max);
 	}
@@ -287,6 +298,7 @@ public class MessagePanel extends GradientPanel {
 	}
 
 	public void setType(Type type) {
+		this.type = type;
 		invalidate();
 		setBackground(type.background);
 		setForeground(type.foreground);
@@ -301,6 +313,10 @@ public class MessagePanel extends GradientPanel {
 		} else {
 			setActions(null);
 		}
+	}
+
+	public Type getType() {
+		return type;
 	}
 
 	public void uncancel() {

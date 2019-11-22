@@ -77,7 +77,8 @@ public interface Plugin<T extends PluginHostContext> {
 	 * @param context context
 	 * @throws PluginException on any initialisation error
 	 */
-	void activatePlugin(T context) throws PluginException;
+	default void activatePlugin(T context) throws PluginException {
+	}
 
 	/**
 	 * Configure the {@link Options} with any command line arguments this plugin
@@ -85,7 +86,8 @@ public interface Plugin<T extends PluginHostContext> {
 	 * 
 	 * @param options options
 	 */
-	void buildCLIOptions(Options options);
+	default void buildCLIOptions(Options options) {
+	}
 
 	/**
 	 * Invoked by Plugspud when it wants to stop the plugin (e.g. when it is
@@ -94,7 +96,9 @@ public interface Plugin<T extends PluginHostContext> {
 	 * 
 	 * @return can close
 	 */
-	boolean canStopPlugin();
+	default boolean canStopPlugin() {
+		return false;
+	}
 
 	/**
 	 * Invoked by Plugspud when it starts the plugin
@@ -102,12 +106,14 @@ public interface Plugin<T extends PluginHostContext> {
 	 * @param context context
 	 * @throws PluginException on any initialisation error
 	 */
-	void startPlugin(T context) throws PluginException;
+	default void startPlugin(T context) throws PluginException {
+	}
 
 	/**
 	 * Stop the plugin.
 	 * 
 	 * @throws PluginException on any plugin error
 	 */
-	void stopPlugin() throws PluginException;
+	default void stopPlugin() throws PluginException {
+	}
 }

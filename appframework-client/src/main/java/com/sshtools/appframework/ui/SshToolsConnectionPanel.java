@@ -416,17 +416,17 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 	public static final Dimension DEFAULT_SIZE = new Dimension(620, 600);
 
 	public static ResourceProfile<?> showConnectionDialog(Component parent,
-			List<SshToolsConnectionTab<ProfileTransport<?>>> optionalTabs) {
+			List<SshToolsConnectionTab<? extends ProfileTransport<?>>> optionalTabs) {
 		return showConnectionDialog(parent, null, optionalTabs);
 	}
 
 	public static ResourceProfile<ProfileTransport<?>> showConnectionDialog(Component parent,
-			ResourceProfile<ProfileTransport<?>> profile, List<SshToolsConnectionTab<ProfileTransport<?>>> optionalTabs2) {
+			ResourceProfile<ProfileTransport<?>> profile, List<SshToolsConnectionTab<? extends ProfileTransport<?>>> optionalTabs2) {
 		return showConnectionDialog(parent, profile, optionalTabs2, DEFAULT_SIZE);
 	}
 
 	public static ResourceProfile<ProfileTransport<?>> showConnectionDialog(Component parent,
-			ResourceProfile<ProfileTransport<?>> origProfile, List<SshToolsConnectionTab<ProfileTransport<?>>> optionalTabs,
+			ResourceProfile<ProfileTransport<?>> origProfile, List<SshToolsConnectionTab<? extends ProfileTransport<?>>> optionalTabs,
 			Dimension size) {
 		final SshToolsConnectionPanel conx = new SshToolsConnectionPanel(true, optionalTabs);
 		conx.setConnectionProfile(origProfile);
@@ -561,7 +561,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 	private boolean advanced;
 	private ConnectionManager mgr;
 	private boolean newProfile;
-	private List<SshToolsConnectionTab<ProfileTransport<?>>> optionalTabs;
+	private List<SshToolsConnectionTab<? extends ProfileTransport<?>>> optionalTabs;
 	private ResourceProfile<ProfileTransport<?>> profile;
 	private SchemeSettings[] schemes;
 	private HoverSchemeSelectionPanel schemeSelector;
@@ -578,7 +578,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 	 * @param showConnectionTabs show tabs for editing the connection
 	 * @param optionalTabs additional tabs
 	 */
-	public SshToolsConnectionPanel(boolean showConnectionTabs, List<SshToolsConnectionTab<ProfileTransport<?>>> optionalTabs) {
+	public SshToolsConnectionPanel(boolean showConnectionTabs, List<SshToolsConnectionTab<? extends ProfileTransport<?>>> optionalTabs) {
 		super(new BorderLayout());
 		this.optionalTabs = optionalTabs;
 		mgr = ConnectionManager.getInstance();
@@ -711,7 +711,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 			}
 		}
 		if (optionalTabs != null) {
-			for (SshToolsConnectionTab<ProfileTransport<?>> tab : optionalTabs) {
+			for (SshToolsConnectionTab<? extends ProfileTransport<?>> tab : optionalTabs) {
 				tabs.add(tab);
 			}
 		}
@@ -734,7 +734,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 			p.setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
 			content.add(p, BorderLayout.CENTER);
 			if (optionalTabs != null) {
-				for (SshToolsConnectionTab<ProfileTransport<?>> tab : optionalTabs) {
+				for (SshToolsConnectionTab<? extends ProfileTransport<?>> tab : optionalTabs) {
 					tabber.addTab(tab);
 				}
 			}
@@ -787,7 +787,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 			schemeSelector.changed();
 		}
 		if (optionalTabs != null) {
-			for (SshToolsConnectionTab<ProfileTransport<?>> t : optionalTabs)
+			for (SshToolsConnectionTab<? extends ProfileTransport<?>> t : optionalTabs)
 				t.setConnectionProfile(profile);
 		}
 	}

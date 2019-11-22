@@ -19,6 +19,7 @@
 package com.sshtools.profile;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -35,7 +36,7 @@ public class ConnectionManager {
 	 * Prevent instantiation outside of this class
 	 */
 	private ConnectionManager() {
-		handlers = new ArrayList<>();
+		handlers = Collections.synchronizedList(new ArrayList<>());
 	}
 
 	/**
@@ -64,12 +65,14 @@ public class ConnectionManager {
 	 * @param schemeHandler SchemeHandler
 	 */
 	public void registerSchemeHandler(SchemeHandler<? extends ProfileTransport<?>> schemeHandler) {
-		SchemeHandler<? extends ProfileTransport<?>> currentHandler = getSchemeHandler(schemeHandler.getName());
-		if (currentHandler != null) {
-			throw new IllegalArgumentException(
-					"Scheme handler for " + schemeHandler.getName() + " is already regisered (" + currentHandler.getClass() + ")");
+		synchronized (handlers) {
+			SchemeHandler<? extends ProfileTransport<?>> currentHandler = getSchemeHandler(schemeHandler.getName());
+			if (currentHandler != null) {
+				throw new IllegalArgumentException("Scheme handler for " + schemeHandler.getName() + " is already regisered ("
+						+ currentHandler.getClass() + ")");
+			}
+			handlers.add(schemeHandler);
 		}
-		handlers.add(schemeHandler);
 	}
 
 	/**
@@ -91,10 +94,12 @@ public class ConnectionManager {
 	 * @return SchemeHandler
 	 */
 	public SchemeHandler<? extends ProfileTransport<?>> getSchemeHandler(String name) {
-		for (int i = 0; i < getSchemeHandlerCount(); i++) {
-			SchemeHandler<? extends ProfileTransport<?>> h = getSchemeHandler(i);
-			if (h.getName().equals(name)) {
-				return h;
+		synchronized (handlers) {
+			for (int i = 0; i < getSchemeHandlerCount(); i++) {
+				SchemeHandler<? extends ProfileTransport<?>> h = getSchemeHandler(i);
+				if (h.getName().equals(name)) {
+					return h;
+				}
 			}
 		}
 		return null;

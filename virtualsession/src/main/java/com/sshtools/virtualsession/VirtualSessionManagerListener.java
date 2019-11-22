@@ -31,33 +31,38 @@ public interface VirtualSessionManagerListener extends EventListener {
 	 *
 	 * @param session session that changed
 	 */
-	void virtualSessionChanged(VirtualSession<?, ?> session);
+	default void virtualSessionChanged(VirtualSession<?, ?> session) {
+	}
 
 	/**
 	 * A virtual session has been added to the virtual session manager
 	 *
 	 * @param session session the has been added
 	 */
-	void virtualSessionAdded(VirtualSession<?, ?> session);
+	default void virtualSessionAdded(VirtualSession<?, ?> session) {
+	}
 
 	/**
 	 * A virtual session has been removed from the virtual session manager
 	 *
 	 * @param session session the has been removed
 	 */
-	void virtualSessionRemoved(VirtualSession<?, ?> session);
+	default void virtualSessionRemoved(VirtualSession<?, ?> session) {
+	}
 
 	/**
 	 * A virtual session has been selected by the user
 	 *
 	 * @param session session selected
 	 */
-	void virtualSessionSelected(VirtualSession<?, ?> session);
+	default void virtualSessionSelected(VirtualSession<?, ?> session) {
+	}
 
 	/**
 	 * A virtual session has been deselected.
 	 *
 	 * @param session the session deselected
 	 */
-	void virtualSessionDeselected(VirtualSession<?, ?> session);
+	default void virtualSessionDeselected(VirtualSession<?, ?> session) {
+	}
 }

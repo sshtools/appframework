@@ -50,6 +50,9 @@ public class ToolsBuilder<T extends JComponent> {
 	final static Logger log = LoggerFactory.getLogger(ToolsBuilder.class);
 	private List<AppAction> actions;
 	private T container;
+	private Boolean smallIcons;
+	private Boolean showSelectiveText;
+	private Boolean showShared;
 
 	public ToolsBuilder(T container) {
 		this(container, null);
@@ -98,8 +101,8 @@ public class ToolsBuilder<T extends JComponent> {
 	protected void rebuildContainer(Collection<AppAction> enabledActions) {
 		container.invalidate();
 		container.removeAll();
-		boolean useSmallIcons = PreferencesStore.getBoolean(SshToolsApplication.PREF_TOOLBAR_SMALL_ICONS, false);
-		boolean showSelectiveText = PreferencesStore.getBoolean(SshToolsApplication.PREF_TOOLBAR_SHOW_SELECTIVE_TEXT, true);
+		boolean useSmallIcons = checkSmallIcons();
+		boolean showSelectiveText = checkShowSelectiveText();
 		// Build the tool bar action list, grouping the actions
 		List<AppAction> toolBarActions = new ArrayList<AppAction>();
 		for (AppAction action : enabledActions) {
@@ -113,6 +116,10 @@ public class ToolsBuilder<T extends JComponent> {
 		Integer grp = null;
 		for (AppAction z : toolBarActions) {
 			boolean grow = Boolean.TRUE.equals(z.getValue(AppAction.GROW));
+			boolean shared = Boolean.TRUE.equals(z.getValue(AppAction.SHARED));
+			if(showShared != null && shared != showShared)
+				continue;
+			
 			String constraints = grow ? "grow" : null;
 			if ((grp != null) && !grp.equals(z.getValue(AppAction.TOOLBAR_GROUP))) {
 				container.add(new ToolBarSeparator(), null);
@@ -135,6 +142,39 @@ public class ToolsBuilder<T extends JComponent> {
 		if (container.getParent() != null) {
 			container.getParent().validate();
 		}
+	}
+	
+
+	public Boolean getSmallIcons() {
+		return smallIcons;
+	}
+
+	public void setSmallIcons(Boolean smallIcons) {
+		this.smallIcons = smallIcons;
+	}
+
+	public Boolean getShowSelectiveText() {
+		return showSelectiveText;
+	}
+
+	public void setShowSelectiveText(Boolean showSelectiveText) {
+		this.showSelectiveText = showSelectiveText;
+	}
+
+	public void setShowShared(Boolean showShared) {
+		this.showShared = showShared;
+	}
+
+	public Boolean getShowSharedOnToolBar() {
+		return showShared;
+	}
+
+	private boolean checkShowSelectiveText() {
+		return showSelectiveText != null ? showSelectiveText : PreferencesStore.getBoolean(SshToolsApplication.PREF_TOOLBAR_SHOW_SELECTIVE_TEXT, true);
+	}
+
+	private boolean checkSmallIcons() {
+		return smallIcons != null ? smallIcons : PreferencesStore.getBoolean(SshToolsApplication.PREF_TOOLBAR_SMALL_ICONS, false);
 	}
 
 	protected void rebuildForActions(List<AppAction> enabledActions) {
