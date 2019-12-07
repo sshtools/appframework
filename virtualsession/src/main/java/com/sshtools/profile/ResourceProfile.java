@@ -54,8 +54,8 @@ import nanoxml.XMLElement;
  * <br>
  * When used in an application context, it may be useful to store application
  * specific properties along with a profile. A profile provides this using its
- * <i>Application Properties</i>. The simple name / value pairs are will also
- * be persisted in the XML representation of the profile. Several convenience
+ * <i>Application Properties</i>. The simple name / value pairs are will also be
+ * persisted in the XML representation of the profile. Several convenience
  * methods for getting primitive types as well as strings are available.<br>
  * <br>
  * Profiles may also hold may implementors of {@link SchemeOptions}. This
@@ -122,7 +122,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	 * Construct a new empty profile.
 	 */
 	public ResourceProfile() {
-		this((URI)null);
+		this((URI) null);
 	}
 
 	/**
@@ -142,7 +142,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	 */
 	public ResourceProfile(String name, URI uri) {
 		try {
-			setURI(uri == null ? new URI("null://") :  uri);
+			setURI(uri == null ? new URI("null://") : uri);
 		} catch (MalformedURIException e) {
 			throw new IllegalArgumentException("Invalid URI.", e);
 		}
@@ -387,13 +387,18 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 				 * a set of SchemeOptions using the createSchemeOptions method
 				 * that it supports.
 				 */
+				String schemeName = (String) el.getAttribute("scheme", uri.getScheme());
 				try {
-					SchemeOptions sopts = ConnectionManager.getInstance()
-							.getSchemeHandler((String) el.getAttribute("scheme", uri.getScheme())).createSchemeOptions();
-					sopts.init(el);
-					schemeOptions.put(sopts.getClass(), sopts);
+					SchemeHandler<? extends ProfileTransport<?>> schemeHandler = ConnectionManager.getInstance().getSchemeHandler(schemeName);
+					if(schemeHandler == null)
+						System.err.println("WARNING: No scheme handler for scheme " + schemeName);
+					else {
+						SchemeOptions sopts = schemeHandler.createSchemeOptions();
+						sopts.init(el);
+						schemeOptions.put(sopts.getClass(), sopts);
+					}
 				} catch (Throwable t) {
-					System.err.println("Could not create scheme specific options for " + uri.getScheme());
+					System.err.println("Could not create scheme specific options for " + schemeName);
 					t.printStackTrace();
 				}
 			} else {
@@ -608,13 +613,13 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 			return null;
 		}
 		String userinfo = uri.getUserinfo();
-		if(userinfo == null) {
+		if (userinfo == null) {
 			String reginfo = uri.getRegBasedAuthority();
-			if(reginfo != null && reginfo.endsWith("@")) {
+			if (reginfo != null && reginfo.endsWith("@")) {
 				userinfo = reginfo.substring(0, reginfo.length() - 1);
 			}
 		}
-		if(userinfo == null)
+		if (userinfo == null)
 			return null;
 		int idx = userinfo.indexOf(':');
 		if (idx == -1) {

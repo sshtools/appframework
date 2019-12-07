@@ -692,8 +692,20 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 	}
 
 	public void setAdvanced(boolean advanced) {
+		applyTabs();
 		this.advanced = advanced;
+		SchemeSettings settings = new SchemeSettings(profile);
+		sel = settings;
 		resetPanel();
+		invalidate();
+		doSetProfile(profile);
+		if (schemeSelector != null) {
+			schemeSelector.changed();
+			schemeSelector.setInComponent(true);
+			schemeSelector.setCategory(sel.handler.getCategory());
+		}
+		validate();
+		repaint();
 	}
 	
 	public boolean isAdvanced() {
