@@ -24,6 +24,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import com.sshtools.ui.swing.AppAction;
+import com.sshtools.ui.swing.EmptyIcon;
 
 /**
  * Abstract implementation of an {@link AppAction}that can be used to open a
@@ -35,6 +36,8 @@ public abstract class AbstractOpenInWindowAction extends AbstractAppAction {
 
 	public AbstractOpenInWindowAction() {
 		putValue(NAME, VAL_NAME);
+		putValue(SMALL_ICON, new EmptyIcon(16, 16));
+		putValue(MEDIUM_ICON, new EmptyIcon(24, 24));
 		putValue(SHORT_DESCRIPTION, Messages.getString("AbstractOpenInWindowAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION, Messages.getString("AbstractOpenInWindowAction.LongDesc"));
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.ALT_MASK + InputEvent.CTRL_MASK));
