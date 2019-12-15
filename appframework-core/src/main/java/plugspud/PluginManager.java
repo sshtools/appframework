@@ -180,6 +180,7 @@ public class PluginManager<T extends PluginHostContext> {
 	public final static String PLUGIN_JARS = "jars";
 	public final static String PLUGIN_NAME = "name";
 	public final static String PLUGIN_ORDER = "order";
+	public final static String PLUGIN_SYNC_LOAD = "syncLoad";
 	public final static String PLUGIN_REQUIRED_HOST_VERSION = "requiredHostVersion";
 	public final static String PLUGIN_RESOURCE = "resource";
 	public final static String PLUGIN_SHORT_DESCRIPTION = "shortDescription";
@@ -611,6 +612,7 @@ public class PluginManager<T extends PluginHostContext> {
 					order = Integer.parseInt(properties.getProperty(PLUGIN_ORDER));
 				} catch (Exception e) {
 				}
+				boolean syncLoad = "true".equals(properties.getProperty(PLUGIN_SYNC_LOAD));
 				String pluginURL = properties.getProperty(PLUGIN_URL);
 				String author = properties.getProperty(PLUGIN_AUTHOR);
 				String information = properties.getProperty(PLUGIN_INFORMATION);
@@ -674,6 +676,7 @@ public class PluginManager<T extends PluginHostContext> {
 						pr.put(PLUGIN_CLASSNAME, className);
 						pr.put(PLUGIN_VERSION, version);
 						pr.put(PLUGIN_RESOURCE, resource);
+						pr.put(PLUGIN_SYNC_LOAD, String.valueOf(syncLoad));
 						if (author != null)
 							pr.put(PLUGIN_AUTHOR, author);
 						if (jars != null)
@@ -743,10 +746,9 @@ public class PluginManager<T extends PluginHostContext> {
 	public void start() {
 		context.log(PluginHostContext.LOG_DEBUG, "Plugins :-");
 		int i = 1;
-		for(PluginWrapper<Plugin<T>> plugin : plugins) {
+		for (PluginWrapper<Plugin<T>> plugin : plugins) {
 			context.log(PluginHostContext.LOG_DEBUG, String.format("    %2d : %s", i++, plugin.getName()));
 		}
-		
 		processedPlugins.clear();
 		buildDependencyTree();
 		/*
@@ -758,10 +760,17 @@ public class PluginManager<T extends PluginHostContext> {
 			String deps = w.properties.getProperty(PLUGIN_DEPENDENCIES);
 			if (StringUtils.isBlank(deps)) {
 				started++;
-				context.log(PluginHostContext.LOG_DEBUG,
-						"Starting root plugin " + w.getName() + " [" + w.plugin.getClass() + "]");
-				synchronized (lock) {
-					loadQueue.execute(() -> startPlugin(w));
+				context.log(PluginHostContext.LOG_DEBUG, "Starting root plugin " + w.getName() + " [" + w.plugin.getClass() + "]");
+				if ("true".equals(w.properties.getProperty(PLUGIN_SYNC_LOAD))) {
+					try {
+						loadQueue.submit(() -> startPlugin(w)).get();
+					} catch (Exception e) {
+						throw new IllegalStateException("Failed to start synchronous plugin.", e);
+					}
+				} else {
+					synchronized (lock) {
+						loadQueue.execute(() -> startPlugin(w));
+					}
 				}
 			}
 		}
@@ -825,9 +834,11 @@ public class PluginManager<T extends PluginHostContext> {
 
 	private void activatePlugin(PluginWrapper<Plugin<T>> w) {
 		try {
-			context.log(PluginHostContext.LOG_DEBUG, String.format("Activating plugin %2d : %s [%s]", activatedPlugins.size() + 1, w.getName(), w.plugin.getClass()));
+			context.log(PluginHostContext.LOG_DEBUG, String.format("Activating plugin %2d : %s [%s]", activatedPlugins.size() + 1,
+					w.getName(), w.plugin.getClass()));
 			w.plugin.activatePlugin(context);
-			context.log(PluginHostContext.LOG_DEBUG, String.format("Activated plugin %2d : %s [%s]", activatedPlugins.size() + 1, w.getName(), w.plugin.getClass()));
+			context.log(PluginHostContext.LOG_DEBUG,
+					String.format("Activated plugin %2d : %s [%s]", activatedPlugins.size() + 1, w.getName(), w.plugin.getClass()));
 			w.status.status = STATUS_ACTIVATED;
 			synchronized (lock) {
 				processedPlugins.add(w);
@@ -986,9 +997,11 @@ public class PluginManager<T extends PluginHostContext> {
 
 	private void startPlugin(PluginWrapper<Plugin<T>> w) {
 		try {
-			context.log(PluginHostContext.LOG_DEBUG, String.format("Starting plugin %2d : %s [%s]", startedPlugins.size() + 1, w.getName(), w.plugin.getClass()));
+			context.log(PluginHostContext.LOG_DEBUG,
+					String.format("Starting plugin %2d : %s [%s]", startedPlugins.size() + 1, w.getName(), w.plugin.getClass()));
 			w.plugin.startPlugin(context);
-			context.log(PluginHostContext.LOG_DEBUG, String.format("Started plugin %2d : %s [%s]", startedPlugins.size() + 1, w.getName(), w.plugin.getClass()));
+			context.log(PluginHostContext.LOG_DEBUG,
+					String.format("Started plugin %2d : %s [%s]", startedPlugins.size() + 1, w.getName(), w.plugin.getClass()));
 			w.status.status = STATUS_STARTED;
 			synchronized (lock) {
 				processedPlugins.add(w);
@@ -1024,14 +1037,12 @@ public class PluginManager<T extends PluginHostContext> {
 		do {
 			List<PluginWrapper<Plugin<T>>> pp = new ArrayList<>(plugins);
 			pp.removeAll(processedPlugins);
-			//loadQueue.awaitTermination(50, TimeUnit.MILLISECONDS);
+			// loadQueue.awaitTermination(50, TimeUnit.MILLISECONDS);
 			loadQueue.awaitTermination(50, TimeUnit.MILLISECONDS);
-
-//			System.out.println("------------------------");
-//			List<PluginWrapper<Plugin<T>>> nl = new ArrayList<>(plugins);
-//			nl.removeAll(processedPlugins);
-//			System.out.println(nl);
-			
+			// System.out.println("------------------------");
+			// List<PluginWrapper<Plugin<T>>> nl = new ArrayList<>(plugins);
+			// nl.removeAll(processedPlugins);
+			// System.out.println(nl);
 		} while (processedPlugins.size() != plugins.size());
 		if (!onLoad.isEmpty()) {
 			StringBuilder b = new StringBuilder();
