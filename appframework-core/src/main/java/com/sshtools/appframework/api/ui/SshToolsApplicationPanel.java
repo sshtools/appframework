@@ -102,6 +102,7 @@ public abstract class SshToolsApplicationPanel extends JPanel {
 		public Collection<AppAction> listActions() {
 			List<AppAction> allActions = new ArrayList<AppAction>();
 			allActions.addAll(actions);
+			allActions.addAll(getApplication().getActions());
 			Collection<AppAction> additionalActions = getAdditionalActions();
 			if (additionalActions != null) {
 				allActions.addAll(additionalActions);

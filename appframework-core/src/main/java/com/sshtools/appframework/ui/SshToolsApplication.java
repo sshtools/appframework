@@ -230,12 +230,25 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	protected int reusePort = -1;
 	protected ServerSocket reuseServerSocket;
 	private boolean stayRunningDefault;
+	private List<AppAction> appActions = new ArrayList<>();
 
 	public SshToolsApplication(Class<? extends SshToolsApplicationPanel> panelClass,
 			Class<? extends SshToolsApplicationContainer> defaultContainerClass) throws IOException, ParseException {
 		this.panelClass = panelClass;
 		this.defaultContainerClass = defaultContainerClass;
 		// this.lic = new LicenseVerification(this);
+	}
+	
+	public void registerAction(AppAction action) {
+		appActions.add(action);
+	}
+	
+	public void deregisterAction(AppAction action) {
+		appActions.remove(action);
+	}
+	
+	public List<AppAction> getActions() {
+		return appActions;
 	}
 
 	public void addAdditionalOptionsTab(OptionsTab tab) {
