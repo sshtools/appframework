@@ -660,6 +660,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		addAdditionalOptionsTab(new GlobalOptionsTab(this));
 		Options options = new Options();
 		buildCLIOptions(options);
+		pluginManager.buildCLIOptions(options);
 		log.debug("Parsing command line");
 		CommandLineParser parser = new PosixParser();
 		try {
@@ -696,6 +697,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 							CommandLineParser parser = new PosixParser();
 							Options options = new Options();
 							buildCLIOptions(options);
+							pluginManager.buildCLIOptions(options);
 							// parse the command line arguments
 							final CommandLine remoteCLI = parser.parse(options, a);
 							pw.println("");
