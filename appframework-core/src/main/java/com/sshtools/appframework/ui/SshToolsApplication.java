@@ -32,8 +32,11 @@ import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilePermission;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -53,6 +56,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -604,18 +608,33 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		}
 		// Try and message the reuse daemon if possible - saves starting another
 		// instance
+		File portReuseFile = new File(getApplicationPreferencesDirectory(), ".reuse-port");
 		if (listen) {
 			Socket s = null;
 			try {
 				String hostname = "localhost";
-				if (reusePort == -1) {
-					reusePort = getDefaultReusePort();
+				int clientReusePort = reusePort;
+				if (clientReusePort == -1) {
+					try(BufferedReader r = new BufferedReader(new FileReader(portReuseFile))) {
+						clientReusePort = Integer.parseInt(r.readLine());
+					}
+					catch(IOException ioe) {
+						throw new SocketException("No " + portReuseFile);
+					}
 				}
-				log.debug("Attempting connection to reuse server on " + hostname + ":" + reusePort);
-				s = new Socket(hostname, reusePort);
-				log.debug("Found reuse server on " + hostname + ":" + reusePort + ", sending arguments");
+				log.debug("Attempting connection to reuse server on " + hostname + ":" + clientReusePort);
+				s = new Socket(hostname, clientReusePort);
+				log.debug("Found reuse server on " + hostname + ":" + clientReusePort + ", sending arguments");
+				File cookieFile = new File(getApplicationPreferencesDirectory(), ".cookie");
+				if(!cookieFile.exists())
+					throw new FileNotFoundException("No cookie.");
+				String cookie = null;
+				try(BufferedReader r = new BufferedReader(new FileReader(cookieFile))) {
+					cookie = r.readLine();
+				}
 				s.setSoTimeout(5000);
 				PrintWriter pw = new PrintWriter(s.getOutputStream(), true);
+				pw.println(cookie);
 				for (int i = 0; args != null && i < args.length; i++) {
 					pw.println(args[i]);
 				}
@@ -695,12 +714,21 @@ public abstract class SshToolsApplication implements PluginHostContext {
 				public void run() {
 					Socket s = null;
 					try {
-						reuseServerSocket = new ServerSocket(reusePort, 1);
+						reuseServerSocket = new ServerSocket(reusePort == -1 ? 0 : reusePort, 1);
+						try(PrintWriter fw = new PrintWriter(new FileWriter(portReuseFile), true)) {
+							fw.println(String.valueOf(reuseServerSocket.getLocalPort()));
+						}
+						UUID cookie = UUID.randomUUID();
+						try(PrintWriter fw = new PrintWriter(new FileWriter(new File(getApplicationPreferencesDirectory(), ".cookie")), true)) {
+							fw.println(cookie.toString());
+						}
 						while (true) {
 							s = reuseServerSocket.accept();
 							BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
 							String line = null;
 							List<String> args = new ArrayList<String>();
+							if(!reader.readLine().equals(cookie.toString()))
+								throw new IOException("Invalid cookie.");
 							while ((line = reader.readLine()) != null && !line.equals("")) {
 								args.add(line);
 							}
