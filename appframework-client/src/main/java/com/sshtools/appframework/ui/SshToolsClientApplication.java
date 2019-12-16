@@ -18,11 +18,16 @@
 /* HEADER */
 package com.sshtools.appframework.ui;
 
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.List;
 
+import com.sshtools.appframework.actions.AbstractNewAction;
+import com.sshtools.appframework.api.ui.AbstractSshToolsApplicationClientPanel;
 import com.sshtools.appframework.api.ui.SshToolsApplicationContainer;
 import com.sshtools.appframework.api.ui.SshToolsApplicationPanel;
+import com.sshtools.ui.swing.AppAction;
 
 /**
  * An abstract extension of {@link SshToolsApplication} that should be used for
@@ -30,7 +35,6 @@ import com.sshtools.appframework.api.ui.SshToolsApplicationPanel;
  * J2SSH Maverick SSH2 support.
  */
 public abstract class SshToolsClientApplication extends SshToolsApplication {
-
 	public static String PREF_LAST_PRIVATE_KEY_LOCATION = "apps.client.lastPrivateKeyFile";
 
 	/**
@@ -44,5 +48,20 @@ public abstract class SshToolsClientApplication extends SshToolsApplication {
 	public SshToolsClientApplication(Class<? extends SshToolsApplicationPanel> panelClass,
 			Class<? extends SshToolsApplicationContainer> defaultContainerClass) throws IOException, ParseException {
 		super(panelClass, defaultContainerClass);
+	}
+
+	@Override
+	protected List<AppAction> getTrayActions() {
+		List<AppAction> actions = super.getTrayActions();
+		actions.add(new AbstractNewAction(false) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent evt) {
+				open();
+				((AbstractSshToolsApplicationClientPanel<?>)getContainerAt(0).getApplicationPanel()).newConnection();
+			}
+		});
+		return actions;
 	}
 }

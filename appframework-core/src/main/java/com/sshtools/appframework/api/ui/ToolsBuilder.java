@@ -48,14 +48,16 @@ public class ToolsBuilder<T extends JComponent> {
 	}
 
 	final static Logger log = LoggerFactory.getLogger(ToolsBuilder.class);
+
+	protected T container;
+	
 	private List<AppAction> actions;
-	private T container;
 	private Boolean smallIcons;
 	private Boolean showSelectiveText;
 	private Boolean showShared;
 
 	public ToolsBuilder(T container) {
-		this(container, null);
+		this(container, new ArrayList<>());
 	}
 
 	public ToolsBuilder(T container, List<AppAction> actions) {

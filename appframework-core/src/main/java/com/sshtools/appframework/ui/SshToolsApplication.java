@@ -26,6 +26,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
@@ -55,13 +56,18 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -77,19 +83,28 @@ import org.apache.commons.vfs2.VFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sshtools.appframework.actions.AboutAction;
+import com.sshtools.appframework.actions.AbstractOpenAction;
+import com.sshtools.appframework.actions.ExitAction;
 import com.sshtools.appframework.api.SshToolsApplicationException;
+import com.sshtools.appframework.api.ui.MenuBuilder;
 import com.sshtools.appframework.api.ui.MultilineLabel;
 import com.sshtools.appframework.api.ui.SshToolsApplicationContainer;
 import com.sshtools.appframework.api.ui.SshToolsApplicationPanel;
+import com.sshtools.appframework.mru.MRUAction;
 import com.sshtools.appframework.mru.MRUList;
 import com.sshtools.appframework.mru.MRUListModel;
+import com.sshtools.appframework.mru.MRUMenu;
 import com.sshtools.appframework.prefs.FilePreferencesFactory;
 import com.sshtools.appframework.util.GeneralUtil;
 import com.sshtools.appframework.util.IOUtil;
+import com.sshtools.ui.swing.AppAction;
 import com.sshtools.ui.swing.EmptyIcon;
 import com.sshtools.ui.swing.OptionDialog;
 import com.sshtools.ui.swing.UIUtil;
 
+import dorkbox.systemTray.Entry;
+import dorkbox.systemTray.SystemTray;
 import plugspud.PluginException;
 import plugspud.PluginHostContext;
 import plugspud.PluginManager;
@@ -107,6 +122,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	public final static String PREF_TOOLBAR_SMALL_ICONS = "apps.toolBar.smallIcons";
 	public static final String PREF_TOOLBAR_WRAP = "apps.toolBar.wrap";
 	public final static String PREF_USE_SYSTEM_ICON_THEME = "apps.toolBar.useSystemIconTheme";
+	public final static String PREF_TRAY_ICON = "apps.toolBar.trayIcon";
 	final static Logger log = LoggerFactory.getLogger(IconStore.class);
 	private static List<SshToolsApplicationContainer> containers = new ArrayList<SshToolsApplicationContainer>();
 	private static SshToolsApplication instance;
@@ -131,11 +147,11 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		addLAF(new UIManager.LookAndFeelInfo("Native", UIManager.getSystemLookAndFeelClassName()));
 		addLAF(new UIManager.LookAndFeelInfo("Cross Platform", UIManager.getCrossPlatformLookAndFeelClassName()));
 		OptionDialog.setIconLoader((option) -> {
-			if(option.equals(com.sshtools.ui.Option.CHOICE_CANCEL))
+			if (option.equals(com.sshtools.ui.Option.CHOICE_CANCEL))
 				return IconStore.getInstance().getIcon("process-stop", 24);
-			else if(option.equals(com.sshtools.ui.Option.CHOICE_CLOSE))
+			else if (option.equals(com.sshtools.ui.Option.CHOICE_CLOSE))
 				return IconStore.getInstance().getIcon("window-close", 24);
-			else if(option.equals(com.sshtools.ui.Option.CHOICE_SAVE))
+			else if (option.equals(com.sshtools.ui.Option.CHOICE_SAVE))
 				return IconStore.getInstance().getIcon("document-save", 24);
 			else
 				return new EmptyIcon(1, 24);
@@ -163,7 +179,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 
 	@SuppressWarnings("unchecked")
 	public static <T extends SshToolsApplication> T getInstance() {
-		return (T)instance;
+		return (T) instance;
 	}
 
 	public static UIManager.LookAndFeelInfo getLAF(String className) {
@@ -268,6 +284,100 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		}
 	}
 
+	public void showTrayIcon() {
+		SystemTray systemTray = SystemTray.get();
+		SystemTray.AUTO_SIZE = false;
+		SystemTray.AUTO_FIX_INCONSISTENCIES = false;
+		if (systemTray == null) {
+			throw new RuntimeException("Unable to load SystemTray!");
+		}
+		systemTray.setStatus(getApplicationName());
+		systemTray.setTooltip(getApplicationName() + " (" + getApplicationVersion() + ")");
+		systemTray.setImage(((ImageIcon) getApplicationSmallIcon()).getImage());
+		mruModel.addListDataListener(new ListDataListener() {
+			@Override
+			public void intervalRemoved(ListDataEvent e) {
+				addSystemTrayMenu(systemTray);
+			}
+
+			@Override
+			public void intervalAdded(ListDataEvent e) {
+				addSystemTrayMenu(systemTray);
+			}
+
+			@Override
+			public void contentsChanged(ListDataEvent e) {
+				addSystemTrayMenu(systemTray);
+			}
+		});
+		addSystemTrayMenu(systemTray);
+		systemTray.setEnabled(true);
+	}
+
+	public void open() {
+		if (containers.size() == 0) {
+			try {
+				newContainer();
+			} catch (SshToolsApplicationException e) {
+				log.error("Failed to open new container.", e);
+			}
+		} else {
+			SshToolsApplicationContainer container = containers.get(0);
+			container.setContainerVisible(true);
+			if (container instanceof JFrame) {
+				JFrame jFrame = (JFrame) container;
+				if (jFrame.getState() == JFrame.ICONIFIED)
+					jFrame.setState(JFrame.NORMAL);
+				jFrame.toFront();
+			}
+		}
+	}
+
+	@SuppressWarnings("serial")
+	protected List<AppAction> getTrayActions() {
+		List<AppAction> actions = new ArrayList<>();
+		actions.add(new AbstractOpenAction(false) {
+			@Override
+			public void actionPerformed(ActionEvent evt) {
+				open();
+			}
+		});
+		actions.add(new ExitAction(this, null));
+		actions.add(new AboutAction(null, this));
+		actions.add(createTrayFavouritesMRUMenu());
+		return actions;
+	}
+
+	private void addSystemTrayMenu(SystemTray systemTray) {
+		JMenu trayMenu = new JMenu("UniTTY");
+		MenuBuilder tb = new MenuBuilder(trayMenu);
+		tb.listActions().addAll(getTrayActions());
+		tb.setSmallIcons(true);
+		tb.rebuildActionComponents();
+		trayMenu.setIcon(getApplicationSmallIcon());
+		if(systemTray.getMenu() != null) {
+			while(true) {
+				Entry item = systemTray.getMenu().get(0);
+				if(item == null)
+					break;
+				systemTray.getMenu().remove(item);
+			}
+		}
+		systemTray.setMenu(trayMenu);
+	}
+
+	@SuppressWarnings("serial")
+	protected MRUAction createTrayFavouritesMRUMenu() {
+		return new MRUAction(mruModel) {
+			@Override
+			protected MRUMenu createMenu(MRUListModel model) {
+				MRUMenu menu = super.createMenu(model);
+				menu.setIcon(new EmptyIcon(16, 16));
+				return menu;
+			}
+		};
+	}
+
 	public SshToolsApplicationContainer convertContainer(SshToolsApplicationContainer container,
 			Class<SshToolsApplicationContainer> newContainerClass) throws SshToolsApplicationException {
 		int idx = containers.indexOf(container);
@@ -324,6 +434,8 @@ public abstract class SshToolsApplication implements PluginHostContext {
 
 	public abstract Icon getApplicationLargeIcon();
 
+	public abstract Icon getApplicationSmallIcon();
+
 	public abstract BigInteger getApplicationModulus();
 
 	public abstract String getApplicationName();
@@ -336,6 +448,11 @@ public abstract class SshToolsApplication implements PluginHostContext {
 
 	public String getApplicationVersion() {
 		return GeneralUtil.getVersionString(getApplicationName(), getClass());
+	}
+
+	public boolean isTraySupported() {
+		// TODO for now... dorkbox seem broken
+		return false;
 	}
 
 	/**
@@ -610,6 +727,8 @@ public abstract class SshToolsApplication implements PluginHostContext {
 			t.setDaemon(true);
 			t.start();
 		}
+		if (isTraySupported() && PreferencesStore.getBoolean(PREF_TRAY_ICON, true))
+			showTrayIcon();
 	}
 
 	protected void parsed(CommandLine commandLine) throws Exception {

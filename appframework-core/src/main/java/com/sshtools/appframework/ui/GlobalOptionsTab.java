@@ -47,11 +47,12 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 	private SshToolsApplication application;
 	// Private instance variables.
 	private JComboBox<UIManager.LookAndFeelInfo> lafChooser;
-	private JCheckBox stayRunning = new JCheckBox("Stay running on closing last window");
 	private JCheckBox toolBarShowSelectiveText = new JCheckBox(Messages.getString("GlobalOptionsTab.SelectiveText"));
 	private JCheckBox toolBarSmallIcons = new JCheckBox(Messages.getString("GlobalOptionsTab.SmallIcons"));
 	private JCheckBox useSystemIconTheme = new JCheckBox(Messages.getString("GlobalOptionsTab.UseSystemIconTheme"));
+	private JCheckBox stayRunning = new JCheckBox("Stay running on closing last window");
 	private JCheckBox wrapToolBar = new JCheckBox("Wrap tool bar icons");
+	private JCheckBox trayIcon = new JCheckBox("System tray icon");
 
 	public GlobalOptionsTab(SshToolsApplication application) {
 		super();
@@ -77,6 +78,10 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 		add(wrapToolBar, "span 2, gapleft 32");
 		stayRunning.setMnemonic('r');
 		add(stayRunning, "span 2, gapleft 32");
+		if (application.isTraySupported()) {
+			trayIcon.setMnemonic('t');
+			add(trayIcon, "span 2, gapleft 32");
+		}
 		reset();
 	}
 
@@ -94,6 +99,7 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 		PreferencesStore.putBoolean(SshToolsApplication.PREF_USE_SYSTEM_ICON_THEME, useSystemIconTheme.isSelected());
 		PreferencesStore.putBoolean(SshToolsApplication.PREF_TOOLBAR_WRAP, wrapToolBar.isSelected());
 		PreferencesStore.putBoolean(SshToolsApplication.PREF_STAY_RUNNING, stayRunning.isSelected());
+		PreferencesStore.putBoolean(SshToolsApplication.PREF_TRAY_ICON, trayIcon.isSelected());
 		if (changed) {
 			application.setLookAndFeel(laf);
 		}
@@ -144,7 +150,9 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 		toolBarSmallIcons.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_TOOLBAR_SMALL_ICONS, false));
 		useSystemIconTheme.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_USE_SYSTEM_ICON_THEME, true));
 		wrapToolBar.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_TOOLBAR_WRAP, false));
-		stayRunning.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_STAY_RUNNING, application.getStayRunningDefault()));
+		stayRunning.setSelected(
+				PreferencesStore.getBoolean(SshToolsApplication.PREF_STAY_RUNNING, application.getStayRunningDefault()));
+		trayIcon.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_TRAY_ICON, true));
 	}
 
 	@Override

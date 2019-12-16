@@ -357,4 +357,6 @@ public abstract class AbstractSshToolsApplicationClientPanel<S extends VirtualSe
 		}
 		return super.getDefaultChooserDir(pref);
 	}
+
+	public abstract void newConnection();
 }

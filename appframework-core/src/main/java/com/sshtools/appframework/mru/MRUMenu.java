@@ -29,6 +29,8 @@ import javax.swing.JMenuItem;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
+import com.sshtools.ui.swing.EmptyIcon;
+
 /**
  * An extension of a {@link JMenu} that is built using a model of Most Recently
  * Used items from a {@link MRUListModel}. When the model changes, the menu will
@@ -36,15 +38,27 @@ import javax.swing.event.ListDataListener;
  */
 public class MRUMenu extends JMenu implements ListDataListener, ActionListener {
 	private MRUListModel model;
+	private int max;
 
-	protected MRUMenu(Action action, MRUListModel model) {
+	public MRUMenu(Action action, MRUListModel model) {
+		this(action, model, Integer.MAX_VALUE);
+	}
+	
+	public MRUMenu(Action action, MRUListModel model, int max) {
 		super(action);
+		this.max = max;
 		init(model);
 	}
 
-	protected MRUMenu(String text, MRUListModel model) {
+	public MRUMenu(String text, MRUListModel model) {
+		this(text, model, Integer.MAX_VALUE);
+	}
+
+	public MRUMenu(String text, MRUListModel model, int max) {
 		super(text);
+		this.max = max;
 		init(model);
+		
 	}
 
 	@Override
@@ -113,11 +127,14 @@ public class MRUMenu extends JMenu implements ListDataListener, ActionListener {
 			File f = (File) model.getElementAt(i);
 			if (include(f)) {
 				JMenuItem m = new JMenuItem(getNameForFavourite(f));
-				m.setIcon(getIconForFavourite(f));
+				Icon icon = getIconForFavourite(f);
+				m.setIcon(icon == null ? new EmptyIcon(16, 16) : icon);
 				m.setActionCommand(f.getAbsolutePath());
 				m.setToolTipText(getToolTipForFavourite(f));
 				m.addActionListener(this);
 				add(m);
+				if(getMenuComponentCount() >= max)
+					break;
 			}
 		}
 		setEnabled(model.getSize() > 0);
