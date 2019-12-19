@@ -59,6 +59,7 @@ import javax.swing.UIManager;
 
 import com.sshtools.appframework.api.ui.AbstractSshToolsApplicationClientPanel;
 import com.sshtools.appframework.api.ui.SshToolsConnectionTab;
+import com.sshtools.appframework.ui.MessagePanel.Type;
 import com.sshtools.appframework.util.IOUtil;
 import com.sshtools.profile.ConnectionManager;
 import com.sshtools.profile.ProfileTransport;
@@ -571,6 +572,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 	private JPanel content;
 	private SshToolsConnectionTab<ProfileTransport<?>> singleTab;
 	private TabValidationHelper tabValidationHelper = new TabValidationHelper();
+	private MessagePanel messages;
 
 	/**
 	 * Creates a new SshToolsConnectionPanel object.
@@ -583,6 +585,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 		this.optionalTabs = optionalTabs;
 		mgr = ConnectionManager.getInstance();
 		content = new JPanel(new BorderLayout());
+		messages = new MessagePanel(Type.hidden);
 		if (showConnectionTabs) {
 			if (schemeSelector == null)
 				schemeSelector = new HoverSchemeSelectionPanel() {
@@ -734,6 +737,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 		tabValidationHelper.clearErrors();
 		content.invalidate();
 		content.removeAll();
+		
 		if (advanced) {
 			if (container != null)
 				container.removeAll();
@@ -756,6 +760,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 			container = new JPanel(new BorderLayout());
 			content.add(container, BorderLayout.CENTER);
 		}
+		content.add(messages, BorderLayout.NORTH);
 		content.validate();
 		content.repaint();
 		if (profile == null)
@@ -813,6 +818,13 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 		tabValidationHelper.clearErrors();
 		SchemeSettings selected = getSelectedSchemeSettings();
 		invalidate();
+		SshToolsSchemeHandler<ProfileTransport<?>> handler = selected == null ? null : sel.handler;
+		if(handler != null && handler.isExperimental()) {
+			messages.setType(Type.information);
+			messages.setMessage("This is an experimental feature. Please report bugs to support@jadaptive.com");
+		}
+		else
+			messages.setType(Type.hidden);
 		singleTab = null;
 		if (advanced) {
 			tabber.removeAllTabs();

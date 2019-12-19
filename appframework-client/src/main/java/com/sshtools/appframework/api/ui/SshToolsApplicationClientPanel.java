@@ -397,7 +397,7 @@ public abstract class SshToolsApplicationClientPanel extends SshToolsApplication
 
 	@Override
 	public void setContainerTitle(File file) {
-		String verString = GeneralUtil.getVersionString(application.getApplicationName(), getClass());
+		String verString = GeneralUtil.getArtifactVersion(application.getApplicationArtifactGroup(), application.getApplicationArtifactId());
 		if (container != null) {
 			container.setContainerTitle((file == null) ? verString : (verString + " [" + file.getName() + "]"));
 		}

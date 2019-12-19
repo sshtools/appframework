@@ -109,7 +109,7 @@ public class SshToolsApplicationInternalFrame extends JInternalFrame implements 
 		this.panel = panel;
 		this.application = application;
 		if (application != null) {
-			setTitle(GeneralUtil.getVersionString(application.getApplicationName(), getClass()));
+			setTitle(GeneralUtil.getArtifactVersion(application.getApplicationArtifactGroup(), application.getApplicationArtifactId()));
 		}
 		// Register the File menu
 		panel.registerActionMenu(new ActionMenu("File", Messages.getString("SshToolsApplicationInternalFrame.File"), 'f', 0));

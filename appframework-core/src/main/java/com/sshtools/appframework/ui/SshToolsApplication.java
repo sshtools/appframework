@@ -290,11 +290,15 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	public abstract boolean canUpgrade();
 
 	public void closeContainer(SshToolsApplicationContainer container) {
+		closeContainer(container, false);
+	}
+	
+	public void closeContainer(SshToolsApplicationContainer container, boolean exitIfLast) {
 		boolean canClose = container.canCloseContainer();
 		if (canClose) {
 			if (container.closeContainer()) {
 				containers.remove(container);
-				if (!PreferencesStore.getBoolean(PREF_STAY_RUNNING, false) && containers.size() == 0) {
+				if ((exitIfLast || !PreferencesStore.getBoolean(PREF_STAY_RUNNING, false)) && containers.size() == 0) {
 					exit();
 				}
 			}
@@ -457,6 +461,10 @@ public abstract class SshToolsApplication implements PluginHostContext {
 
 	public abstract String getApplicationName();
 
+	public abstract String getApplicationArtifactId();
+
+	public abstract String getApplicationArtifactGroup();
+
 	public abstract File getApplicationPreferencesDirectory();
 
 	public String getApplicationVendor() {
@@ -464,7 +472,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	}
 
 	public String getApplicationVersion() {
-		return GeneralUtil.getVersionString(getApplicationName(), getClass());
+		return GeneralUtil.getArtifactVersion(getApplicationArtifactGroup(), getApplicationArtifactId());
 	}
 
 	public boolean isTraySupported() {
@@ -534,7 +542,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 
 	@Override
 	public PluginVersion getPluginHostVersion() {
-		return new PluginVersion(GeneralUtil.getVersionString(getApplicationName(), getClass()));
+		return new PluginVersion(getApplicationVersion());
 	}
 
 	public PluginManager<?> getPluginManager() {
@@ -690,6 +698,9 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		log.debug("Plugin manager initialised, adding global preferences tabs");
 		postInitialization();
 		addAdditionalOptionsTab(new GlobalOptionsTab(this));
+		if("true".equals(System.getProperty("appframework.pluginManagement"))) {
+			addAdditionalOptionsTab(new PluginsTab<SshToolsApplication>(pluginManager, this));
+		}
 		Options options = new Options();
 		buildCLIOptions(options);
 		pluginManager.buildCLIOptions(options);

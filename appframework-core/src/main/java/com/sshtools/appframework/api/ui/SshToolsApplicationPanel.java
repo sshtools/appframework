@@ -506,7 +506,7 @@ public abstract class SshToolsApplicationPanel extends JPanel {
 	public void setContainerTitle(File file) {
 		String verString = "";
 		if (application != null) {
-			verString = GeneralUtil.getVersionString(application.getApplicationName(), application.getClass());
+			verString = GeneralUtil.getArtifactVersion(application.getApplicationArtifactGroup(), application.getApplicationArtifactId());
 		}
 		if (container != null) {
 			container.setContainerTitle((file == null) ? verString : (verString + " [" + file.getName() + "]"));

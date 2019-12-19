@@ -37,6 +37,7 @@ public abstract class SshToolsSchemeHandler<T extends ProfileTransport<?>> exten
 	private boolean internal;
 	private int weight;
 	private Icon largeIcon;
+	private boolean experimental;
 
 	/**
 	 * Construct a new SchemeHandler
@@ -54,6 +55,14 @@ public abstract class SshToolsSchemeHandler<T extends ProfileTransport<?>> exten
 		this.category = category;
 		this.icon = icon;
 		this.internal = internal;
+	}
+	
+	public boolean isExperimental() {
+		return experimental;
+	}
+
+	protected void setExperimental(boolean experimental) {
+		this.experimental = experimental;
 	}
 
 	public abstract List<SshToolsConnectionTab<T>> createTabs();
