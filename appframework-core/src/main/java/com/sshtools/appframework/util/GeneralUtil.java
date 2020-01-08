@@ -84,7 +84,7 @@ public class GeneralUtil {
 			InputStream is = GeneralUtil.class.getResourceAsStream("/META-INF/maven/" + groupId + "/" + artifactId + "/pom.properties");
 			if (is != null) {
 				p.load(is);
-				version = p.getProperty("version", "");
+				version = p.getProperty("version", null);
 			}
 		} catch (Exception e) {
 			// ignore
