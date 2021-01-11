@@ -30,6 +30,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -50,6 +51,8 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 import java.security.AccessControlException;
 import java.security.AccessController;
 import java.text.ParseException;
@@ -119,6 +122,28 @@ import plugspud.PluginVersion;
  * feel configuration and most recently used menus.
  */
 public abstract class SshToolsApplication implements PluginHostContext {
+	static {
+		/*
+		 * BUG: Not totally sure what is going on, but some Linux icon themes
+		 * can unknown URI errors. This supplies an empty SVG document when such
+		 * a URI is encountered, this seems to stop the error at lest.
+		 */
+		URL.setURLStreamHandlerFactory(protocol -> "svgsalamander".equals(protocol) ? new URLStreamHandler() {
+			protected URLConnection openConnection(URL url) throws IOException {
+				return new URLConnection(url) {
+					@Override
+					public InputStream getInputStream() throws IOException {
+						return new ByteArrayInputStream("<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>".getBytes());
+					}
+
+					@Override
+					public void connect() throws IOException {
+					}
+				};
+			}
+		} : null);
+	}
+	
 	public final static String PREF_LAF = "apps.laf";
 	public final static String PREF_SKIN = "apps.skin";
 	public final static String PREF_STAY_RUNNING = "apps.stayRunningOnLastWindowClose";
@@ -127,7 +152,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	public static final String PREF_TOOLBAR_WRAP = "apps.toolBar.wrap";
 	public final static String PREF_USE_SYSTEM_ICON_THEME = "apps.toolBar.useSystemIconTheme";
 	public final static String PREF_TRAY_ICON = "apps.toolBar.trayIcon";
-	final static Logger log = LoggerFactory.getLogger(IconStore.class);
+	final static Logger log = LoggerFactory.getLogger(SshToolsApplication.class);
 	private static List<SshToolsApplicationContainer> containers = new ArrayList<SshToolsApplicationContainer>();
 	private static SshToolsApplication instance;
 	// Private statics
@@ -242,15 +267,15 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		this.defaultContainerClass = defaultContainerClass;
 		// this.lic = new LicenseVerification(this);
 	}
-	
+
 	public void registerAction(AppAction action) {
 		appActions.add(action);
 	}
-	
+
 	public void deregisterAction(AppAction action) {
 		appActions.remove(action);
 	}
-	
+
 	public List<AppAction> getActions() {
 		return appActions;
 	}
@@ -292,7 +317,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	public void closeContainer(SshToolsApplicationContainer container) {
 		closeContainer(container, false);
 	}
-	
+
 	public void closeContainer(SshToolsApplicationContainer container, boolean exitIfLast) {
 		boolean canClose = container.canCloseContainer();
 		if (canClose) {
@@ -376,10 +401,10 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		tb.setSmallIcons(true);
 		tb.rebuildActionComponents();
 		trayMenu.setIcon(getApplicationSmallIcon());
-		if(systemTray.getMenu() != null) {
-			while(true) {
+		if (systemTray.getMenu() != null) {
+			while (true) {
 				Entry item = systemTray.getMenu().get(0);
-				if(item == null)
+				if (item == null)
 					break;
 				systemTray.getMenu().remove(item);
 			}
@@ -544,7 +569,8 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	public PluginVersion getPluginHostVersion() {
 		return new PluginVersion(getApplicationVersion());
 	}
-
+	
+	@Deprecated
 	public PluginManager<?> getPluginManager() {
 		return pluginManager;
 	}
@@ -623,10 +649,9 @@ public abstract class SshToolsApplication implements PluginHostContext {
 				String hostname = "localhost";
 				int clientReusePort = reusePort;
 				if (clientReusePort == -1) {
-					try(BufferedReader r = new BufferedReader(new FileReader(portReuseFile))) {
+					try (BufferedReader r = new BufferedReader(new FileReader(portReuseFile))) {
 						clientReusePort = Integer.parseInt(r.readLine());
-					}
-					catch(IOException ioe) {
+					} catch (IOException ioe) {
 						throw new SocketException("No " + portReuseFile);
 					}
 				}
@@ -634,10 +659,10 @@ public abstract class SshToolsApplication implements PluginHostContext {
 				s = new Socket(hostname, clientReusePort);
 				log.debug("Found reuse server on " + hostname + ":" + clientReusePort + ", sending arguments");
 				File cookieFile = new File(getApplicationPreferencesDirectory(), ".cookie");
-				if(!cookieFile.exists())
+				if (!cookieFile.exists())
 					throw new FileNotFoundException("No cookie.");
 				String cookie = null;
-				try(BufferedReader r = new BufferedReader(new FileReader(cookieFile))) {
+				try (BufferedReader r = new BufferedReader(new FileReader(cookieFile))) {
 					cookie = r.readLine();
 				}
 				s.setSoTimeout(5000);
@@ -692,13 +717,13 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		} catch (ParseException sshe) {
 			throw new SshToolsApplicationException("Failed to setup icons.", sshe);
 		}
+		setLookAndFeel(getDefaultLAF());
 		configureChooser();
 		loadMRU();
-		setLookAndFeel(getDefaultLAF());
 		log.debug("Plugin manager initialised, adding global preferences tabs");
 		postInitialization();
 		addAdditionalOptionsTab(new GlobalOptionsTab(this));
-		if("true".equals(System.getProperty("appframework.pluginManagement"))) {
+		if ("true".equals(System.getProperty("appframework.pluginManagement"))) {
 			addAdditionalOptionsTab(new PluginsTab<SshToolsApplication>(pluginManager, this));
 		}
 		Options options = new Options();
@@ -726,11 +751,12 @@ public abstract class SshToolsApplication implements PluginHostContext {
 					Socket s = null;
 					try {
 						reuseServerSocket = new ServerSocket(reusePort == -1 ? 0 : reusePort, 1);
-						try(PrintWriter fw = new PrintWriter(new FileWriter(portReuseFile), true)) {
+						try (PrintWriter fw = new PrintWriter(new FileWriter(portReuseFile), true)) {
 							fw.println(String.valueOf(reuseServerSocket.getLocalPort()));
 						}
 						UUID cookie = UUID.randomUUID();
-						try(PrintWriter fw = new PrintWriter(new FileWriter(new File(getApplicationPreferencesDirectory(), ".cookie")), true)) {
+						try (PrintWriter fw = new PrintWriter(
+								new FileWriter(new File(getApplicationPreferencesDirectory(), ".cookie")), true)) {
 							fw.println(cookie.toString());
 						}
 						while (true) {
@@ -738,7 +764,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 							BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
 							String line = null;
 							List<String> args = new ArrayList<String>();
-							if(!reader.readLine().equals(cookie.toString()))
+							if (!reader.readLine().equals(cookie.toString()))
 								throw new IOException("Invalid cookie.");
 							while ((line = reader.readLine()) != null && !line.equals("")) {
 								args.add(line);

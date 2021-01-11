@@ -36,26 +36,26 @@ import javax.swing.ImageIcon;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.vfs2.FileSystemException;
-import org.freedesktop.icons.DefaultIconService;
-import org.freedesktop.icons.IconService;
-import org.freedesktop.icons.LinuxIconService;
-import org.freedesktop.mime.AliasService;
-import org.freedesktop.mime.DefaultAliasService;
-import org.freedesktop.mime.DefaultGlobService;
-import org.freedesktop.mime.DefaultMIMEService;
-import org.freedesktop.mime.DefaultMagicService;
-import org.freedesktop.mime.GlobService;
-import org.freedesktop.mime.LinuxAliasService;
-import org.freedesktop.mime.LinuxGlobService;
-import org.freedesktop.mime.LinuxMIMEService;
-import org.freedesktop.mime.LinuxMagicService;
-import org.freedesktop.mime.MIMEEntry;
-import org.freedesktop.mime.MIMEService;
-import org.freedesktop.swing.SVGIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sshtools.appframework.util.IOUtil;
+import com.sshtools.jfreedesktop.icons.DefaultIconService;
+import com.sshtools.jfreedesktop.icons.IconService;
+import com.sshtools.jfreedesktop.icons.LinuxIconService;
+import com.sshtools.jfreedesktop.mime.AliasService;
+import com.sshtools.jfreedesktop.mime.DefaultAliasService;
+import com.sshtools.jfreedesktop.mime.DefaultGlobService;
+import com.sshtools.jfreedesktop.mime.DefaultMIMEService;
+import com.sshtools.jfreedesktop.mime.DefaultMagicService;
+import com.sshtools.jfreedesktop.mime.GlobService;
+import com.sshtools.jfreedesktop.mime.LinuxAliasService;
+import com.sshtools.jfreedesktop.mime.LinuxGlobService;
+import com.sshtools.jfreedesktop.mime.LinuxMIMEService;
+import com.sshtools.jfreedesktop.mime.LinuxMagicService;
+import com.sshtools.jfreedesktop.mime.MIMEEntry;
+import com.sshtools.jfreedesktop.mime.MIMEService;
+import com.sshtools.jfreedesktop.swing.SVGIcon;
 
 public class IconStore {
 	final static Logger LOG = LoggerFactory.getLogger(IconStore.class);

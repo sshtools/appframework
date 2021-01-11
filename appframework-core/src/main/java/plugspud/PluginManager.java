@@ -123,6 +123,11 @@ public class PluginManager<T extends PluginHostContext> {
 		public int getStatus() {
 			return status;
 		}
+
+		@Override
+		public String toString() {
+			return "PluginStatus [exception=" + exception + ", status=" + status + "]";
+		}
 	}
 
 	//
@@ -212,6 +217,8 @@ public class PluginManager<T extends PluginHostContext> {
 	 * Activate all plugins
 	 */
 	public void activate() {
+		context.log(PluginHostContext.LOG_INFORMATION,
+				"Activating plugin manager");
 		processedPlugins.clear();
 		buildDependencyTree();
 		/*
@@ -223,7 +230,7 @@ public class PluginManager<T extends PluginHostContext> {
 			String deps = w.properties.getProperty(PLUGIN_DEPENDENCIES);
 			if (StringUtils.isBlank(deps)) {
 				started++;
-				context.log(PluginHostContext.LOG_DEBUG,
+				context.log(PluginHostContext.LOG_INFORMATION,
 						"Activating root plugin " + w.getName() + " [" + w.plugin.getClass() + "]");
 				synchronized (lock) {
 					loadQueue.execute(() -> activatePlugin(w));
@@ -744,6 +751,8 @@ public class PluginManager<T extends PluginHostContext> {
 	 * Start all plugins
 	 */
 	public void start() {
+		context.log(PluginHostContext.LOG_INFORMATION,
+				"Starting plugin manager");
 		context.log(PluginHostContext.LOG_DEBUG, "Plugins :-");
 		int i = 1;
 		for (PluginWrapper<Plugin<T>> plugin : plugins) {
@@ -760,8 +769,10 @@ public class PluginManager<T extends PluginHostContext> {
 			String deps = w.properties.getProperty(PLUGIN_DEPENDENCIES);
 			if (StringUtils.isBlank(deps)) {
 				started++;
-				context.log(PluginHostContext.LOG_DEBUG, "Starting root plugin " + w.getName() + " [" + w.plugin.getClass() + "]");
-				if ("true".equals(w.properties.getProperty(PLUGIN_SYNC_LOAD))) {
+				boolean sync = "true".equals(w.properties.getProperty(PLUGIN_SYNC_LOAD));
+				context.log(PluginHostContext.LOG_DEBUG,
+						"Starting root plugin " + w.getName() + " [" + w.plugin.getClass() + ", sync=" + sync + "]");
+				if (sync) {
 					try {
 						loadQueue.submit(() -> startPlugin(w)).get();
 					} catch (Exception e) {
@@ -780,6 +791,8 @@ public class PluginManager<T extends PluginHostContext> {
 		}
 		try {
 			waitForPlugins();
+			context.log(PluginHostContext.LOG_INFORMATION,
+					"All plugins started.");
 		} catch (InterruptedException ie) {
 			context.log(PluginHostContext.LOG_ERROR, "Interrupted starting plugins", ie);
 		}
@@ -834,8 +847,8 @@ public class PluginManager<T extends PluginHostContext> {
 
 	private void activatePlugin(PluginWrapper<Plugin<T>> w) {
 		try {
-			context.log(PluginHostContext.LOG_DEBUG, String.format("Activating plugin %2d : %s [%s]", activatedPlugins.size() + 1,
-					w.getName(), w.plugin.getClass()));
+			context.log(PluginHostContext.LOG_DEBUG, String.format("Activating plugin %2d : %s [%s]",
+					activatedPlugins.size() + 1, w.getName(), w.plugin.getClass()));
 			w.plugin.activatePlugin(context);
 			context.log(PluginHostContext.LOG_DEBUG,
 					String.format("Activated plugin %2d : %s [%s]", activatedPlugins.size() + 1, w.getName(), w.plugin.getClass()));
@@ -864,6 +877,29 @@ public class PluginManager<T extends PluginHostContext> {
 			w.status.exception = pe;
 			w.status.status = STATUS_ERRORED;
 			context.log(PluginHostContext.LOG_ERROR, "Failed to activate plugin " + w.properties.getProperty(PLUGIN_NAME), pe);
+			/* Anything that depends on this plugin cannot be started now */
+			for (PluginWrapper<Plugin<T>> en : plugins) {
+				if (en != w) {
+					String pname = en.properties.getProperty(PLUGIN_NAME);
+					Set<PluginWrapper<Plugin<T>>> l = onLoad.get(pname);
+					if (l != null) {
+						for (PluginWrapper<Plugin<T>> p : new ArrayList<>(l)) {
+							if (!startedPlugins.contains(p)) {
+								if (areAllDepsReady(p)) {
+									removeFromPlan(p);
+									processedPlugins.add(p);
+									p.status.exception = pe;
+									p.status.status = STATUS_ERRORED;
+									context.log(PluginHostContext.LOG_ERROR,
+											"Failed to activate plugin " + p.properties.getProperty(PLUGIN_NAME) + " because "
+													+ p.properties.getProperty(PLUGIN_NAME) + " did not activate.",
+											pe);
+								}
+							}
+						}
+					}
+				}
+			}
 		} finally {
 			processedPlugins.add(w);
 		}
@@ -1024,10 +1060,35 @@ public class PluginManager<T extends PluginHostContext> {
 				}
 			}
 		} catch (Exception pe) {
-			processedPlugins.add(w);
-			w.status.exception = pe;
-			w.status.status = STATUS_ERRORED;
-			context.log(PluginHostContext.LOG_ERROR, "Failed to start plugin " + w.properties.getProperty(PLUGIN_NAME), pe);
+			synchronized (lock) {
+				processedPlugins.add(w);
+				w.status.exception = pe;
+				w.status.status = STATUS_ERRORED;
+				context.log(PluginHostContext.LOG_ERROR, "Failed to start plugin " + w.properties.getProperty(PLUGIN_NAME), pe);
+				/* Anything that depends on this plugin cannot be started now */
+				for (PluginWrapper<Plugin<T>> en : plugins) {
+					if (en != w) {
+						String pname = en.properties.getProperty(PLUGIN_NAME);
+						Set<PluginWrapper<Plugin<T>>> l = onLoad.get(pname);
+						if (l != null) {
+							for (PluginWrapper<Plugin<T>> p : new ArrayList<>(l)) {
+								if (!startedPlugins.contains(p)) {
+									if (areAllDepsReady(p)) {
+										removeFromPlan(p);
+										processedPlugins.add(p);
+										p.status.exception = pe;
+										p.status.status = STATUS_ERRORED;
+										context.log(PluginHostContext.LOG_ERROR,
+												"Failed to start plugin " + p.properties.getProperty(PLUGIN_NAME) + " because "
+														+ p.properties.getProperty(PLUGIN_NAME) + " did not start.",
+												pe);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 		} finally {
 			processedPlugins.add(w);
 		}
@@ -1039,10 +1100,8 @@ public class PluginManager<T extends PluginHostContext> {
 			pp.removeAll(processedPlugins);
 			// loadQueue.awaitTermination(50, TimeUnit.MILLISECONDS);
 			loadQueue.awaitTermination(50, TimeUnit.MILLISECONDS);
-			// System.out.println("------------------------");
-			// List<PluginWrapper<Plugin<T>>> nl = new ArrayList<>(plugins);
-			// nl.removeAll(processedPlugins);
-			// System.out.println(nl);
+			List<PluginWrapper<Plugin<T>>> nl = new ArrayList<>(plugins);
+			nl.removeAll(processedPlugins);
 		} while (processedPlugins.size() != plugins.size());
 		if (!onLoad.isEmpty()) {
 			StringBuilder b = new StringBuilder();

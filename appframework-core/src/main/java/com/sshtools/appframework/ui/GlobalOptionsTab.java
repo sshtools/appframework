@@ -30,6 +30,7 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import com.sshtools.ui.swing.ComboBoxRenderer;
+import com.sshtools.ui.swing.ShowUIDefaults;
 
 import net.miginfocom.swing.MigLayout;
 

@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
 
-import org.freedesktop.icons.DefaultIconService;
-import org.freedesktop.icons.IconTheme;
+import com.sshtools.jfreedesktop.icons.DefaultIconService;
+import com.sshtools.jfreedesktop.icons.IconTheme;
 
 public class NonFreedesktopIconService extends DefaultIconService {
 
