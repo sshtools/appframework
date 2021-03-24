@@ -36,6 +36,8 @@ public abstract class SshToolsSchemeHandler<T extends ProfileTransport<?>> exten
 	private Icon icon;
 	private boolean internal;
 	private int weight;
+	private Icon largeIcon;
+	private boolean experimental;
 
 	/**
 	 * Construct a new SchemeHandler
@@ -54,8 +56,16 @@ public abstract class SshToolsSchemeHandler<T extends ProfileTransport<?>> exten
 		this.icon = icon;
 		this.internal = internal;
 	}
+	
+	public boolean isExperimental() {
+		return experimental;
+	}
 
-	public abstract List<SshToolsConnectionTab<? extends ProfileTransport<?>>> createTabs();
+	protected void setExperimental(boolean experimental) {
+		this.experimental = experimental;
+	}
+
+	public abstract List<SshToolsConnectionTab<T>> createTabs();
 
 	/**
 	 * Get the category of scheme.
@@ -73,6 +83,20 @@ public abstract class SshToolsSchemeHandler<T extends ProfileTransport<?>> exten
 	 */
 	public Icon getIcon() {
 		return icon;
+	}
+
+
+	/**
+	 * Get the large icon for the scheme
+	 * 
+	 * @return large scheme icon
+	 */
+	public Icon getLargeIcon() {
+		return largeIcon;
+	}
+
+	protected void setLargeIcon(Icon largeIcon) {
+		this.largeIcon = largeIcon;
 	}
 
 	/**

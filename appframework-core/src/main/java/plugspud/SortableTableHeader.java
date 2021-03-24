@@ -25,6 +25,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.JTableHeader;
 
+@SuppressWarnings("serial")
 public class SortableTableHeader extends JTableHeader {
 	private ChangeEvent changeEvent;
 	private SortCriteria criteria;

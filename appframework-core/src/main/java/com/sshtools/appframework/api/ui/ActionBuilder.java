@@ -34,8 +34,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sshtools.appframework.ui.PreferencesStore;
 import com.sshtools.appframework.ui.SshToolsApplication;
@@ -63,7 +63,7 @@ public abstract class ActionBuilder extends ToolsBuilder<ActionToolBar> {
 		}
 	}
 
-	final static Log log = LogFactory.getLog(ActionBuilder.class);
+	final static Logger log = LoggerFactory.getLogger(ActionBuilder.class);
 	protected JPopupMenu contextMenu;
 	protected JMenuBar menuBar;
 

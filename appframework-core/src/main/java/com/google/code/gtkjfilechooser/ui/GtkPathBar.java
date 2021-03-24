@@ -44,10 +44,10 @@ import javax.swing.JToggleButton;
 
 import com.google.code.gtkjfilechooser.FreeDesktopUtil;
 import com.google.code.gtkjfilechooser.FreeDesktopUtil.WellKnownDir;
-import com.google.code.gtkjfilechooser.GTKConstants.ArrowType;
 import com.google.code.gtkjfilechooser.GtkArrow;
 import com.google.code.gtkjfilechooser.GtkStockIcon;
 import com.google.code.gtkjfilechooser.GtkStockIcon.Size;
+import com.sun.java.swing.plaf.gtk.GTKConstants.ArrowType;
 
 
 public class GtkPathBar extends JPanel {

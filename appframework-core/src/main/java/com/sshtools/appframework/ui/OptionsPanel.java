@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import com.sshtools.ui.Option;
 import com.sshtools.ui.OptionChooser;
 import com.sshtools.ui.swing.OptionDialog;
+import com.sshtools.ui.swing.ScrollingPanel.ButtonMode;
 import com.sshtools.ui.swing.SideBarTabber;
 
 /**
@@ -58,6 +59,7 @@ public class OptionsPanel extends JPanel {
 	public OptionsPanel(OptionsTab[] optionalTabs) {
 		super();
 		tabber = new SideBarTabber();
+		tabber.setButtonMode(ButtonMode.VISIBILITY_AND_SIZE);
 		tabber.setFixedToolBarWidth(72);
 		if (optionalTabs != null) {
 			for (int i = 0; i < optionalTabs.length; i++) {

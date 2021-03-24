@@ -29,7 +29,7 @@ import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import com.google.code.gtkjfilechooser.ui.GtkFileChooserUI;
 

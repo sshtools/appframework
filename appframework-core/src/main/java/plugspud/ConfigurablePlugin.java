@@ -66,7 +66,7 @@ import javax.swing.JComponent;
  * This interface should be implemented by plugins that wish to have the
  * configure option enabled in the plugin manager UI.
  */
-public interface ConfigurablePlugin extends Plugin {
+public interface ConfigurablePlugin<T extends PluginHostContext> extends Plugin<T> {
 	/**
 	 * Invoked by Plugspud when it the user clicks on the 'Configure' button.
 	 *

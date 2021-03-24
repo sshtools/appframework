@@ -20,7 +20,13 @@ package com.google.code.gtkjfilechooser.ui;
 import static com.google.code.gtkjfilechooser.I18N.i18n;
 import static com.google.code.gtkjfilechooser.ui.ContextMenu.ACTION_ADD_BOOKMARK;
 import static com.google.code.gtkjfilechooser.ui.ContextMenu.SHOW_SIZE_COLUMN_CHANGED_PROPERTY;
-import static javax.swing.JFileChooser.*;
+import static javax.swing.JFileChooser.APPROVE_SELECTION;
+import static javax.swing.JFileChooser.DIRECTORIES_ONLY;
+import static javax.swing.JFileChooser.DIRECTORY_CHANGED_PROPERTY;
+import static javax.swing.JFileChooser.FILES_ONLY;
+import static javax.swing.JFileChooser.FILE_HIDING_CHANGED_PROPERTY;
+import static javax.swing.JFileChooser.SELECTED_FILES_CHANGED_PROPERTY;
+import static javax.swing.JFileChooser.SELECTED_FILE_CHANGED_PROPERTY;
 import static javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION;
 import static javax.swing.ListSelectionModel.SINGLE_SELECTION;
 

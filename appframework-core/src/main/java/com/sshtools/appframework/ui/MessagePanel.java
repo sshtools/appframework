@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -42,9 +41,11 @@ import javax.swing.SwingUtilities;
 import com.sshtools.ui.swing.AppAction;
 import com.sshtools.ui.swing.GradientPanel;
 import com.sshtools.ui.swing.ResourceIcon;
+import com.sshtools.ui.swing.WrappingLabel;
 
 import net.miginfocom.swing.MigLayout;
 
+@SuppressWarnings("serial")
 public class MessagePanel extends GradientPanel {
 
 	public interface Listener {
@@ -125,7 +126,7 @@ public class MessagePanel extends GradientPanel {
 				@Override
 				public void run() {
 					progressBar.setValue(update.progress);
-					message.setText(update.text);
+					doSetMessage(update.text);
 				}
 			});
 			if (updates.size() == 0) {
@@ -174,7 +175,7 @@ public class MessagePanel extends GradientPanel {
 	private JLabel icon;
 	private List<Listener> listeners = new ArrayList<Listener>();
 	private Object lock = new Object();
-	private JLabel message;
+	private WrappingLabel message;
 	private int progress;
 	private JProgressBar progressBar;
 
@@ -182,23 +183,26 @@ public class MessagePanel extends GradientPanel {
 
 	private boolean stopUpdateThread;
 
-	private BlockingQueue updates;
+	private BlockingQueue<Update> updates;
 
 	private Thread updateThread;
 
-	private BlockingQueue waitQueue;
+	private BlockingQueue<Boolean> waitQueue;
+	private Type type;
+	private AppAction[] actions;
 
 	public MessagePanel() {
 		this(Type.hidden);
 	}
 
 	public MessagePanel(Type type) {
-		super(new MigLayout("wrap 3, hidemode 3", "[][fill,grow][]", "push[][]push"));
-		setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+		super(new MigLayout("wrap 3, hidemode 3", "[][fill,grow][]", "[][]"));
 		setOpaque(true);
 
 		add(icon = new JLabel());
-		add(message = new JLabel());
+		add(message = new WrappingLabel(), "growx");
+		message.setBackground(Color.green);
+		message.setOpaque(true);
 		actionsPanel = new JPanel(new MigLayout());
 		actionsPanel.setOpaque(false);
 		add(actionsPanel);
@@ -208,8 +212,8 @@ public class MessagePanel extends GradientPanel {
 		progressPanel.add(progressBar, BorderLayout.CENTER);
 		add(progressPanel, "span 2, wrap");
 
-		updates = new ArrayBlockingQueue(100, true);
-		waitQueue = new ArrayBlockingQueue(3, true);
+		updates = new ArrayBlockingQueue<>(100, true);
+		waitQueue = new ArrayBlockingQueue<>(3, true);
 
 	}
 
@@ -219,7 +223,7 @@ public class MessagePanel extends GradientPanel {
 
 	public void error(String mesg, Throwable exception) {
 		setType(Type.error);
-		StringBuffer buf = new StringBuffer("<html>");
+		StringBuffer buf = new StringBuffer();
 		if (mesg != null) {
 			buf.append(mesg.replace("\n", " ") + ""); //$NON-NLS-1$
 		}
@@ -241,7 +245,6 @@ public class MessagePanel extends GradientPanel {
 		}
 
 		// appendException(exception, 0, buf, false);/
-		buf.append("</html>");
 		setMessage(buf.toString());
 	}
 
@@ -252,10 +255,15 @@ public class MessagePanel extends GradientPanel {
 	public void removeListener(Listener listener) {
 		listeners.remove(listener);
 	}
+	
+	public AppAction[] getActions() {
+		return actions;
+	}
 
 	public void setActions(AppAction[] actions) {
 		invalidate();
 		actionsPanel.removeAll();
+		this.actions = actions;
 		if (actions != null) {
 			for (AppAction action : actions) {
 				JButton button = new JButton(action);
@@ -274,7 +282,11 @@ public class MessagePanel extends GradientPanel {
 
 	public void setMessage(String message) {
 		clearUpdates();
-		this.message.setText(message);
+		doSetMessage(message);
+	}
+
+	public String getMessage() {
+		return message.getText();
 	}
 
 	public void setProgressMaximum(int max) {
@@ -287,6 +299,7 @@ public class MessagePanel extends GradientPanel {
 	}
 
 	public void setType(Type type) {
+		this.type = type;
 		invalidate();
 		setBackground(type.background);
 		setForeground(type.foreground);
@@ -301,6 +314,10 @@ public class MessagePanel extends GradientPanel {
 		} else {
 			setActions(null);
 		}
+	}
+
+	public Type getType() {
+		return type;
 	}
 
 	public void uncancel() {
@@ -325,7 +342,14 @@ public class MessagePanel extends GradientPanel {
 		}
 	}
 
-	private void clearUpdates() {
+	protected void doSetMessage(String message) {
+		getParent().invalidate();
+		this.message.setText(message);
+		getParent().validate();
+		getParent().repaint();
+	}
+
+	protected void clearUpdates() {
 		if (updateThread != null) {
 			try {
 				stopUpdateThread = true;

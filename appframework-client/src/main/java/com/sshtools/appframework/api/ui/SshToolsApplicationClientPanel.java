@@ -33,6 +33,9 @@ import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sshtools.appframework.api.SshToolsApplicationException;
 import com.sshtools.appframework.ui.Messages;
 import com.sshtools.appframework.ui.PreferencesStore;
@@ -51,6 +54,9 @@ import com.sshtools.ui.swing.AppAction;
 import com.sshtools.ui.swing.OptionDialog;
 
 public abstract class SshToolsApplicationClientPanel extends SshToolsApplicationPanel {
+
+	final static Logger log = LoggerFactory.getLogger(SshToolsApplicationContainer.class);
+	
 	class ConnectionFileFilter extends javax.swing.filechooser.FileFilter {
 		@Override
 		public boolean accept(File f) {
@@ -226,7 +232,7 @@ public abstract class SshToolsApplicationClientPanel extends SshToolsApplication
 	 * 
 	 * @return tabs
 	 */
-	public abstract List<SshToolsConnectionTab<ProfileTransport<?>>> getAdditionalConnectionTabs();
+	public abstract List<SshToolsConnectionTab<? extends ProfileTransport<?>>> getAdditionalConnectionTabs();
 
 	public abstract File getCurrentFile();
 
@@ -305,6 +311,7 @@ public abstract class SshToolsApplicationClientPanel extends SshToolsApplication
 					((SshToolsApplicationClientPanel) c.getApplicationPanel()).open(f);
 					return;
 				} catch (SshToolsApplicationException stae) {
+
 					log.error("Failed to open profile.", stae);
 				}
 			} else {
@@ -390,7 +397,7 @@ public abstract class SshToolsApplicationClientPanel extends SshToolsApplication
 
 	@Override
 	public void setContainerTitle(File file) {
-		String verString = GeneralUtil.getVersionString(application.getApplicationName(), getClass());
+		String verString = GeneralUtil.getArtifactVersion(application.getApplicationArtifactGroup(), application.getApplicationArtifactId());
 		if (container != null) {
 			container.setContainerTitle((file == null) ? verString : (verString + " [" + file.getName() + "]"));
 		}

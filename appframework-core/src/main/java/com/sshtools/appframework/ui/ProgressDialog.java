@@ -182,10 +182,10 @@ public class ProgressDialog extends JDialog {
 
     public void packHeight() {
         Container parent = getParent();
-        if (parent != null && parent.getPeer() == null) {
+        if (parent != null && parent.isDisplayable()) {
             parent.addNotify();
         }
-        if (getPeer() == null) {
+        if (!isDisplayable()) {
             addNotify();
         }
         setSize(new Dimension(getSize().width, getPreferredSize().height));

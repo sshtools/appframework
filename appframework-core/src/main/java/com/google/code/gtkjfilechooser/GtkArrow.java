@@ -25,7 +25,7 @@ import java.lang.reflect.Method;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 
-import com.google.code.gtkjfilechooser.GTKConstants.ArrowType;
+import com.sun.java.swing.plaf.gtk.GTKConstants.ArrowType;
 
 /**
  * @author Costantino Cerbo

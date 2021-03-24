@@ -26,7 +26,7 @@ import com.sshtools.ui.swing.AppAction;
 import com.sshtools.ui.swing.EmptyIcon;
 import com.sshtools.ui.swing.MenuAction;
 
-public abstract class MRUAction extends AppAction implements MenuAction {
+public class MRUAction extends AppAction implements MenuAction {
 
 	public MRUAction(MRUListModel model) {
 		putValue(Action.NAME, Messages.getString("MRUAction.Name"));

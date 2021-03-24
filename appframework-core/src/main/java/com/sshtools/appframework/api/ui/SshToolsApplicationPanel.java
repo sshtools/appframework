@@ -42,8 +42,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sshtools.appframework.actions.AbstractOptionsAction;
 import com.sshtools.appframework.api.SshToolsApplicationException;
@@ -102,6 +102,7 @@ public abstract class SshToolsApplicationPanel extends JPanel {
 		public Collection<AppAction> listActions() {
 			List<AppAction> allActions = new ArrayList<AppAction>();
 			allActions.addAll(actions);
+			allActions.addAll(getApplication().getActions());
 			Collection<AppAction> additionalActions = getAdditionalActions();
 			if (additionalActions != null) {
 				allActions.addAll(additionalActions);
@@ -116,7 +117,7 @@ public abstract class SshToolsApplicationPanel extends JPanel {
 	}
 	public final static boolean DETAILED_ERROR_DIALOGS = "true"
 			.equalsIgnoreCase(GeneralUtil.checkAndGetProperty("sshtoos.appframework.detailedErrorDialogs", "true"));
-	final static Log log = LogFactory.getLog(SshToolsApplicationPanel.class);
+	final static Logger log = LoggerFactory.getLogger(SshToolsApplicationPanel.class);
 	private static final long serialVersionUID = 1L;
 	public static Option doShowMessage(final Component parent, final String title, final String mesg, final Throwable exception,
 			final int messageType, Option[] options, Option defaultOption) {
@@ -505,7 +506,7 @@ public abstract class SshToolsApplicationPanel extends JPanel {
 	public void setContainerTitle(File file) {
 		String verString = "";
 		if (application != null) {
-			verString = GeneralUtil.getVersionString(application.getApplicationName(), application.getClass());
+			verString = GeneralUtil.getArtifactVersion(application.getApplicationArtifactGroup(), application.getApplicationArtifactId());
 		}
 		if (container != null) {
 			container.setContainerTitle((file == null) ? verString : (verString + " [" + file.getName() + "]"));

@@ -41,7 +41,7 @@ public abstract class AbstractVirtualSessionManager<S extends VirtualSession<? e
 	 * Constructor.
 	 */
 	public AbstractVirtualSessionManager() {
-		terminalListener = new VirtualSessionAdapter() {
+		terminalListener = new VirtualSessionListener() {
 			@SuppressWarnings("unchecked")
 			@Override
 			public void titleChanged(VirtualSession<?, ?> session, final String title) {

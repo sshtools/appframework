@@ -30,17 +30,17 @@ import plugspud.PluginHostContext;
 import plugspud.PluginManager;
 import plugspud.PluginManagerPane;
 
-public class PluginsTab extends JPanel implements OptionsTab {
+public class PluginsTab<C extends PluginHostContext> extends JPanel implements OptionsTab {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	private Icon icon, largeIcon;
-	private PluginManagerPane plugins;
+	private PluginManagerPane<C> plugins;
 
-	public PluginsTab(PluginManager manager, PluginHostContext context) {
+	public PluginsTab(PluginManager<C> manager, PluginHostContext context) {
 		setLayout(new BorderLayout());
-		plugins = new PluginManagerPane(manager, context, true);
+		plugins = new PluginManagerPane<>(manager, context, true);
 		IconStore iconStore = IconStore.getInstance();
 		icon = iconStore.getIcon("system-installer", 24);
 		largeIcon = iconStore.getIcon("system-installer", 32);

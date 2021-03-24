@@ -18,7 +18,8 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<properties>
@@ -30,24 +31,18 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.sshtools</groupId>
 	<artifactId>appframework</artifactId>
-	<version>3.0.1</version>
+	<version>3.1.0</version>
 	<name>Appframework</name>
 	<description>Parent project for appframework, consisting of a Swing framework for applications and
 	modules that are used across a number of projects.</description>
 	<url>http://www.sshtools.com</url>
 	<packaging>pom</packaging>
 
-	<!-- <distributionManagement>
-		<snapshotRepository>
-			<id>ossrh-sshtools</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>ossrh-sshtools</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement> -->
-	
+	<!-- <distributionManagement> <snapshotRepository> <id>ossrh-sshtools</id> 
+		<url>https://oss.sonatype.org/content/repositories/snapshots</url> </snapshotRepository> 
+		<repository> <id>ossrh-sshtools</id> <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url> 
+		</repository> </distributionManagement> -->
+
 	<distributionManagement>
 		<snapshotRepository>
 			<uniqueVersion>true</uniqueVersion>
@@ -96,12 +91,24 @@
 	<dependencies>
 		<!-- Tests -->
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.7</version>
-			<scope>test</scope>
+		    <groupId>junit</groupId>
+		    <artifactId>junit</artifactId>
+		    <version>4.13.2</version>
+		    <scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>opensource-snapshots</id>
+			<name>SSHTOOLS Opensource Snapshots</name>
+			<url>http://artifactory.javassh.com/opensource-snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots/>
+		</repository>
+	</repositories>
 
 	<profiles>
 		<profile>
@@ -151,7 +158,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.0.1</version>
+					<version>2.9.1</version>
 					<executions>
 						<execution>
 							<id>javadoc-jar</id>
@@ -166,7 +173,7 @@
 									<!-- include ONLY dependencies I control -->
 									<dependencySourceInclude>com.sshtools:*</dependencySourceInclude>
 								</dependencySourceIncludes>
-								<doclint>none</doclint>
+								<additionalparam>-Xdoclint:none</additionalparam>
 							</configuration>
 						</execution>
 					</executions>
@@ -204,9 +211,7 @@
 					<executions>
 						<execution>
 							<goals>
-								<goal>check</goal>
 								<goal>format</goal>
-								<goal>remove</goal>
 							</goals>
 						</execution>
 					</executions>

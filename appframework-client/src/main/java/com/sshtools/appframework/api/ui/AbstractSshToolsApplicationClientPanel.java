@@ -27,6 +27,7 @@ import java.io.OutputStream;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
@@ -36,6 +37,7 @@ import com.sshtools.appframework.ui.PreferencesStore;
 import com.sshtools.appframework.ui.SshToolsApplication;
 import com.sshtools.appframework.ui.SshToolsClientApplication;
 import com.sshtools.appframework.ui.SshToolsConnectionPanel;
+import com.sshtools.appframework.ui.TabValidationHelper;
 import com.sshtools.appframework.util.ApplicationException;
 import com.sshtools.appframework.util.IOUtil;
 import com.sshtools.profile.AuthenticationException;
@@ -47,6 +49,7 @@ import com.sshtools.ui.OptionCallback;
 import com.sshtools.ui.OptionChooser;
 import com.sshtools.ui.swing.AppAction;
 import com.sshtools.ui.swing.OptionDialog;
+import com.sshtools.ui.swing.TabValidationException;
 import com.sshtools.virtualsession.VirtualSession;
 
 @SuppressWarnings("serial")
@@ -63,6 +66,7 @@ public abstract class AbstractSshToolsApplicationClientPanel<S extends VirtualSe
 			return Messages.getString("AbstractSshToolsApplicationClientPanel.ConnectionFiles") + " (*.xml)";
 		}
 	}
+
 	class MenuItemActionComparator implements Comparator<AppAction> {
 		@Override
 		public int compare(AppAction o1, AppAction o2) {
@@ -71,6 +75,7 @@ public abstract class AbstractSshToolsApplicationClientPanel<S extends VirtualSe
 					.compareTo((Integer) o2.getValue(AppAction.MENU_ITEM_WEIGHT)) : i;
 		}
 	}
+
 	class ToolBarActionComparator implements Comparator<AppAction> {
 		@Override
 		public int compare(AppAction o1, AppAction o2) {
@@ -80,13 +85,11 @@ public abstract class AbstractSshToolsApplicationClientPanel<S extends VirtualSe
 					: i;
 		}
 	}
+
 	//
 	public final static int BANNER_TIMEOUT = 2000;
-
 	public final static String PREF_CONNECTION_FILE_DIRECTORY = "sshapps.connectionFile.directory";
-
 	public final static String PREF_DEFAULT_SCHEME_NAME = "sshapps.defaultSchemeName";
-
 	protected javax.swing.filechooser.FileFilter connectionFileFilter = new ConnectionFileFilter();
 
 	public AbstractSshToolsApplicationClientPanel() {
@@ -109,9 +112,9 @@ public abstract class AbstractSshToolsApplicationClientPanel<S extends VirtualSe
 	 * Connect.
 	 * 
 	 * @throws ApplicationException on application error
-	 * @throws ProfileException  on profile error
-	 * @throws IOException  on I/O error
-	 * @throws AuthenticationException  on authentication error
+	 * @throws ProfileException on profile error
+	 * @throws IOException on I/O error
+	 * @throws AuthenticationException on authentication error
 	 */
 	public void connect() throws ApplicationException, ProfileException, IOException, AuthenticationException {
 		if (getCurrentProfile() == null) {
@@ -164,30 +167,40 @@ public abstract class AbstractSshToolsApplicationClientPanel<S extends VirtualSe
 	 * @param profile
 	 * @return applied
 	 */
-	public boolean editConnection(ResourceProfile<? extends ProfileTransport<?>> profile) {
+	public boolean editConnection(ResourceProfile<ProfileTransport<?>> profile) {
 		final SshToolsConnectionPanel panel = new SshToolsConnectionPanel(allowConnectionSettingsEditing(),
 				getAdditionalConnectionTabs());
+		TabValidationHelper validationHelper = new TabValidationHelper();
 		panel.setConnectionProfile(profile);
 		OptionCallback callback = new OptionCallback() {
 			@Override
 			public boolean canClose(OptionChooser dialog, Option option) {
-				if (Option.CHOICE_OK.equals(option)) {
-					return panel.validateTabs();
-				}
-				return true;
+				if (Option.CHOICE_SAVE.equals(option)) {
+					try {
+						if (panel.validateTabs()) {
+							panel.applyTabs();
+							return true;
+						}
+					} catch (TabValidationException tve) {
+						validationHelper.handleTabValidationException(tve);
+					}
+				} else
+					return true;
+				return false;
 			}
 		};
+		JCheckBox advanced = null;
+		panel.setAdvanced(true);
 		Option opt = OptionDialog.prompt(AbstractSshToolsApplicationClientPanel.this, OptionChooser.UNCATEGORISED,
-				Messages.getString("AbstractSshToolsApplicationClientPanel.ConnSettings"), panel, Option.CHOICES_OK_CANCEL,
-				Option.CHOICE_CANCEL, callback, null, SshToolsConnectionPanel.DEFAULT_SIZE);
-		if (Option.CHOICE_OK.equals(opt)) {
-			panel.applyTabs();
+				Messages.getString("AbstractSshToolsApplicationClientPanel.ConnSettings"), panel, Option.CHOICES_SAVE_CANCEL,
+				Option.CHOICE_SAVE, callback, advanced, null, true, SshToolsConnectionPanel.DEFAULT_SIZE);
+		if (Option.CHOICE_SAVE.equals(opt)) {
 			return true;
 		}
 		return false;
 	}
 
-	public abstract List<SshToolsConnectionTab<ProfileTransport<?>>> getAdditionalConnectionTabs();
+	public abstract List<SshToolsConnectionTab<? extends ProfileTransport<?>>> getAdditionalConnectionTabs();
 
 	public abstract File getCurrentFile();
 
@@ -208,8 +221,7 @@ public abstract class AbstractSshToolsApplicationClientPanel<S extends VirtualSe
 	 */
 	public abstract boolean isConnected();
 
-	public ResourceProfile<? extends ProfileTransport<?>> newConnectionProfile(
-			ResourceProfile<? extends ProfileTransport<?>> profile) {
+	public ResourceProfile<ProfileTransport<?>> newConnectionProfile(ResourceProfile<ProfileTransport<?>> profile) {
 		return SshToolsConnectionPanel.showConnectionDialog(AbstractSshToolsApplicationClientPanel.this, profile,
 				getAdditionalConnectionTabs());
 	}
@@ -231,7 +243,6 @@ public abstract class AbstractSshToolsApplicationClientPanel<S extends VirtualSe
 	}
 
 	public void open(File f) {
-		log.info("Opening file " + f);
 		// Make sure a connection is not already open
 		if (isConnected()) {
 			Option optNew = new Option(Messages.getString("AbstractSshToolsApplicationClientPanel.New"),
@@ -346,4 +357,6 @@ public abstract class AbstractSshToolsApplicationClientPanel<S extends VirtualSe
 		}
 		return super.getDefaultChooserDir(pref);
 	}
+
+	public abstract void newConnection();
 }

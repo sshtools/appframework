@@ -50,8 +50,8 @@ public abstract class AbstractConnectionPropertiesAction extends AbstractAppActi
 		putValue(MENU_NAME, "Edit");
 		putValue(MENU_ITEM_GROUP, new Integer(80));
 		putValue(MENU_ITEM_WEIGHT, new Integer(10));
-		putValue(ON_TOOLBAR, new Boolean(true));
-		putValue(TOOLBAR_GROUP, new Integer(85));
-		putValue(TOOLBAR_WEIGHT, new Integer(60));
+//		putValue(ON_TOOLBAR, new Boolean(true));
+//		putValue(TOOLBAR_GROUP, new Integer(85));
+//		putValue(TOOLBAR_WEIGHT, new Integer(60));
 	}
 }

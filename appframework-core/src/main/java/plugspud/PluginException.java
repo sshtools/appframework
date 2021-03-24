@@ -66,6 +66,8 @@ import java.lang.reflect.Method;
  * Exception thrown by plugin
  */
 public class PluginException extends Exception {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Construct a new execption
 	 *

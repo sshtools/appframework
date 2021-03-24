@@ -66,6 +66,9 @@ public class ExitAction extends AbstractAppAction {
 
 	@Override
 	public void actionPerformed(ActionEvent evt) {
-		application.closeContainer(container);
+		if(container == null)
+			application.exit();
+		else
+			application.closeContainer(container);
 	}
 }

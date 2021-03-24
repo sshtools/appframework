@@ -34,9 +34,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import com.google.code.gtkjfilechooser.FileSearch;
+import com.google.code.gtkjfilechooser.FileSearch.FileSearchHandler;
 import com.google.code.gtkjfilechooser.GtkFileChooserSettings;
 import com.google.code.gtkjfilechooser.GtkStockIcon;
-import com.google.code.gtkjfilechooser.FileSearch.FileSearchHandler;
 import com.google.code.gtkjfilechooser.GtkStockIcon.Size;
 
 
