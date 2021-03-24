@@ -19,6 +19,8 @@
 
 package com.sshtools.appframework.actions;
 
+import org.kordamp.ikonli.bootstrapicons.BootstrapIcons;
+
 import com.sshtools.ui.swing.AppAction;
 
 /**
@@ -34,19 +36,19 @@ public abstract class AbstractHelpContentsAction extends AbstractAppAction {
 	 */
 	public AbstractHelpContentsAction() {
 		putValue(NAME, Messages.getString("AbstractHelpContentsAction.Name"));
-		putValue(SMALL_ICON, loadIcon("help-browser", 16));
-		putValue(MEDIUM_ICON, loadIcon("help-browser", 24));
+		putValue(SMALL_ICON, loadIcon(BootstrapIcons.LIFE_PRESERVER, 16));
+		putValue(MEDIUM_ICON, loadIcon(BootstrapIcons.LIFE_PRESERVER, 24));
 		putValue(SHORT_DESCRIPTION, Messages.getString("AbstractHelpContentsAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION, Messages.getString("AbstractHelpContentsAction.LongDesc"));
-		putValue(MNEMONIC_KEY, new Integer('o'));
+		putValue(MNEMONIC_KEY, Integer.valueOf('o'));
 		putValue(ACTION_COMMAND_KEY, "contents-command");
-		putValue(ON_MENUBAR, new Boolean(true));
+		putValue(ON_MENUBAR, Boolean.valueOf(true));
 		putValue(MENU_NAME, "Help");
-		putValue(MENU_ITEM_GROUP, new Integer(90));
-		putValue(MENU_ITEM_WEIGHT, new Integer(50));
-		putValue(ON_TOOLBAR, new Boolean(true));
-		putValue(TOOLBAR_GROUP, new Integer(90));
-		putValue(TOOLBAR_WEIGHT, new Integer(0));
+		putValue(MENU_ITEM_GROUP, Integer.valueOf(90));
+		putValue(MENU_ITEM_WEIGHT, Integer.valueOf(50));
+		putValue(ON_TOOLBAR, Boolean.valueOf(true));
+		putValue(TOOLBAR_GROUP, Integer.valueOf(90));
+		putValue(TOOLBAR_WEIGHT, Integer.valueOf(0));
 
 	}
 

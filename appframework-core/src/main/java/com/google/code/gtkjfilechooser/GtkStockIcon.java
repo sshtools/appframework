@@ -241,7 +241,7 @@ public class GtkStockIcon {
 	 * This is a very naive implementation that follows this rules:
 	 * 
 	 * 1. If the file is a script (first three bytes are !#/), we return the
-	 * icon "text-x-script"
+	 * icon BootstrapIcons.APP
 	 * 
 	 * 2. If the file is executable, we return application-x-executable.png
 	 * 

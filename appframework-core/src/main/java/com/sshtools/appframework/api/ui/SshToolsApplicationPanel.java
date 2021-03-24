@@ -479,7 +479,7 @@ public abstract class SshToolsApplicationPanel extends JPanel {
 	 * @param visible visible
 	 */
 	public void setActionVisible(String name, boolean visible) {
-		actionsVisible.put(name, new Boolean(visible));
+		actionsVisible.put(name, Boolean.valueOf(visible));
 	}
 
 	/**

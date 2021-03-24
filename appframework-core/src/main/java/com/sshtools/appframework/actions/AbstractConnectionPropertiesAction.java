@@ -23,6 +23,8 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import org.kordamp.ikonli.bootstrapicons.BootstrapIcons;
+
 import com.sshtools.ui.swing.AppAction;
 
 /**
@@ -40,18 +42,18 @@ public abstract class AbstractConnectionPropertiesAction extends AbstractAppActi
 	 */
 	public AbstractConnectionPropertiesAction() {
 		putValue(NAME, VAL_NAME);
-		putValue(SMALL_ICON, loadIcon("document-properties", 16));
-		putValue(MEDIUM_ICON, loadIcon("document-properties", 24));
+		putValue(SMALL_ICON, loadIcon(BootstrapIcons.GEAR, 16));
+		putValue(MEDIUM_ICON, loadIcon(BootstrapIcons.GEAR, 24));
 		putValue(SHORT_DESCRIPTION, Messages.getString("AbstractConnectionPropertiesAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION, Messages.getString("AbstractConnectionPropertiesAction.LongDesc"));
-		putValue(MNEMONIC_KEY, new Integer('t'));
+		putValue(MNEMONIC_KEY, Integer.valueOf('t'));
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.ALT_MASK | InputEvent.CTRL_MASK));
-		putValue(ON_MENUBAR, new Boolean(true));
+		putValue(ON_MENUBAR, Boolean.valueOf(true));
 		putValue(MENU_NAME, "Edit");
-		putValue(MENU_ITEM_GROUP, new Integer(80));
-		putValue(MENU_ITEM_WEIGHT, new Integer(10));
-//		putValue(ON_TOOLBAR, new Boolean(true));
-//		putValue(TOOLBAR_GROUP, new Integer(85));
-//		putValue(TOOLBAR_WEIGHT, new Integer(60));
+		putValue(MENU_ITEM_GROUP, Integer.valueOf(80));
+		putValue(MENU_ITEM_WEIGHT, Integer.valueOf(10));
+//		putValue(ON_TOOLBAR, Boolean.valueOf(true));
+//		putValue(TOOLBAR_GROUP, Integer.valueOf(85));
+//		putValue(TOOLBAR_WEIGHT, Integer.valueOf(60));
 	}
 }

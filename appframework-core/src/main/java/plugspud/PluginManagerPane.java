@@ -124,6 +124,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
+import org.kordamp.ikonli.bootstrapicons.BootstrapIcons;
+
 import com.sshtools.appframework.ui.IconStore;
 
 /**
@@ -141,7 +143,7 @@ public class PluginManagerPane<C extends PluginHostContext> extends JPanel imple
 			putValue(Action.SMALL_ICON, CONFIGURE_ICON);
 			putValue(Action.SHORT_DESCRIPTION, "Configure plugin");
 			putValue(Action.LONG_DESCRIPTION, "Configure the selected plugin");
-			putValue(Action.MNEMONIC_KEY, new Integer('c'));
+			putValue(Action.MNEMONIC_KEY, Integer.valueOf('c'));
 		}
 
 		@Override
@@ -161,7 +163,7 @@ public class PluginManagerPane<C extends PluginHostContext> extends JPanel imple
 			putValue(Action.SMALL_ICON, INSTALL_ICON);
 			putValue(Action.SHORT_DESCRIPTION, "Install plugin");
 			putValue(Action.LONG_DESCRIPTION, "Install the selected plugin");
-			putValue(Action.MNEMONIC_KEY, new Integer('i'));
+			putValue(Action.MNEMONIC_KEY, Integer.valueOf('i'));
 		}
 
 		@Override
@@ -422,7 +424,7 @@ public class PluginManagerPane<C extends PluginHostContext> extends JPanel imple
 			putValue(Action.SMALL_ICON, REMOVE_ICON);
 			putValue(Action.SHORT_DESCRIPTION, "Remove plugin");
 			putValue(Action.LONG_DESCRIPTION, "Remove the selected plugin");
-			putValue(Action.MNEMONIC_KEY, new Integer('r'));
+			putValue(Action.MNEMONIC_KEY, Integer.valueOf('r'));
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, InputEvent.CTRL_MASK));
 		}
 
@@ -515,7 +517,7 @@ public class PluginManagerPane<C extends PluginHostContext> extends JPanel imple
 			putValue(Action.SMALL_ICON, UPDATE_ICON);
 			putValue(Action.SHORT_DESCRIPTION, "Update plugin");
 			putValue(Action.LONG_DESCRIPTION, "Update the selected plugin");
-			putValue(Action.MNEMONIC_KEY, new Integer('u'));
+			putValue(Action.MNEMONIC_KEY, Integer.valueOf('u'));
 		}
 
 		@Override
@@ -544,25 +546,25 @@ public class PluginManagerPane<C extends PluginHostContext> extends JPanel imple
 		}
 	}
 
-	public final static Icon ACTIVE_ICON = IconStore.getInstance().getIcon("network-receive", 32);
-	public final static Icon CONFIGURE_ICON = IconStore.getInstance().getIcon("preferences-system", 24);
-	public final static Icon ERROR_ICON = IconStore.getInstance().getIcon("dialog-error", 32);
+	public final static Icon ACTIVE_ICON = IconStore.getInstance().getIcon(BootstrapIcons.CHEVRON_LEFT, 32);
+	public final static Icon CONFIGURE_ICON = IconStore.getInstance().getIcon(BootstrapIcons.GEAR_WIDE_CONNECTED, 24);
+	public final static Icon ERROR_ICON = IconStore.getInstance().getIcon(BootstrapIcons.DASH_CIRCLE_FILL, 32);
 	// Icons
-	public final static Icon IDLE_ICON = IconStore.getInstance().getIcon("system-software-update", 32);
-	public final static Icon INFORMATION_ICON = IconStore.getInstance().getIcon("dialog-information", 32);
-	public final static Icon INSTALL_ICON = IconStore.getInstance().getIcon("list-add", 24);
+	public final static Icon IDLE_ICON = IconStore.getInstance().getIcon(BootstrapIcons.ARROW_UP_SQUARE, 32);
+	public final static Icon INFORMATION_ICON = IconStore.getInstance().getIcon(BootstrapIcons.INFO_CIRCLE_FILL, 32);
+	public final static Icon INSTALL_ICON = IconStore.getInstance().getIcon(BootstrapIcons.JOURNAL_PLUS, 24);
 	// Plugin states
 	public final static int INSTALLED = 0;
-	public final static Icon LARGE_INSTALL_ICON = IconStore.getInstance().getIcon("list-add", 48);
-	public final static Icon LARGE_REMOVE_ICON = IconStore.getInstance().getIcon("user-trash", 48);
-	public final static Icon LARGE_UPDATE_ICON = IconStore.getInstance().getIcon("view-refresh", 48);
+	public final static Icon LARGE_INSTALL_ICON = IconStore.getInstance().getIcon(BootstrapIcons.JOURNAL_PLUS, 48);
+	public final static Icon LARGE_REMOVE_ICON = IconStore.getInstance().getIcon(BootstrapIcons.TRASH, 48);
+	public final static Icon LARGE_UPDATE_ICON = IconStore.getInstance().getIcon(BootstrapIcons.ARROW_CLOCKWISE, 48);
 	public final static int NOT_INSTALLED = 2;
 	public final static String PLUGIN_DOWNLOAD_LOCATION = "downloadLocation";
 	public final static String PROGRESS_DIALOG_GEOMETRY = "pluginManager.progressDialog.geometry";
-	public final static Icon REMOVE_ICON = IconStore.getInstance().getIcon("user-trash", 24);
+	public final static Icon REMOVE_ICON = IconStore.getInstance().getIcon(BootstrapIcons.TRASH, 24);
 	public final static String TABLE_GEOMETRY = "pluginManager.table.geometry";
 	public final static int UPDATE_AVAILABLE = 1;
-	public final static Icon UPDATE_ICON = IconStore.getInstance().getIcon("view-refresh", 24);
+	public final static Icon UPDATE_ICON = IconStore.getInstance().getIcon(BootstrapIcons.ARROW_CLOCKWISE, 24);
 
 	public static void centerComponent(Component c) {
 		Rectangle r = c.getGraphicsConfiguration().getBounds();

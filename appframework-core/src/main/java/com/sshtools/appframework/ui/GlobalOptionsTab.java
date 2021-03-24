@@ -29,8 +29,9 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
+import org.kordamp.ikonli.bootstrapicons.BootstrapIcons;
+
 import com.sshtools.ui.swing.ComboBoxRenderer;
-import com.sshtools.ui.swing.ShowUIDefaults;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -41,9 +42,9 @@ import net.miginfocom.swing.MigLayout;
  * @author $Author: brett $
  */
 public class GlobalOptionsTab extends JPanel implements OptionsTab {
-	private final static Icon GLOBAL_ICON = IconStore.getInstance().getIcon("applications-internet", 24);
+	private final static Icon GLOBAL_ICON = IconStore.getInstance().getIcon(BootstrapIcons.GLOBE, 24);
 	// Private statics
-	private final static Icon LARGE_GLOBAL_ICON = IconStore.getInstance().getIcon("applications-internet", 32);
+	private final static Icon LARGE_GLOBAL_ICON = IconStore.getInstance().getIcon(BootstrapIcons.GLOBE, 32);
 	private static final long serialVersionUID = 1L;
 	private SshToolsApplication application;
 	// Private instance variables.

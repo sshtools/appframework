@@ -26,6 +26,8 @@ import java.awt.Component;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 
+import org.kordamp.ikonli.bootstrapicons.BootstrapIcons;
+
 import plugspud.PluginHostContext;
 import plugspud.PluginManager;
 import plugspud.PluginManagerPane;
@@ -42,8 +44,8 @@ public class PluginsTab<C extends PluginHostContext> extends JPanel implements O
 		setLayout(new BorderLayout());
 		plugins = new PluginManagerPane<>(manager, context, true);
 		IconStore iconStore = IconStore.getInstance();
-		icon = iconStore.getIcon("system-installer", 24);
-		largeIcon = iconStore.getIcon("system-installer", 32);
+		icon = iconStore.getIcon(BootstrapIcons.ARROW_DOWN_SQUARE, 24);
+		largeIcon = iconStore.getIcon(BootstrapIcons.ARROW_DOWN_SQUARE, 32);
 		add(plugins, BorderLayout.CENTER);
 	}
 

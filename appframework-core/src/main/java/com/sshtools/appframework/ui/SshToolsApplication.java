@@ -87,6 +87,7 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
+import org.kordamp.ikonli.bootstrapicons.BootstrapIcons;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -177,11 +178,11 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		addLAF(new UIManager.LookAndFeelInfo("Cross Platform", UIManager.getCrossPlatformLookAndFeelClassName()));
 		OptionDialog.setIconLoader((option) -> {
 			if (option.equals(com.sshtools.ui.Option.CHOICE_CANCEL))
-				return IconStore.getInstance().getIcon("process-stop", 24);
+				return IconStore.getInstance().getIcon(BootstrapIcons.STOP, 24);
 			else if (option.equals(com.sshtools.ui.Option.CHOICE_CLOSE))
-				return IconStore.getInstance().getIcon("window-close", 24);
+				return IconStore.getInstance().getIcon(BootstrapIcons.CIRCLE_FILL, 24);
 			else if (option.equals(com.sshtools.ui.Option.CHOICE_SAVE))
-				return IconStore.getInstance().getIcon("document-save", 24);
+				return IconStore.getInstance().getIcon(BootstrapIcons.FILE_WORD_FILL, 24);
 			else
 				return new EmptyIcon(1, 24);
 		});

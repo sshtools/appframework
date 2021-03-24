@@ -51,15 +51,13 @@ public class NewWindowAction extends AbstractAppAction {
 	public NewWindowAction(SshToolsApplication application) {
 		this.application = application;
 		putValue(NAME, Messages.getString("NewWindowAction.Name"));
-		putValue(SMALL_ICON, loadIcon("window-new", 16));
-		putValue(MEDIUM_ICON, loadIcon("window-new", 24));
 		putValue(SHORT_DESCRIPTION, Messages.getString("NewWindowAction.ShortDesc"));
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.ALT_MASK | InputEvent.SHIFT_MASK));
 		putValue(LONG_DESCRIPTION, Messages.getString("NewWindowAction.LongDesc"));
-		putValue(MNEMONIC_KEY, new Integer('w'));
+		putValue(MNEMONIC_KEY, Integer.valueOf('w'));
 		putValue(MENU_NAME, "File");
-		putValue(MENU_ITEM_GROUP, new Integer(0));
-		putValue(MENU_ITEM_WEIGHT, new Integer(5));
+		putValue(MENU_ITEM_GROUP, Integer.valueOf(0));
+		putValue(MENU_ITEM_WEIGHT, Integer.valueOf(5));
 
 	}
 

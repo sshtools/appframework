@@ -152,7 +152,7 @@ public class PluginManager<T extends PluginHostContext> {
 
 		@Override
 		public int compareTo(PluginWrapper<P> arg0) {
-			return new Integer(getOrder()).compareTo(new Integer((arg0).getOrder()));
+			return Integer.valueOf(getOrder()).compareTo(Integer.valueOf((arg0).getOrder()));
 		}
 
 		public String getName() {
