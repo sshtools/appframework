@@ -40,12 +40,12 @@ public abstract class AbstractPrintPreviewAction extends AppAction {
 				Messages.getString("AbstractPrintPreviewAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION,
 				Messages.getString("AbstractPrintPreviewAction.LongDesc"));
-		putValue(MNEMONIC_KEY, Integer.valueOf('r'));
-		putValue(ON_MENUBAR, Boolean.valueOf(true));
+		putValue(MNEMONIC_KEY, new Integer('r'));
+		putValue(ON_MENUBAR, new Boolean(true));
 		putValue(MENU_NAME, "File");
-		putValue(MENU_ITEM_GROUP, Integer.valueOf(80));
-		putValue(MENU_ITEM_WEIGHT, Integer.valueOf(10));
-		putValue(ON_TOOLBAR, Boolean.valueOf(false));
+		putValue(MENU_ITEM_GROUP, new Integer(80));
+		putValue(MENU_ITEM_WEIGHT, new Integer(10));
+		putValue(ON_TOOLBAR, new Boolean(false));
 		setEmptyIcons();
 	}
 

@@ -45,14 +45,14 @@ public class AboutAction extends AbstractAppAction {
 				+ " " + application.getApplicationName());
 		putValue(LONG_DESCRIPTION, Messages.getString("AboutAction.LongDesc")
 				+ " " + application.getApplicationName());
-		putValue(MNEMONIC_KEY, Integer.valueOf('a'));
-		putValue(ON_MENUBAR, Boolean.valueOf(true));
+		putValue(MNEMONIC_KEY, new Integer('a'));
+		putValue(ON_MENUBAR, new Boolean(true));
 		putValue(MENU_NAME, "Help");
-		putValue(MENU_ITEM_GROUP, Integer.valueOf(90));
-		putValue(MENU_ITEM_WEIGHT, Integer.valueOf(90));
-		putValue(ON_TOOLBAR, Boolean.valueOf(false));
-		putValue(TOOLBAR_GROUP, Integer.valueOf(90));
-		putValue(TOOLBAR_WEIGHT, Integer.valueOf(10));
+		putValue(MENU_ITEM_GROUP, new Integer(90));
+		putValue(MENU_ITEM_WEIGHT, new Integer(90));
+		putValue(ON_TOOLBAR, new Boolean(false));
+		putValue(TOOLBAR_GROUP, new Integer(90));
+		putValue(TOOLBAR_WEIGHT, new Integer(10));
 		setEmptyIcons();
 	}
 

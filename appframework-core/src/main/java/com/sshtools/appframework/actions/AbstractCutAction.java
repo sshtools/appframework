@@ -24,8 +24,6 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
-import org.kordamp.ikonli.bootstrapicons.BootstrapIcons;
-
 import com.sshtools.ui.swing.AppAction;
 
 /**
@@ -43,27 +41,27 @@ public abstract class AbstractCutAction extends AbstractAppAction {
 
 	public AbstractCutAction(boolean onToolBar) {
 		putValue(NAME, Messages.getString("AbstractCutAction.Name"));
-		putValue(SMALL_ICON, loadIcon(BootstrapIcons.SCISSORS, 16));
-		putValue(MEDIUM_ICON, loadIcon(BootstrapIcons.SCISSORS, 24));
+		putValue(SMALL_ICON, loadIcon("edit-cut", 16));
+		putValue(MEDIUM_ICON, loadIcon("edit-cut", 24));
 		putValue(ACCELERATOR_KEY,
 				KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_MASK));
 		putValue(SHORT_DESCRIPTION,
 				Messages.getString("AbstractCutAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION,
 				Messages.getString("AbstractCutAction.LongDesc"));
-		putValue(MNEMONIC_KEY, Integer.valueOf('t'));
-		putValue(ON_MENUBAR, Boolean.valueOf(true));
+		putValue(MNEMONIC_KEY, new Integer('t'));
+		putValue(ON_MENUBAR, new Boolean(true));
 		putValue(MENU_NAME, "Edit");
-		putValue(MENU_ITEM_GROUP, Integer.valueOf(10));
-		putValue(MENU_ITEM_WEIGHT, Integer.valueOf(10));
+		putValue(MENU_ITEM_GROUP, new Integer(10));
+		putValue(MENU_ITEM_WEIGHT, new Integer(10));
 		if (onToolBar) {
-			putValue(ON_TOOLBAR, Boolean.valueOf(true));
-			putValue(TOOLBAR_GROUP, Integer.valueOf(10));
-			putValue(TOOLBAR_WEIGHT, Integer.valueOf(10));
+			putValue(ON_TOOLBAR, new Boolean(true));
+			putValue(TOOLBAR_GROUP, new Integer(10));
+			putValue(TOOLBAR_WEIGHT, new Integer(10));
 		}
-		putValue(ON_CONTEXT_MENU, Boolean.valueOf(true));
-		putValue(CONTEXT_MENU_GROUP, Integer.valueOf(10));
-		putValue(CONTEXT_MENU_WEIGHT, Integer.valueOf(10));
+		putValue(ON_CONTEXT_MENU, new Boolean(true));
+		putValue(CONTEXT_MENU_GROUP, new Integer(10));
+		putValue(CONTEXT_MENU_WEIGHT, new Integer(10));
 
 	}
 

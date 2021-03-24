@@ -23,8 +23,6 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
-import org.kordamp.ikonli.bootstrapicons.BootstrapIcons;
-
 import com.sshtools.appframework.ui.IconStore;
 import com.sshtools.ui.swing.AppAction;
 
@@ -45,19 +43,19 @@ public abstract class AbstractRefreshAction extends AppAction {
 	public AbstractRefreshAction() {
 		putValue(NAME, Messages.getString("AbstractRefreshAction.Name"));
 		IconStore iconStore = IconStore.getInstance();
-		putValue(SMALL_ICON, iconStore.getIcon(BootstrapIcons.ARROW_CLOCKWISE, 16));
-		putValue(MEDIUM_ICON, iconStore.getIcon(BootstrapIcons.ARROW_CLOCKWISE, 24));
+		putValue(SMALL_ICON, iconStore.getIcon("view-refresh", 16));
+		putValue(MEDIUM_ICON, iconStore.getIcon("view-refresh", 24));
 		putValue(SHORT_DESCRIPTION, Messages.getString("AbstractRefreshAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION, Messages.getString("AbstractRefreshAction.LongDesc"));
-		putValue(MNEMONIC_KEY, Integer.valueOf('r'));
+		putValue(MNEMONIC_KEY, new Integer('r'));
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
 		putValue(MENU_NAME, "View");
-		putValue(ON_MENUBAR, Boolean.valueOf(true));
-		putValue(MENU_ITEM_GROUP, Integer.valueOf(20));
-		putValue(MENU_ITEM_WEIGHT, Integer.valueOf(10));
-		putValue(ON_TOOLBAR, Boolean.valueOf(true));
-		putValue(TOOLBAR_GROUP, Integer.valueOf(80));
-		putValue(TOOLBAR_WEIGHT, Integer.valueOf(20));
+		putValue(ON_MENUBAR, new Boolean(true));
+		putValue(MENU_ITEM_GROUP, new Integer(20));
+		putValue(MENU_ITEM_WEIGHT, new Integer(10));
+		putValue(ON_TOOLBAR, new Boolean(true));
+		putValue(TOOLBAR_GROUP, new Integer(80));
+		putValue(TOOLBAR_WEIGHT, new Integer(20));
 
 	}
 

@@ -40,13 +40,13 @@ public abstract class AbstractSaveAsAction extends AbstractAppAction {
 		putValue(NAME, Messages.getString("AbstractSaveAsAction.Name"));
 		putValue(SHORT_DESCRIPTION, Messages.getString("AbstractSaveAsAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION, Messages.getString("AbstractSaveAsAction.LongDesc"));
-		putValue(MNEMONIC_KEY, Integer.valueOf('v'));
+		putValue(MNEMONIC_KEY, new Integer('v'));
 		putValue(ACTION_COMMAND_KEY, "saveas-command");
 		putValue(MENU_NAME, "File");
-		putValue(MENU_ITEM_GROUP, Integer.valueOf(0));
-		putValue(ON_MENUBAR, Boolean.valueOf(true));
-		putValue(MENU_ITEM_WEIGHT, Integer.valueOf(51));
-		putValue(ON_TOOLBAR, Boolean.valueOf(false));
+		putValue(MENU_ITEM_GROUP, new Integer(0));
+		putValue(ON_MENUBAR, new Boolean(true));
+		putValue(MENU_ITEM_WEIGHT, new Integer(51));
+		putValue(ON_TOOLBAR, new Boolean(false));
 		setEmptyIcons();
 
 	}

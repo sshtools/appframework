@@ -55,7 +55,7 @@ public class NumericTextField extends XTextField {
 					currentVal = new Short((short) 0);
 				} else {
 					if (min.getClass().equals(Integer.class)) {
-						currentVal = Integer.valueOf(0);
+						currentVal = new Integer(0);
 					} else {
 						if (min.getClass().equals(Long.class)) {
 							currentVal = new Long(0L);
@@ -158,7 +158,7 @@ public class NumericTextField extends XTextField {
 					return new Short(d.shortValue());
 				}
 				if (min.getClass().equals(Integer.class)) {
-					return Integer.valueOf(d.intValue());
+					return new Integer(d.intValue());
 				}
 				if (min.getClass().equals(Long.class)) {
 					return new Long(d.longValue());

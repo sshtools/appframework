@@ -438,7 +438,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	 */
 	public boolean getApplicationPropertyBoolean(String name, boolean defaultValue) {
 		try {
-			return Boolean.valueOf(getApplicationProperty(name, String.valueOf(defaultValue))).booleanValue();
+			return new Boolean(getApplicationProperty(name, String.valueOf(defaultValue))).booleanValue();
 		} catch (NumberFormatException nfe) {
 			return defaultValue;
 		}

@@ -50,16 +50,16 @@ public class ToggleMenuBarAction extends AppAction {
 		putValue(SMALL_ICON, new EmptyIcon(16, 16));
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.ALT_MASK | InputEvent.CTRL_MASK));
 		putValue(LONG_DESCRIPTION, Messages.getString("ToggleMenuBarAction.LongDesc"));
-		putValue(MNEMONIC_KEY, Integer.valueOf('m'));
-		putValue(ON_MENUBAR, Boolean.valueOf(true));
+		putValue(MNEMONIC_KEY, new Integer('m'));
+		putValue(ON_MENUBAR, new Boolean(true));
 		putValue(MENU_NAME, "View");
-		putValue(MENU_ITEM_GROUP, Integer.valueOf(90));
-		putValue(MENU_ITEM_WEIGHT, Integer.valueOf(5));
+		putValue(MENU_ITEM_GROUP, new Integer(90));
+		putValue(MENU_ITEM_WEIGHT, new Integer(5));
 		putValue(IS_TOGGLE_BUTTON, Boolean.TRUE);
 		putValue(IS_SELECTED, Boolean.valueOf(panel.isMenuBarVisible()));
 		putValue(AppAction.ON_CONTEXT_MENU, Boolean.TRUE);
-		putValue(AppAction.CONTEXT_MENU_GROUP, Integer.valueOf(95));
-		putValue(AppAction.CONTEXT_MENU_WEIGHT, Integer.valueOf(0));
+		putValue(AppAction.CONTEXT_MENU_GROUP, new Integer(95));
+		putValue(AppAction.CONTEXT_MENU_WEIGHT, new Integer(0));
 	}
 
 	/*

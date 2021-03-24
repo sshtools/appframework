@@ -51,7 +51,7 @@ public abstract class WizardPanel extends JPanel {
 			putValue(Action.NAME, Messages.getString("WizardPanel.Back"));
 			putValue(Action.SHORT_DESCRIPTION, Messages.getString("WizardPanel.BackDesc"));
 			putValue(Action.LONG_DESCRIPTION, Messages.getString("WizardPanel.BackDesc"));
-			putValue(Action.MNEMONIC_KEY, Integer.valueOf('b'));
+			putValue(Action.MNEMONIC_KEY, new Integer('b'));
 			putValue(Action.ACTION_COMMAND_KEY, "back");
 		}
 
@@ -68,7 +68,7 @@ public abstract class WizardPanel extends JPanel {
 			putValue(Action.NAME, Messages.getString("WizardPanel.Cancel"));
 			putValue(Action.SHORT_DESCRIPTION, Messages.getString("WizardPanel.CancelDesc"));
 			putValue(Action.LONG_DESCRIPTION, Messages.getString("WizardPanel.CancelDesc"));
-			putValue(Action.MNEMONIC_KEY, Integer.valueOf('c'));
+			putValue(Action.MNEMONIC_KEY, new Integer('c'));
 			putValue(Action.ACTION_COMMAND_KEY, "cancel");
 		}
 
@@ -85,7 +85,7 @@ public abstract class WizardPanel extends JPanel {
 			putValue(Action.NAME, Messages.getString("WizardPanel.Next"));
 			putValue(Action.SHORT_DESCRIPTION, Messages.getString("WizardPanel.NextDesc"));
 			putValue(Action.LONG_DESCRIPTION, Messages.getString("WizardPanel.NextDesc"));
-			putValue(Action.MNEMONIC_KEY, Integer.valueOf('n'));
+			putValue(Action.MNEMONIC_KEY, new Integer('n'));
 			putValue(Action.ACTION_COMMAND_KEY, "next");
 		}
 

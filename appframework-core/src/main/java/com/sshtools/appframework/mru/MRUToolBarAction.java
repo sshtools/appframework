@@ -62,14 +62,14 @@ public abstract class MRUToolBarAction extends AppAction implements
 				Messages.getString("MRUToolBarAction.ShortDesc"));
 		putValue(Action.LONG_DESCRIPTION,
 				Messages.getString("MRUToolBarAction.LongDesc"));
-		putValue(Action.MNEMONIC_KEY, Integer.valueOf('r'));
+		putValue(Action.MNEMONIC_KEY, new Integer('r'));
 		putValue(Action.ACTION_COMMAND_KEY, "recent");
 		putValue(AppAction.ON_MENUBAR, Boolean.FALSE);
 		putValue(AppAction.TEXT_ON_TOOLBAR, Boolean.FALSE);
 		if (onToolBar) {
 			putValue(AppAction.ON_TOOLBAR, Boolean.TRUE);
-			putValue(AppAction.TOOLBAR_GROUP, Integer.valueOf(0));
-			putValue(AppAction.TOOLBAR_WEIGHT, Integer.valueOf(6));
+			putValue(AppAction.TOOLBAR_GROUP, new Integer(0));
+			putValue(AppAction.TOOLBAR_WEIGHT, new Integer(6));
 		}
 		menu = createPopupMenu(model);
 		menu.addPopupMenuListener(new PopupMenuListener() {

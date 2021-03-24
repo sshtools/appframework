@@ -37,7 +37,7 @@ public class ActionMenu implements Comparable<ActionMenu> {
 
 	@Override
 	public int compareTo(ActionMenu o) {
-		int i = Integer.valueOf(weight).compareTo(Integer.valueOf(o.weight));
+		int i = new Integer(weight).compareTo(new Integer(o.weight));
 		return (i == 0) ? displayName.compareTo(o.displayName) : i;
 	}
 

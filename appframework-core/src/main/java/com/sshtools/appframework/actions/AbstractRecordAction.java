@@ -24,8 +24,6 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
-import org.kordamp.ikonli.bootstrapicons.BootstrapIcons;
-
 import com.sshtools.ui.swing.AppAction;
 
 /**
@@ -43,19 +41,19 @@ public class AbstractRecordAction extends AbstractAppAction {
 	 */
 	public AbstractRecordAction() {
 		putValue(NAME, Messages.getString("AbstractRecordAction.Name"));
-		putValue(SMALL_ICON, loadIcon(BootstrapIcons.RECORD, 16));
-		putValue(MEDIUM_ICON, loadIcon(BootstrapIcons.RECORD, 24));
+		putValue(SMALL_ICON, loadIcon("media-record", 16));
+		putValue(MEDIUM_ICON, loadIcon("media-record", 24));
 		putValue(SHORT_DESCRIPTION, Messages.getString("AbstractRecordAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION, Messages.getString("AbstractRecordAction.LongDesc"));
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_MASK));
-		putValue(MNEMONIC_KEY, Integer.valueOf('r'));
-		putValue(ON_MENUBAR, Boolean.valueOf(true));
+		putValue(MNEMONIC_KEY, new Integer('r'));
+		putValue(ON_MENUBAR, new Boolean(true));
 		putValue(MENU_NAME, "Record");
-		putValue(MENU_ITEM_GROUP, Integer.valueOf(60));
-		putValue(MENU_ITEM_WEIGHT, Integer.valueOf(20));
-		putValue(ON_TOOLBAR, Boolean.valueOf(false));
-		putValue(TOOLBAR_GROUP, Integer.valueOf(60));
-		putValue(TOOLBAR_WEIGHT, Integer.valueOf(20));
+		putValue(MENU_ITEM_GROUP, new Integer(60));
+		putValue(MENU_ITEM_WEIGHT, new Integer(20));
+		putValue(ON_TOOLBAR, new Boolean(false));
+		putValue(TOOLBAR_GROUP, new Integer(60));
+		putValue(TOOLBAR_WEIGHT, new Integer(20));
 
 	}
 

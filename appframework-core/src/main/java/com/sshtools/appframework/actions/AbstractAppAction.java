@@ -19,8 +19,6 @@ package com.sshtools.appframework.actions;
 
 import javax.swing.Icon;
 
-import org.kordamp.ikonli.Ikon;
-
 import com.sshtools.appframework.ui.IconStore;
 import com.sshtools.ui.swing.AppAction;
 
@@ -40,12 +38,8 @@ public class AbstractAppAction extends AppAction {
 		super(name, smallIcon);
 	}
 
-	protected Icon loadIconX(String name, int size) {
+	protected Icon loadIcon(String name, int size) {
 		return store.getIcon(name, size);
-	}
-
-	protected Icon loadIcon(Ikon ikon, int size) {
-		return store.getIcon(ikon, size);
 	}
 
 }

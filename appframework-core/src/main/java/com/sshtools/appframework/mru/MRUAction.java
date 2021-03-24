@@ -33,12 +33,12 @@ public class MRUAction extends AppAction implements MenuAction {
 		putValue(Action.SMALL_ICON, new EmptyIcon(16, 16));
 		putValue(Action.SHORT_DESCRIPTION, Messages.getString("MRUAction.ShortDesc"));
 		putValue(Action.LONG_DESCRIPTION, Messages.getString("MRUAction.LongDesc"));
-		putValue(Action.MNEMONIC_KEY, Integer.valueOf('r'));
+		putValue(Action.MNEMONIC_KEY, new Integer('r'));
 //		putValue(Action.ACTION_COMMAND_KEY, "recent");
 		putValue(MENU_NAME, "File");
-		putValue(MENU_ITEM_GROUP, Integer.valueOf(5));
-		putValue(ON_MENUBAR, Boolean.valueOf(true));
-		putValue(MENU_ITEM_WEIGHT, Integer.valueOf(10));
+		putValue(MENU_ITEM_GROUP, new Integer(5));
+		putValue(ON_MENUBAR, new Boolean(true));
+		putValue(MENU_ITEM_WEIGHT, new Integer(10));
 		MRUMenu menu = createMenu(model);
 //		menu.addActionListener(this);
 		putValue(MenuAction.MENU, menu);

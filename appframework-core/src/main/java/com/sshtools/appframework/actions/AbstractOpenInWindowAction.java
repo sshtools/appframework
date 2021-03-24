@@ -41,10 +41,10 @@ public abstract class AbstractOpenInWindowAction extends AbstractAppAction {
 		putValue(SHORT_DESCRIPTION, Messages.getString("AbstractOpenInWindowAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION, Messages.getString("AbstractOpenInWindowAction.LongDesc"));
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.ALT_MASK + InputEvent.CTRL_MASK));
-		putValue(MNEMONIC_KEY, Integer.valueOf('w'));
-		putValue(ON_MENUBAR, Boolean.valueOf(true));
+		putValue(MNEMONIC_KEY, new Integer('w'));
+		putValue(ON_MENUBAR, new Boolean(true));
 		putValue(MENU_NAME, "File");
-		putValue(MENU_ITEM_GROUP, Integer.valueOf(0));
-		putValue(MENU_ITEM_WEIGHT, Integer.valueOf(7));
+		putValue(MENU_ITEM_GROUP, new Integer(0));
+		putValue(MENU_ITEM_WEIGHT, new Integer(7));
 	}
 }

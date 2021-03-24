@@ -34,7 +34,6 @@ import javax.swing.Timer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
-import org.kordamp.ikonli.bootstrapicons.BootstrapIcons;
 
 import com.maverick.di.InfoBubble;
 import com.sshtools.ui.swing.TabValidationException;
@@ -61,7 +60,7 @@ public class TabValidationHelper {
 		} else
 			throw tve;
 		errorParent.setLayout(null);
-		errorLabel = new JLabel(IconStore.getInstance().getIcon(BootstrapIcons.STOP, 12));
+		errorLabel = new JLabel(IconStore.getInstance().getIcon("process-stop", 12));
 		errorParent.add(errorLabel);
 		Point p = getRelativePosition(component, root);
 		errorLabel.setBounds(p.x - 14, p.y + ((component.getHeight() - 12) / 2), 12, 12);
@@ -86,7 +85,7 @@ public class TabValidationHelper {
 		if (bubble != null)
 			hideBubble();
 		bubble = new InfoBubble("<html>" + StringEscapeUtils.escapeHtml4(getMessageText(tve)) + "</html>",
-				IconStore.getInstance().getIcon(BootstrapIcons.STOP, 48), tve.getComponent(), new Point(0, 0));
+				IconStore.getInstance().getIcon("process-stop", 48), tve.getComponent(), new Point(0, 0));
 		bubble.show();
 		bubbleTimer = new Timer(10000, new ActionListener() {
 			@Override

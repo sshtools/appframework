@@ -57,8 +57,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 
-import org.kordamp.ikonli.bootstrapicons.BootstrapIcons;
-
 import com.sshtools.appframework.api.ui.AbstractSshToolsApplicationClientPanel;
 import com.sshtools.appframework.api.ui.SshToolsConnectionTab;
 import com.sshtools.appframework.ui.MessagePanel.Type;
@@ -336,7 +334,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 			int i1 = handler1.handler.getCategory() == null && handler2.handler.getCategory() != null ? -1
 					: (handler2.handler.getCategory() == null && handler1.handler.getCategory() != null ? 1
 							: handler1.handler.getCategory().compareTo(handler2.handler.getCategory()));
-			return i1 == 0 ? Integer.valueOf(handler1.handler.getWeight()).compareTo(Integer.valueOf(handler2.handler.getWeight())) : i1;
+			return i1 == 0 ? new Integer(handler1.handler.getWeight()).compareTo(new Integer(handler2.handler.getWeight())) : i1;
 		}
 	}
 
@@ -450,7 +448,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 		}
 		final UserAction userAction = new UserAction();
 		// Create the bottom button panel
-		final JButton cancel = new JButton(Messages.getString("Cancel"), IconStore.getInstance().getIcon(BootstrapIcons.STOP, 24));
+		final JButton cancel = new JButton(Messages.getString("Cancel"), IconStore.getInstance().getIcon("process-stop", 24));
 		cancel.setMnemonic('c');
 		cancel.addActionListener(new ActionListener() {
 			@Override
@@ -459,7 +457,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 			}
 		});
 		final JButton connect = new JButton(Messages.getString("Connect"),
-				IconStore.getInstance().getIcon(BootstrapIcons.CHEVRON_LEFT, 24));
+				IconStore.getInstance().getIcon("network-transmit-receive", 24));
 		connect.setMnemonic('t');
 		connect.addActionListener(new ActionListener() {
 			@Override
@@ -476,7 +474,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 				}
 			}
 		});
-		final JButton save = new JButton(Messages.getString("Save"), IconStore.getInstance().getIcon(BootstrapIcons.FILE_WORD_FILL, 24));
+		final JButton save = new JButton(Messages.getString("Save"), IconStore.getInstance().getIcon("document-save", 24));
 		save.setMnemonic('s');
 		save.addActionListener(new ActionListener() {
 			@Override

@@ -33,13 +33,9 @@ import java.util.Properties;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.UIManager;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.vfs2.FileSystemException;
-import org.kordamp.ikonli.Ikon;
-import org.kordamp.ikonli.bootstrapicons.BootstrapIcons;
-import org.kordamp.ikonli.swing.FontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -172,26 +168,7 @@ public class IconStore {
 		iconService.postInit();
 	}
 
-	public Icon getIcon(Ikon ikon, int size) {
-		return configureIcon(FontIcon.of(ikon, size));
-	}
-
 	public Icon getIcon(String name, int size) {
-		try {
-			return configureIcon(FontIcon.of(BootstrapIcons.findByDescription(name.startsWith("bi-") ? name : "bi-" + name), size));
-		}
-		catch(Exception e) {
-			return configureIcon(FontIcon.of(BootstrapIcons.QUESTION_DIAMOND, size));
-		}
-	}
-
-	private Icon configureIcon(FontIcon of) {
-		of.setIconColor(UIManager.getColor("Label.foreground"));
-		return of;
-	}
-
-	@Deprecated
-	public Icon getIconOld(String name, int size) {
 		if (iconService == null) {
 			throw new IllegalStateException("configure() not yet called.");
 		}
@@ -257,17 +234,17 @@ public class IconStore {
 						}
 					}
 				}
-				return getIcon(BootstrapIcons.FILE_TEXT_FILL, size);
+				return getIcon("text-x-generic", size);
 			} else if (Files.isDirectory(file)) {
-				return getIcon(BootstrapIcons.FOLDER, size);
+				return getIcon("folder", size);
 			} else if (!Files.isReadable(file)) {
-				return getIcon(BootstrapIcons.SLASH_CIRCLE_FILL, size);
+				return getIcon("emblem-unreadable", size);
 			} else {
-				return getIcon(BootstrapIcons.FILE_TEXT_FILL, size);
+				return getIcon("text-x-generic", size);
 			}
 		} catch (Exception fse) {
 			LOG.debug("Failed to load icon.", fse);
-			return getIcon(BootstrapIcons.DASH_CIRCLE_FILL, size);
+			return getIcon("dialog-error", size);
 		}
 	}
 

@@ -210,7 +210,7 @@ public class ProgressDialog extends JDialog {
             progressBar.getClass().getMethod("setIndeterminate", new Class[] {
                 boolean.class
             }).invoke(progressBar, new Object[] {
-                Boolean.valueOf(indeterminate)
+                new Boolean(indeterminate)
             });
         } catch (Exception e) {
             progressBar.setValue(0);
