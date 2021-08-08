@@ -31,7 +31,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.sshtools</groupId>
 	<artifactId>appframework</artifactId>
-	<version>3.1.1</version>
+	<version>3.1.2</version>
 	<name>Appframework</name>
 	<description>Parent project for appframework, consisting of a Swing framework for applications and
 	modules that are used across a number of projects.</description>
@@ -48,14 +48,14 @@
 			<uniqueVersion>true</uniqueVersion>
 			<id>opensource-snapshots</id>
 			<name>SSHTOOLS Opensource Snapshots</name>
-			<url>http://artifactory.javassh.com/opensource-snapshots</url>
+			<url>https://artifactory.jadaptive.com/opensource-snapshots</url>
 			<layout>default</layout>
 		</snapshotRepository>
 		<repository>
 			<uniqueVersion>true</uniqueVersion>
 			<id>opensource-releases</id>
 			<name>SSHTOOLS Opensource Releases</name>
-			<url>http://artifactory.javassh.com/opensource-releases</url>
+			<url>https://artifactory.jadaptive.com/opensource-releases</url>
 			<layout>default</layout>
 		</repository>
 	</distributionManagement>
@@ -102,7 +102,7 @@
 		<repository>
 			<id>opensource-snapshots</id>
 			<name>SSHTOOLS Opensource Snapshots</name>
-			<url>http://artifactory.javassh.com/opensource-snapshots</url>
+			<url>https://artifactory.jadaptive.com/opensource-snapshots</url>
 			<releases>
 				<enabled>false</enabled>
 			</releases>

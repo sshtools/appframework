@@ -917,9 +917,7 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		if (laf != null) {
 			log.info("Setting Look and Feel to " + laf.getClassName());
 			try {
-				@SuppressWarnings("unchecked")
-				LookAndFeel l = createLookAndFeel((Class<LookAndFeel>) Class.forName(laf.getClassName()));
-				UIManager.setLookAndFeel(l);
+				UIManager.setLookAndFeel(laf.getClassName());
 				Icon checkIcon = UIManager.getIcon("CheckBoxMenuItem.checkIcon");
 				Icon radioIcon = UIManager.getIcon("RadioButtonMenuItem.checkIcon");
 				UIManager.put("MenuItem.checkIcon",
