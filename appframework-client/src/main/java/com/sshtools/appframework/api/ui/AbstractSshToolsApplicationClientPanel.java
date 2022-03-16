@@ -175,7 +175,7 @@ public abstract class AbstractSshToolsApplicationClientPanel<S extends VirtualSe
 		OptionCallback callback = new OptionCallback() {
 			@Override
 			public boolean canClose(OptionChooser dialog, Option option) {
-				if (Option.CHOICE_SAVE.equals(option)) {
+				if (Option.CHOICE_APPLY.equals(option)) {
 					try {
 						if (panel.validateTabs()) {
 							panel.applyTabs();
@@ -192,9 +192,9 @@ public abstract class AbstractSshToolsApplicationClientPanel<S extends VirtualSe
 		JCheckBox advanced = null;
 		panel.setAdvanced(true);
 		Option opt = OptionDialog.prompt(AbstractSshToolsApplicationClientPanel.this, OptionChooser.UNCATEGORISED,
-				Messages.getString("AbstractSshToolsApplicationClientPanel.ConnSettings"), panel, Option.CHOICES_SAVE_CANCEL,
-				Option.CHOICE_SAVE, callback, advanced, null, true, SshToolsConnectionPanel.DEFAULT_SIZE);
-		if (Option.CHOICE_SAVE.equals(opt)) {
+				Messages.getString("AbstractSshToolsApplicationClientPanel.ConnSettings"), panel, Option.CHOICES_APPLY,
+				Option.CHOICE_APPLY, callback, advanced, null, true, SshToolsConnectionPanel.DEFAULT_SIZE);
+		if (Option.CHOICE_APPLY.equals(opt)) {
 			return true;
 		}
 		return false;

@@ -17,13 +17,9 @@
  */
 package com.sshtools.appframework.ui;
 
-import java.awt.Image;
-import java.io.DataInputStream;
+import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
@@ -32,17 +28,16 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
+import javax.swing.UIManager;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.apache.commons.vfs2.FileSystemException;
+import org.kordamp.ikonli.Ikon;
+import org.kordamp.ikonli.carbonicons.CarbonIcons;
+import org.kordamp.ikonli.fileicons.FileIcons;
+import org.kordamp.ikonli.swing.FontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sshtools.appframework.util.IOUtil;
-import com.sshtools.jfreedesktop.icons.DefaultIconService;
-import com.sshtools.jfreedesktop.icons.IconService;
-import com.sshtools.jfreedesktop.icons.LinuxIconService;
 import com.sshtools.jfreedesktop.mime.AliasService;
 import com.sshtools.jfreedesktop.mime.DefaultAliasService;
 import com.sshtools.jfreedesktop.mime.DefaultGlobService;
@@ -55,9 +50,10 @@ import com.sshtools.jfreedesktop.mime.LinuxMIMEService;
 import com.sshtools.jfreedesktop.mime.LinuxMagicService;
 import com.sshtools.jfreedesktop.mime.MIMEEntry;
 import com.sshtools.jfreedesktop.mime.MIMEService;
-import com.sshtools.jfreedesktop.swing.SVGIcon;
+import com.sshtools.ui.GlobalUIUtil;
 
 public class IconStore {
+	private static final String HIGHLIGHT_PREFIX = "__HIGHLIGHT__/";
 	final static Logger LOG = LoggerFactory.getLogger(IconStore.class);
 	private static Properties fixes = new Properties();
 	private static IconStore iconStore;
@@ -89,11 +85,11 @@ public class IconStore {
 	private AliasService aliasService;
 	private Map<String, Icon> cache = new HashMap<String, Icon>();
 	private GlobService globService;
-	private DefaultIconService iconService;
 	private DefaultMagicService magicService;
 	private LimitedCache<Path, MIMEEntry> mimeCache = new LimitedCache<Path, MIMEEntry>();
 	private LimitedCache<String, MIMEEntry> mimePatternCache = new LimitedCache<String, MIMEEntry>();
 	private MIMEService mimeService;
+	private Color iconColor;
 
 	private IconStore() throws IOException, ParseException {
 		aliasService = new DefaultAliasService();
@@ -101,13 +97,6 @@ public class IconStore {
 		magicService = new DefaultMagicService();
 		mimeService = new DefaultMIMEService(globService, aliasService, magicService);
 		if (SystemUtils.IS_OS_LINUX) {
-			if (System.getProperty("appframework.disableDefaultIconThemes", "false").equals("false")) {
-				try {
-					iconService = new LinuxIconService();
-				} catch (Exception e) {
-					LOG.error("Failed to load icon theme.", e);
-				}
-			}
 			try {
 				globService = new LinuxGlobService();
 			} catch (Exception e) {
@@ -129,71 +118,132 @@ public class IconStore {
 				LOG.error("Failed to MIME.", e);
 			}
 		}
-		if (iconService == null) {
-			iconService = new DefaultIconService();
-		}
-		iconService.setReturnMissingImage(false);
-		// Add the default fallback icon
-		addThemeJar("default-tango-theme");
-		setDefaultThemeName("default-tango-theme");
 	}
 
-	public void addThemeJar(String themeName) throws IOException {
-		URL loc = getClass().getClassLoader().getResource(themeName + "/index.theme");
-		Path obj = null;
-		if (loc != null) {
-			try {
-				LOG.info(String.format("Adding theme resource %s", loc));
-				obj = IOUtil.resourceToPath(loc);
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-			}
-		}
-		if (obj != null) {
-			URI uri = obj.toUri();
-			if (uri.getScheme().equals("jar")) {
-				for (Path r : obj.getFileSystem().getRootDirectories()) {
-					LOG.info(String.format("Adding theme base %s", r));
-					iconService.addBase(r);
+	public void updateIconColors() {
+		this.iconColor = null;
+		Color hl = getHighlightColor();
+		Color ic = getIconColor();
+		for (Map.Entry<String, Icon> icon : cache.entrySet()) {
+			if (icon.getValue() instanceof FontIcon) {
+				if (icon.getKey().startsWith(HIGHLIGHT_PREFIX)) {
+					((FontIcon) icon.getValue()).setIconColor(hl);
+				} else {
+					((FontIcon) icon.getValue()).setIconColor(ic);
 				}
-			} else if (uri.getScheme().equals("file")) {
-				LOG.info(String.format("Adding theme base %s", obj.getParent().getParent()));
-				iconService.addBase(obj.getParent().getParent());
 			}
 		}
 	}
 
 	public void configure(SshToolsApplication application) throws IOException, ParseException {
-		// Initialise icon service
-		iconService.postInit();
 	}
 
-	public Icon getIcon(String name, int size) {
-		if (iconService == null) {
-			throw new IllegalStateException("configure() not yet called.");
+	public Icon mimeIcon(String name, int size) {
+
+		if (name.indexOf('/') > -1) {
+			// TODO lookup
+			return mimeIcon(name.substring(0, name.indexOf('/')), size);
 		}
-		String cacheKey = name + "/" + size;
+
+		switch (name) {
+		case "application":
+			return icon(CarbonIcons.APPLICATION, size);
+		case "audio":
+			return icon(CarbonIcons.MUSIC, size);
+		case "chemical":
+			return icon(CarbonIcons.CHEMISTRY, size);
+		case "font":
+			return icon(CarbonIcons.STRING_TEXT, size);
+		case "image":
+			return icon(CarbonIcons.IMAGE, size);
+		case "inode":
+			return icon(CarbonIcons.EDGE_NODE, size);
+		case "message":
+			return icon(CarbonIcons.EMAIL, size);
+		case "model":
+			return icon(CarbonIcons.MODEL, size);
+		case "multipart":
+			return icon(CarbonIcons.CATEGORIES, size);
+		case "video":
+			return icon(CarbonIcons.VIDEO, size);
+		case "text":
+			return icon(FileIcons.ASCIIDOC, size);
+		}
+		return icon(CarbonIcons.ERROR_OUTLINE, size);
+	}
+
+	public Icon highlightIcon(Ikon name, int size) {
+		return doIcon(HIGHLIGHT_PREFIX, name, size, getHighlightColor());
+	}
+
+	public Icon icon(Ikon name, int size) {
+		return icon(name, size, getIconColor());
+	}
+
+	public Icon icon(Ikon name, int size, Color color) {
+		return doIcon("", name, size, color);
+	}
+
+	protected Icon doIcon(String prefix, Ikon name, int size, Color color) {
+		String cacheKey = prefix + name.getDescription() + "/" + size + "/" + color.getRGB();
 		if (cache.containsKey(cacheKey)) {
 			return cache.get(cacheKey);
 		}
 		Icon icon = null;
 		try {
-			Path file = iconService.findIcon(name, 48);
-			if (file != null) {
-				icon = get(name, size, cacheKey, file);
-			} else {
-				if (fixes.containsKey(name)) {
-					file = iconService.findIcon(fixes.getProperty(name), 48);
-					if (file != null) {
-						icon = get(name, size, cacheKey, file);
-					}
-				}
-			}
+			icon = FontIcon.of(name, size, color);
 		} catch (Exception e) {
 			LOG.error("Failed to load icon " + name + " at size " + size + ".", e);
 		}
 		cache.put(cacheKey, icon);
 		return icon;
+	}
+
+	public Color getHighlightColor() {
+		Color iconColor = getIconColor();
+		if (iconColor.equals(Color.BLACK) || iconColor.equals(Color.WHITE))
+			return Color.GRAY;
+		else {
+			Color bg = UIManager.getColor("Panel.background");
+			if (bg == null) {
+				float[] hsb = Color.RGBtoHSB(iconColor.getRed(), iconColor.getGreen(), iconColor.getBlue(), null);
+				if (hsb[2] < 0.5) {
+					return Color.WHITE;
+				} else {
+					return Color.BLACK;
+				}
+			} else {
+				float[] hsb = Color.RGBtoHSB(bg.getRed(), bg.getGreen(), bg.getBlue(), null);
+				if (hsb[2] < 0.5) {
+					return Color.WHITE;
+				} else {
+					return Color.BLACK;
+				}
+			}
+		}
+	}
+
+	public Color getIconColor() {
+		if (this.iconColor == null) {
+			Color iconColor = GlobalUIUtil
+					.stringToColor(PreferencesStore.get(SshToolsApplication.PREF_ICON_COLOR, null), null);
+			if (iconColor == null) {
+				Color defc = UIManager.getColor("Panel.background");
+				if (defc != null) {
+					float[] hsb = Color.RGBtoHSB(defc.getRed(), defc.getGreen(), defc.getBlue(), null);
+					if (hsb[2] < 0.5) {
+						iconColor = Color.WHITE;
+					} else {
+						iconColor = Color.BLACK;
+					}
+				}
+			}
+			if (iconColor == null) {
+				iconColor = Color.BLACK;
+			}
+			this.iconColor = iconColor;
+		}
+		return this.iconColor;
 	}
 
 	public Icon getIconForFile(Path file) {
@@ -214,37 +264,37 @@ public class IconStore {
 				if (mime != null) {
 					mimeCache.cache(file, mime);
 				}
-				if (mime != null && mime.getIcon() != null) {
-					Icon icon = getIcon(mime.getIcon(), size);
-					if (icon != null) {
-						return icon;
-					}
-				}
-				if (mime != null && mime.getGenericIcon() != null) {
-					Icon icon = getIcon(mime.getGenericIcon(), size);
-					if (icon != null) {
-						return icon;
-					}
-				}
+//				if (mime != null && mime.getIcon() != null) {
+//					Icon icon = getIcon(mime.getIcon(), size);
+//					if (icon != null) {
+//						return icon;
+//					}
+//				}
+//				if (mime != null && mime.getGenericIcon() != null) {
+//					Icon icon = getIcon(mime.getGenericIcon(), size);
+//					if (icon != null) {
+//						return icon;
+//					}
+//				}
 				if (mime != null && mime.getSubclasses() != null) {
 					for (String subclass : mime.getSubclasses()) {
-						Icon icon = getIcon(subclass, size);
+						Icon icon = mimeIcon(subclass, size);
 						if (icon != null) {
 							return icon;
 						}
 					}
 				}
-				return getIcon("text-x-generic", size);
+				return icon(CarbonIcons.DOCUMENT, size);
 			} else if (Files.isDirectory(file)) {
-				return getIcon("folder", size);
+				return icon(CarbonIcons.FOLDER, size);
 			} else if (!Files.isReadable(file)) {
-				return getIcon("emblem-unreadable", size);
+				return icon(CarbonIcons.ERROR_FILLED, size);
 			} else {
-				return getIcon("text-x-generic", size);
+				return icon(CarbonIcons.DOCUMENT, size);
 			}
 		} catch (Exception fse) {
 			LOG.debug("Failed to load icon.", fse);
-			return getIcon("dialog-error", size);
+			return icon(CarbonIcons.ERROR, size);
 		}
 	}
 
@@ -286,44 +336,5 @@ public class IconStore {
 
 	public MIMEService getMIMEService() {
 		return mimeService;
-	}
-
-	public IconService getService() {
-		return iconService;
-	}
-
-	public void setDefaultThemeName(String defaultThemeName) {
-		iconService.setDefaultThemeName(defaultThemeName);
-	}
-
-	private Icon get(String name, int size, String cacheKey, Path file) throws FileSystemException, IOException {
-		Icon icon;
-		if (file.getFileName().toString().toLowerCase().endsWith(".svg")) {
-			InputStream in = Files.newInputStream(file);
-			try {
-				icon = new SVGIcon(name + "-" + size, in, size, size);
-			} finally {
-				in.close();
-			}
-		} else {
-			DataInputStream din = new DataInputStream(Files.newInputStream(file));
-			try {
-				byte[] imgData = new byte[(int) Files.size(file)];
-				din.readFully(imgData);
-				icon = new ImageIcon(imgData);
-			} finally {
-				din.close();
-			}
-		}
-		if (icon.getIconWidth() != size && icon instanceof ImageIcon) {
-			Image img = ((ImageIcon) icon).getImage();
-			img = img.getScaledInstance(size, size, Image.SCALE_SMOOTH);
-			icon = new ImageIcon(img);
-		}
-		return icon;
-	}
-
-	public void addGlobalFallbackTheme(String theme) {
-		iconService.addGlobalFallbackTheme(theme);
 	}
 }

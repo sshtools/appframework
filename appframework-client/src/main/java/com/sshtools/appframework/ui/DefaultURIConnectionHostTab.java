@@ -28,6 +28,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.kordamp.ikonli.carbonicons.CarbonIcons;
+
 import com.sshtools.appframework.api.ui.NumericTextField;
 import com.sshtools.appframework.api.ui.SshToolsConnectionTab;
 import com.sshtools.profile.ProfileTransport;
@@ -41,8 +43,8 @@ import com.sshtools.ui.swing.XTextField;
 import net.miginfocom.swing.MigLayout;
 
 public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends JPanel implements SshToolsConnectionTab<T> {
-	public static final Icon CONNECT_ICON = IconStore.getInstance().getIcon("network-server", 24);
-	public static final Icon LARGE_CONNECT_ICON = IconStore.getInstance().getIcon("network-server", 32);
+	public static final Icon CONNECT_ICON = IconStore.getInstance().icon(CarbonIcons.DATA_BASE, 24);
+	public static final Icon LARGE_CONNECT_ICON = IconStore.getInstance().icon(CarbonIcons.DATA_BASE, 32);
 	public final static int OMIT = 0;
 	public final static int OPTIONAL = 2;
 	public final static int REQUIRED = 1;
@@ -50,7 +52,7 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 	// Private instance variables
 	protected XTextField hostnameField = new XTextField();
 	protected XTextField pathField = new XTextField();
-	protected NumericTextField portField = new NumericTextField(new Integer(0), new Integer(65535), new Integer(0));
+	protected NumericTextField portField = new NumericTextField(Integer.valueOf(0), Integer.valueOf(65535), Integer.valueOf(0));
 	protected JTextField userField = new XTextField();
 	private String category;
 	private String defaultPath;
@@ -335,6 +337,7 @@ public class DefaultURIConnectionHostTab<T extends ProfileTransport<?>> extends 
 		try {
 			processUserUriPortion(uri);
 		} catch (MalformedURIException e) {
+			e.printStackTrace();
 			throw new TabValidationException(this, userField);
 		}
 		return uri;

@@ -19,6 +19,8 @@
 
 package com.sshtools.appframework.actions;
 
+import org.kordamp.ikonli.carbonicons.CarbonIcons;
+
 import com.sshtools.ui.swing.AppAction;
 
 /**
@@ -30,25 +32,27 @@ import com.sshtools.ui.swing.AppAction;
 
 public abstract class AbstractOptionsAction extends AbstractAppAction {
 
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Creates a new AbstractOptionsAction object.
 	 */
 
 	public AbstractOptionsAction() {
 		putValue(NAME, Messages.getString("AbstractOptionsAction.Name"));
-		putValue(SMALL_ICON, loadIcon("preferences-desktop", 16));
-		putValue(MEDIUM_ICON, loadIcon("preferences-desktop", 24));
+		putValue(SMALL_ICON, loadIcon(CarbonIcons.SETTINGS, 16));
+		putValue(MEDIUM_ICON, loadIcon(CarbonIcons.SETTINGS, 24));
 		putValue(SHORT_DESCRIPTION, Messages.getString("AbstractOptionsAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION, Messages.getString("AbstractOptionsAction.LongDesc"));
-		putValue(MNEMONIC_KEY, new Integer('o'));
+		putValue(MNEMONIC_KEY, Integer.valueOf('o'));
 		putValue(ACTION_COMMAND_KEY, "options-command");
-		putValue(ON_MENUBAR, new Boolean(true));
+		putValue(ON_MENUBAR, Boolean.valueOf(true));
 		putValue(MENU_NAME, "Tools");
-		putValue(MENU_ITEM_GROUP, new Integer(90));
-		putValue(MENU_ITEM_WEIGHT, new Integer(99));
-		putValue(ON_TOOLBAR, new Boolean(false));
-		putValue(TOOLBAR_GROUP, new Integer(90));
-		putValue(TOOLBAR_WEIGHT, new Integer(0));
+		putValue(MENU_ITEM_GROUP, Integer.valueOf(90));
+		putValue(MENU_ITEM_WEIGHT, Integer.valueOf(99));
+		putValue(ON_TOOLBAR, Boolean.valueOf(false));
+		putValue(TOOLBAR_GROUP, Integer.valueOf(90));
+		putValue(TOOLBAR_WEIGHT, Integer.valueOf(0));
 
 	}
 

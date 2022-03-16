@@ -37,7 +37,6 @@ import javax.swing.ImageIcon;
 
 import com.google.code.gtkjfilechooser.FreeDesktopUtil.WellKnownDir;
 import com.google.code.gtkjfilechooser.ui.MissingResourceIcon;
-import com.sshtools.appframework.ui.IconStore;
 
 public class GtkStockIcon {
 	/**
@@ -135,9 +134,6 @@ public class GtkStockIcon {
 	 * @return icon
 	 */
 	static public Icon get(String name, Size size) {
-		Icon icon = IconStore.getInstance().getIcon(name, size.getSize());
-		if (icon != null)
-			return icon;
 		if (name.startsWith("gtk-")) {
 			return getFromStock(name, size);
 		}

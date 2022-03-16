@@ -24,6 +24,8 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import org.kordamp.ikonli.carbonicons.CarbonIcons;
+
 import com.sshtools.ui.swing.AppAction;
 
 /**
@@ -40,15 +42,15 @@ public abstract class AbstractPasteAction extends AbstractAppAction {
 	public AbstractPasteAction(boolean onToolBar) {
 		putValue(NAME, Messages.getString("AbstractPasteAction.Name"));
 
-		putValue(SMALL_ICON, loadIcon("edit-paste", 16));
-		putValue(MEDIUM_ICON, loadIcon("edit-paste", 24));
+		putValue(SMALL_ICON, loadIcon(CarbonIcons.PASTE, 16));
+		putValue(MEDIUM_ICON, loadIcon(CarbonIcons.PASTE, 24));
 		putValue(SHORT_DESCRIPTION,
 				Messages.getString("AbstractPasteAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION,
 				Messages.getString("AbstractPasteAction.LongDesc"));
 		putValue(ACCELERATOR_KEY,
-				KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK));
-		putValue(MNEMONIC_KEY, new Integer('p'));
+				KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK));
+		putValue(MNEMONIC_KEY, Integer.valueOf('p'));
 		putValue(MENU_NAME, "Edit");
 		putValue(ON_MENUBAR, true);
 		putValue(MENU_ITEM_GROUP, 10);

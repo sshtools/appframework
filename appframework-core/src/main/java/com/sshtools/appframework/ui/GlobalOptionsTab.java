@@ -29,8 +29,10 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
+import org.kordamp.ikonli.carbonicons.CarbonIcons;
+
+import com.sshtools.ui.GlobalUIUtil;
 import com.sshtools.ui.swing.ComboBoxRenderer;
-import com.sshtools.ui.swing.ShowUIDefaults;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -41,13 +43,14 @@ import net.miginfocom.swing.MigLayout;
  * @author $Author: brett $
  */
 public class GlobalOptionsTab extends JPanel implements OptionsTab {
-	private final static Icon GLOBAL_ICON = IconStore.getInstance().getIcon("applications-internet", 24);
+	private final static Icon GLOBAL_ICON = IconStore.getInstance().icon(CarbonIcons.GLOBE, 24);
 	// Private statics
-	private final static Icon LARGE_GLOBAL_ICON = IconStore.getInstance().getIcon("applications-internet", 32);
+	private final static Icon LARGE_GLOBAL_ICON = IconStore.getInstance().icon(CarbonIcons.GLOBE, 32);
 	private static final long serialVersionUID = 1L;
 	private SshToolsApplication application;
 	// Private instance variables.
 	private JComboBox<UIManager.LookAndFeelInfo> lafChooser;
+	private ColorComboBox iconColor = new ColorComboBox();
 	private JCheckBox toolBarShowSelectiveText = new JCheckBox(Messages.getString("GlobalOptionsTab.SelectiveText"));
 	private JCheckBox toolBarSmallIcons = new JCheckBox(Messages.getString("GlobalOptionsTab.SmallIcons"));
 	private JCheckBox useSystemIconTheme = new JCheckBox(Messages.getString("GlobalOptionsTab.UseSystemIconTheme"));
@@ -58,7 +61,7 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 	public GlobalOptionsTab(SshToolsApplication application) {
 		super();
 		this.application = application;
-		setLayout(new MigLayout("wrap 2, fillx", "[][grow]", "[][][][][][]"));
+		setLayout(new MigLayout("wrap 2, fillx", "[][grow]", "[][][][][][][]"));
 		add(new JLabel(Messages.getString("GlobalOptionsTab.LAF")));
 		lafChooser = new JComboBox<UIManager.LookAndFeelInfo>(new LookAndFeelModel());
 		lafChooser.setRenderer(new ComboBoxRenderer<UIManager.LookAndFeelInfo>(lafChooser) {
@@ -69,6 +72,8 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 			}
 		});
 		add(lafChooser, "growx");
+		add(new JLabel(Messages.getString("GlobalOptionsTab.IconColor")));
+		add(iconColor, "growx");
 		toolBarSmallIcons.setMnemonic('i');
 		add(toolBarSmallIcons, "span 2, gapleft 32");
 		useSystemIconTheme.setMnemonic('y');
@@ -95,6 +100,7 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 			PreferencesStore.put(SshToolsApplication.PREF_LAF, newLaf);
 			changed = true;
 		}
+		PreferencesStore.put(SshToolsApplication.PREF_ICON_COLOR, GlobalUIUtil.colorToString(iconColor.getColor()));
 		PreferencesStore.putBoolean(SshToolsApplication.PREF_TOOLBAR_SHOW_SELECTIVE_TEXT, toolBarShowSelectiveText.isSelected());
 		PreferencesStore.putBoolean(SshToolsApplication.PREF_TOOLBAR_SMALL_ICONS, toolBarSmallIcons.isSelected());
 		PreferencesStore.putBoolean(SshToolsApplication.PREF_USE_SYSTEM_ICON_THEME, useSystemIconTheme.isSelected());
@@ -104,6 +110,13 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 		if (changed) {
 			application.setLookAndFeel(laf);
 		}
+		else {
+			for(int i = 0 ; i < application.getContainerCount(); i++) {
+				application.getContainerAt(i).updateUI();
+			}
+		}
+		IconStore.getInstance().updateIconColors();
+		
 	}
 
 	@Override
@@ -143,6 +156,7 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 
 	@Override
 	public void reset() {
+		iconColor.setColor(GlobalUIUtil.stringToColor(PreferencesStore.get(SshToolsApplication.PREF_ICON_COLOR, null), null));
 		LookAndFeelModel model = (LookAndFeelModel) lafChooser.getModel();
 		lafChooser.setSelectedItem(model.getElementForName(
 				PreferencesStore.get(SshToolsApplication.PREF_LAF, UIManager.getLookAndFeel().getClass().getName())));

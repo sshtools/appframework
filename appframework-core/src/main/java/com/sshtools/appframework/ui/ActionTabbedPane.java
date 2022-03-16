@@ -25,7 +25,6 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -138,10 +137,11 @@ public class ActionTabbedPane extends DnDTabbedPane {
 			MouseAdapter listener = new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
-					if (closeTabButton.isVisible() && (e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK) {
+					if (closeTabButton.isVisible()
+							&& e.getButton() == MouseEvent.BUTTON3) {
 						selectIfRequired();
 						showPopup(TabHeader.this);
-					} else if ((e.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK) {
+					} else if(e.getButton() == MouseEvent.BUTTON1) {
 						selectIfRequired();
 					}
 				}

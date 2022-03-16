@@ -23,6 +23,8 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import org.kordamp.ikonli.carbonicons.CarbonIcons;
+
 import com.sshtools.ui.swing.AppAction;
 
 /**
@@ -40,20 +42,20 @@ public abstract class AbstractNewAction extends AbstractAppAction {
 	 */
 	public AbstractNewAction(boolean onToolBar) {
 		putValue(NAME, VAL_NAME);
-		putValue(SMALL_ICON, loadIcon("document-new", 16));
-		putValue(MEDIUM_ICON, loadIcon("document-new", 24));
+		putValue(SMALL_ICON, loadIcon(CarbonIcons.ADD_FILLED, 16));
+		putValue(MEDIUM_ICON, loadIcon(CarbonIcons.ADD_FILLED, 24));
 		putValue(SHORT_DESCRIPTION, Messages.getString("AbstractNewAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION, Messages.getString("AbstractNewAction.LongDesc"));
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK | InputEvent.ALT_MASK));
-		putValue(MNEMONIC_KEY, new Integer('n'));
-		putValue(ON_MENUBAR, new Boolean(true));
+		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK));
+		putValue(MNEMONIC_KEY, Integer.valueOf('n'));
+		putValue(ON_MENUBAR, Boolean.valueOf(true));
 		putValue(MENU_NAME, "File");
-		putValue(MENU_ITEM_GROUP, new Integer(0));
-		putValue(MENU_ITEM_WEIGHT, new Integer(0));
-		putValue(ON_TOOLBAR, new Boolean(onToolBar));
+		putValue(MENU_ITEM_GROUP, Integer.valueOf(0));
+		putValue(MENU_ITEM_WEIGHT, Integer.valueOf(0));
+		putValue(ON_TOOLBAR, Boolean.valueOf(onToolBar));
 		if (onToolBar) {
-			putValue(TOOLBAR_GROUP, new Integer(0));
-			putValue(TOOLBAR_WEIGHT, new Integer(0));
+			putValue(TOOLBAR_GROUP, Integer.valueOf(0));
+			putValue(TOOLBAR_WEIGHT, Integer.valueOf(0));
 			putValue(TEXT_ON_TOOLBAR, Boolean.TRUE);
 		}
 	}

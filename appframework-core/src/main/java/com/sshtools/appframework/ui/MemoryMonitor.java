@@ -35,89 +35,90 @@ import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-
 /**
  * @author brett
  */
+@SuppressWarnings("serial")
 public class MemoryMonitor extends JPanel implements ActionListener {
 
-  private static JFrame frame;
-  public static void showMemoryMonitor() {
-    if(frame == null) {
-      frame = new JFrame("Memory monitor");
-      frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-      frame.addWindowListener(new WindowAdapter() {
-        @Override
-		public void windowClosing(WindowEvent evt) {
-          frame.setVisible(false);
-        }
-      });
-      frame.getContentPane().setLayout(new BorderLayout());
-      frame.getContentPane().add(new MemoryMonitor(), BorderLayout.CENTER);
-      frame.pack();
-    }
-    frame.setVisible(true);
-  }
+	private static JFrame frame;
 
-  private JProgressBar memoryGauge;
-  
-  public MemoryMonitor() {
-    memoryGauge = new JProgressBar(0, 100) {
+	public static void showMemoryMonitor() {
+		if (frame == null) {
+			frame = new JFrame("Memory monitor");
+			frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+			frame.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent evt) {
+					frame.setVisible(false);
+				}
+			});
+			frame.getContentPane().setLayout(new BorderLayout());
+			frame.getContentPane().add(new MemoryMonitor(), BorderLayout.CENTER);
+			frame.pack();
+		}
+		frame.setVisible(true);
+	}
 
-      @Override
-	public Dimension getMinimumSize() {
-        return new Dimension(100, 16);
-      }
+	private JProgressBar memoryGauge;
 
-      @Override
-	public Dimension getSize() {
-        return getMinimumSize();
-      }
-    };
-    memoryGauge.setBorder(BorderFactory.createLineBorder(Color.black));
-    memoryGauge.setBackground(Color.white);
-    memoryGauge.setForeground(Color.red);
-    memoryGauge.setStringPainted(true);
-    memoryGauge.addMouseListener(new MouseAdapter() {
-      @Override
-	public void mouseClicked(MouseEvent evt) {
-        System.gc();
-      }
-    });
-    add(memoryGauge);
-    javax.swing.Timer timer = new javax.swing.Timer(2000, this);
-    timer.start();
-  }
+	public MemoryMonitor() {
+		memoryGauge = new JProgressBar(0, 100) {
 
-  @Override
-public void actionPerformed(ActionEvent evt) {
-      SwingUtilities.invokeLater(new Runnable() {
-          @Override
-		public void run() {
-              doUpdate();
-          }
-      });
-  }
-  
-  void doUpdate() {
-    long total = Runtime.getRuntime().totalMemory();
-    long free = Runtime.getRuntime().freeMemory();
-    StringBuffer buf = new StringBuffer();
-    buf.append("Memory    Total=");
-    buf.append(total);
-    buf.append(" Free=");
-    buf.append(free);
-    long used = total - free;
-    buf.append(" Used=");
-    buf.append(used);
-    int gauge = (int) (((double) used / (double) total) * 100d);
-    memoryGauge.setValue(gauge);
-    memoryGauge.setToolTipText(buf.toString());
-    buf.setLength(0);
-    buf.append(gauge);
-    buf.append("% (");
-    buf.append((int) (used / 1024d / 1024d));
-    buf.append("M)");
-    memoryGauge.setString(buf.toString());
-  }
+			@Override
+			public Dimension getMinimumSize() {
+				return new Dimension(100, 16);
+			}
+
+			@Override
+			public Dimension getSize() {
+				return getMinimumSize();
+			}
+		};
+		memoryGauge.setBorder(BorderFactory.createLineBorder(Color.black));
+		memoryGauge.setBackground(Color.white);
+		memoryGauge.setForeground(Color.red);
+		memoryGauge.setStringPainted(true);
+		memoryGauge.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent evt) {
+				System.gc();
+			}
+		});
+		add(memoryGauge);
+		javax.swing.Timer timer = new javax.swing.Timer(2000, this);
+		timer.start();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent evt) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				doUpdate();
+			}
+		});
+	}
+
+	void doUpdate() {
+		long total = Runtime.getRuntime().totalMemory();
+		long free = Runtime.getRuntime().freeMemory();
+		StringBuffer buf = new StringBuffer();
+		buf.append("Memory    Total=");
+		buf.append(total);
+		buf.append(" Free=");
+		buf.append(free);
+		long used = total - free;
+		buf.append(" Used=");
+		buf.append(used);
+		int gauge = (int) (((double) used / (double) total) * 100d);
+		memoryGauge.setValue(gauge);
+		memoryGauge.setToolTipText(buf.toString());
+		buf.setLength(0);
+		buf.append(gauge);
+		buf.append("% (");
+		buf.append((int) (used / 1024d / 1024d));
+		buf.append("M)");
+		memoryGauge.setString(buf.toString());
+	}
 }

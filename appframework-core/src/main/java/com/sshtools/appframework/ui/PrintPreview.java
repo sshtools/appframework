@@ -45,6 +45,7 @@ import javax.swing.border.MatteBorder;
  *
  * @author $author$
  */
+@SuppressWarnings("serial")
 public class PrintPreview extends JPanel implements ActionListener, Runnable {
 	class PagePreview extends JPanel {
 		protected int m_h;
@@ -181,7 +182,7 @@ public class PrintPreview extends JPanel implements ActionListener, Runnable {
 	/**  */
 	protected Printable printable;
 	/**  */
-	protected JComboBox scale;
+	protected JComboBox<String> scale;
 
 	/**  */
 	protected JScrollPane scrollpane;
@@ -208,7 +209,7 @@ public class PrintPreview extends JPanel implements ActionListener, Runnable {
 		setup.setMnemonic('p');
 		jpanel.add(setup);
 		String[] as = { "10 %", "25 %", "50 %", "75 %", "100 %", "200 %" };
-		scale = new JComboBox(as);
+		scale = new JComboBox<>(as);
 		scale.setSelectedItem(as[2]);
 		scale.addActionListener(this);
 		scale.setEditable(true);

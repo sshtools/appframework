@@ -18,7 +18,6 @@
 package com.sshtools.appframework.ui;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,9 +25,9 @@ import java.util.Vector;
 
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
@@ -37,20 +36,22 @@ import javax.swing.event.ChangeListener;
 
 import com.sshtools.ui.swing.ArrowIcon;
 import com.sshtools.ui.swing.ColorIcon;
+import com.sshtools.ui.swing.ComboBoxRenderer;
 
 /**
  *
  *
  * @author $author$
  */
-public class ColorComboBox extends JComboBox {
+@SuppressWarnings("serial")
+public class ColorComboBox extends JComboBox<Color> {
 	// Supporting classes
-	static class ColorComboModel extends AbstractListModel implements ComboBoxModel {
-		private Vector colors = new Vector();
-		private Object selected;
+	static class ColorComboModel extends AbstractListModel<Color> implements ComboBoxModel<Color> {
+		private Vector<Color> colors = new Vector<Color>();
+		private Color selected;
 
 		ColorComboModel() {
-			colors = new Vector();
+			colors = new Vector<>();
 			// Add the initial colors
 			colors.addElement(Color.black);
 			colors.addElement(Color.white);
@@ -77,7 +78,7 @@ public class ColorComboBox extends JComboBox {
 		}
 
 		@Override
-		public Object getElementAt(int i) {
+		public Color getElementAt(int i) {
 			if (i == colors.size()) {
 				return null;
 			}
@@ -96,32 +97,32 @@ public class ColorComboBox extends JComboBox {
 
 		@Override
 		public void setSelectedItem(Object sel) {
-			selected = sel;
+			selected = (Color) sel;
 		}
 	}
 
-	class ColorRenderer extends DefaultListCellRenderer {
+	class ColorRenderer extends ComboBoxRenderer<Color> {
 		private ColorIcon icon;
 
-		ColorRenderer() {
+		ColorRenderer(JComboBox<Color> combo) {
+			super(combo);
 			icon = new ColorIcon(Color.black, new Dimension(10, 10), Color.black);
 			// setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 0));
 		}
 
 		@Override
-		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
+		protected void decorate(JLabel label, JList<? extends Color> list, Color value, int index, boolean isSelected,
 				boolean cellHasFocus) {
-			super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 			Color c = (Color) value;
 			// If the value is null. Then this signifies custom background
 			if (c == null) {
-				setIcon(new ArrowIcon(SwingConstants.EAST, UIManager.getColor("controlShadow"), UIManager.getColor("Button.foreground"),
+				label.setIcon(new ArrowIcon(SwingConstants.EAST, UIManager.getColor("controlShadow"), UIManager.getColor("Button.foreground"),
 						UIManager.getColor("controlLtHighlight")));
-				setText("Choose ....");
+				label.setText("Choose ....");
 			} else {
 				// Set up the icon
 				icon.setColor(c);
-				setIcon(icon);
+				label.setIcon(icon);
 				// Set the text. If the background is a well known one with a
 				// name, render
 				// the name. Otherwise use the RGB values
@@ -153,10 +154,10 @@ public class ColorComboBox extends JComboBox {
 				} else if (c.equals(Color.darkGray)) {
 					s = "Dark Gray";
 				}
-				setText(s);
+				label.setText(s);
 			}
 			//
-			return this;
+//			return label;
 		}
 	}
 
@@ -175,7 +176,7 @@ public class ColorComboBox extends JComboBox {
 	public ColorComboBox(Color color) {
 		super(new ColorComboModel());
 		setColor(color);
-		setRenderer(new ColorRenderer());
+		setRenderer(new ColorRenderer(this));
 		addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evt) {

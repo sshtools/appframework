@@ -29,12 +29,16 @@ import java.util.StringTokenizer;
 
 import javax.swing.JTable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  *
  *
  * @author $author$
  */
 public class PreferencesStore {
+	final static Logger log = LoggerFactory.getLogger(PreferencesStore.class);
 	//
 	private static File file;
 	private static Properties preferences;
@@ -171,12 +175,14 @@ public class PreferencesStore {
 	/**
 	 * Restore a table.
 	 *
-	 * @param table table
-	 * @param pref pref
+	 * @param table         table
+	 * @param pref          pref
 	 * @param defaultWidths default widths
 	 * @throws IllegalArgumentException on error
 	 */
 	public static void restoreTableMetrics(JTable table, String pref, int[] defaultWidths) {
+		log.info("Restore table metrics " + pref);
+
 		// Check the table columns may be resized correctly
 		if (table.getAutoResizeMode() != JTable.AUTO_RESIZE_OFF) {
 			throw new IllegalArgumentException("Table AutoResizeMode must be JTable.AUTO_RESIZE_OFF");
@@ -184,13 +190,16 @@ public class PreferencesStore {
 		// Restore the table column widths and positions
 		for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
 			try {
-				table.moveColumn(table.convertColumnIndexToView(getInt(pref + ".column." + i + ".position", i)), i);
+				int pos = table.convertColumnIndexToView(getInt(pref + ".column." + i + ".position", i));
+				table.moveColumn(pos, i);
 				table.getColumnModel().getColumn(i).setMinWidth(10);
-				table.getColumnModel().getColumn(i)
-						.setPreferredWidth(getInt(pref + ".column." + i + ".width",
-								(defaultWidths == null || defaultWidths[i] == -1)
-										? table.getColumnModel().getColumn(i).getPreferredWidth()
-										: defaultWidths[i]));
+				int width = (defaultWidths == null || defaultWidths[i] == -1)
+						? table.getColumnModel().getColumn(i).getPreferredWidth()
+						: defaultWidths[i];
+				
+				table.getColumnModel().getColumn(i).setPreferredWidth(getInt(pref + ".column." + i + ".width", width));
+
+				log.info("    " + i + ": " + width + " " + pos);
 			} catch (NumberFormatException nfe) {
 			}
 		}
@@ -219,10 +228,12 @@ public class PreferencesStore {
 	}
 
 	public static void saveTableMetrics(JTable table, String pref) {
+		log.info("Saving table metrics " + pref);
 		for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
 			int w = table.getColumnModel().getColumn(i).getWidth();
 			put(pref + ".column." + i + ".width", String.valueOf(w));
 			put(pref + ".column." + i + ".position", String.valueOf(table.convertColumnIndexToModel(i)));
+			log.info("    " + i + ": " + w + " " + String.valueOf(table.convertColumnIndexToModel(i)));
 		}
 	}
 }

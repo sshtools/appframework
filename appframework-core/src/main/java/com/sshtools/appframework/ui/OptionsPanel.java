@@ -33,13 +33,14 @@ import com.sshtools.ui.swing.SideBarTabber;
  * 
  * @author $author$
  */
+@SuppressWarnings("serial")
 public class OptionsPanel extends JPanel {
 	public static boolean showOptionsDialog(Component parent, OptionsTab[] tabs) {
 		final OptionsPanel opts = new OptionsPanel(tabs);
 		opts.reset();
 		Option opt = OptionDialog.prompt(parent, OptionChooser.UNCATEGORISED, Messages.getString("OptionsPanel.Options"), opts,
-				Option.CHOICES_OK_CANCEL, Option.CHOICE_CANCEL);
-		if (opt.equals(Option.CHOICE_OK)) {
+				Option.CHOICES_APPLY, Option.CHOICE_APPLY);
+		if (opt.equals(Option.CHOICE_APPLY)) {
 			opts.applyTabs();
 			return true;
 		}
@@ -60,7 +61,7 @@ public class OptionsPanel extends JPanel {
 		super();
 		tabber = new SideBarTabber();
 		tabber.setButtonMode(ButtonMode.VISIBILITY_AND_SIZE);
-		tabber.setFixedToolBarWidth(72);
+		tabber.setFixedToolBarWidth(128);
 		if (optionalTabs != null) {
 			for (int i = 0; i < optionalTabs.length; i++) {
 				optionalTabs[i].reset();

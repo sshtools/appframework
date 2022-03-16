@@ -152,11 +152,15 @@ public class PluginManager<T extends PluginHostContext> {
 
 		@Override
 		public int compareTo(PluginWrapper<P> arg0) {
-			return new Integer(getOrder()).compareTo(new Integer((arg0).getOrder()));
+			return Integer.valueOf(getOrder()).compareTo(Integer.valueOf((arg0).getOrder()));
 		}
 
 		public String getName() {
 			return properties.getProperty(PLUGIN_NAME);
+		}
+
+		public String getId() {
+			return properties.getProperty(PLUGIN_ID);
 		}
 
 		public int getOrder() {
@@ -184,6 +188,7 @@ public class PluginManager<T extends PluginHostContext> {
 	public final static String PLUGIN_INFORMATION = "information";
 	public final static String PLUGIN_JARS = "jars";
 	public final static String PLUGIN_NAME = "name";
+	public final static String PLUGIN_ID = "id";
 	public final static String PLUGIN_ORDER = "order";
 	public final static String PLUGIN_SYNC_LOAD = "syncLoad";
 	public final static String PLUGIN_REQUIRED_HOST_VERSION = "requiredHostVersion";
@@ -256,8 +261,9 @@ public class PluginManager<T extends PluginHostContext> {
 	 */
 	public void addPlugin(Plugin<T> plugin, Properties properties) {
 		PluginWrapper<Plugin<T>> w = new PluginWrapper<Plugin<T>>(plugin, properties);
+		context.log(PluginHostContext.LOG_INFORMATION,String.format("Adding plugin %s (%s)", w.getId(), plugin.getClass()));
 		plugins.add(w);
-		pluginMap.put(w.getName(), w);
+		pluginMap.put(w.getId(), w);
 	}
 
 	public void buildCLIOptions(Options options1) {
@@ -414,6 +420,7 @@ public class PluginManager<T extends PluginHostContext> {
 	public void init(T context) throws PluginException {
 		this.context = context;
 		loadQueue = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+//		loadQueue = Executors.newScheduledThreadPool(1);
 		pluginMap = new HashMap<String, PluginWrapper<Plugin<T>>>();
 		plugins = new ArrayList<PluginWrapper<Plugin<T>>>();
 		startedPlugins = new HashSet<PluginWrapper<Plugin<T>>>();
@@ -678,6 +685,7 @@ public class PluginManager<T extends PluginHostContext> {
 							context.log(PluginHostContext.LOG_DEBUG, "Resource is " + resource);
 						}
 						Properties pr = new Properties();
+						pr.put(PLUGIN_ID, en.getKey());
 						pr.put(PLUGIN_NAME, name);
 						pr.put(PLUGIN_SHORT_DESCRIPTION, shortDescription);
 						pr.put(PLUGIN_CLASSNAME, className);
@@ -730,7 +738,7 @@ public class PluginManager<T extends PluginHostContext> {
 	public void removePlugin(Plugin<T> plugin) {
 		PluginWrapper<Plugin<T>> w = getPluginWrapper(plugin);
 		plugins.remove(w);
-		pluginMap.remove(w.getName());
+		pluginMap.remove(w.getId());
 	}
 
 	/**
@@ -847,26 +855,31 @@ public class PluginManager<T extends PluginHostContext> {
 
 	private void activatePlugin(PluginWrapper<Plugin<T>> w) {
 		try {
-			context.log(PluginHostContext.LOG_DEBUG, String.format("Activating plugin %2d : %s [%s]",
-					activatedPlugins.size() + 1, w.getName(), w.plugin.getClass()));
+			context.log(PluginHostContext.LOG_INFORMATION, String.format("Activating plugin %2d : %s [%s]",
+					activatedPlugins.size() + 1, w.getId(), w.plugin.getClass()));
 			w.plugin.activatePlugin(context);
-			context.log(PluginHostContext.LOG_DEBUG,
-					String.format("Activated plugin %2d : %s [%s]", activatedPlugins.size() + 1, w.getName(), w.plugin.getClass()));
+			context.log(PluginHostContext.LOG_INFORMATION,
+					String.format("Activated plugin %2d : %s [%s]", activatedPlugins.size() + 1, w.getId(), w.plugin.getClass()));
 			w.status.status = STATUS_ACTIVATED;
 			synchronized (lock) {
 				processedPlugins.add(w);
 				activatedPlugins.add(w);
 				for (PluginWrapper<Plugin<T>> en : plugins) {
 					if (en != w) {
-						String pname = en.properties.getProperty(PLUGIN_NAME);
+						String pname = en.getId();
 						Set<PluginWrapper<Plugin<T>>> l = onLoad.get(pname);
 						if (l != null) {
 							for (PluginWrapper<Plugin<T>> p : new ArrayList<>(l)) {
+								context.log(PluginHostContext.LOG_INFORMATION,
+										String.format("   %s is a dependent of %s", p.getId(), w.getId()));
 								if (!activatedPlugins.contains(p)) {
 									if (areAllDepsReady(p)) {
 										removeFromPlan(p);
 										loadQueue.execute(() -> activatePlugin(p));
 									}
+									else
+										context.log(PluginHostContext.LOG_INFORMATION,
+												String.format("   %s (dependent of %s) deps are not ready: %s", p.getName(), w.getName(), p.properties.getProperty(PLUGIN_DEPENDENCIES)));
 								}
 							}
 						}
@@ -944,8 +957,8 @@ public class PluginManager<T extends PluginHostContext> {
 			context.log(PluginHostContext.LOG_INFORMATION,
 					"Checking dependencies for " + w.getName() + " (order " + w.getOrder() + ")");
 			String deps = w.properties.getProperty(PLUGIN_DEPENDENCIES);
-			if (deps != null) {
-				context.log(PluginHostContext.LOG_INFORMATION, "Dependencies for " + w.getName() + " are " + deps);
+			if (deps != null && deps.length() > 0) {
+				context.log(PluginHostContext.LOG_INFORMATION, "    " + deps);
 				StringTokenizer t = new StringTokenizer(deps, ",");
 				while (t.hasMoreTokens()) {
 					String depName = t.nextToken();
@@ -984,7 +997,7 @@ public class PluginManager<T extends PluginHostContext> {
 		}
 		for (PluginWrapper<Plugin<T>> w : toRemove) {
 			plugins.remove(w);
-			pluginMap.remove(w.getName());
+			pluginMap.remove(w.getId());
 		}
 	}
 
@@ -993,7 +1006,7 @@ public class PluginManager<T extends PluginHostContext> {
 		b.append(key);
 		b.append("=");
 		for (PluginWrapper<Plugin<T>> pl : value) {
-			b.append(pl.getName());
+			b.append(pl.getId());
 			b.append(",");
 		}
 		return b.toString();
@@ -1033,18 +1046,18 @@ public class PluginManager<T extends PluginHostContext> {
 
 	private void startPlugin(PluginWrapper<Plugin<T>> w) {
 		try {
-			context.log(PluginHostContext.LOG_DEBUG,
-					String.format("Starting plugin %2d : %s [%s]", startedPlugins.size() + 1, w.getName(), w.plugin.getClass()));
+			context.log(PluginHostContext.LOG_INFORMATION,
+					String.format("Starting plugin %2d : %s [%s]", startedPlugins.size() + 1, w.getId(), w.plugin.getClass()));
 			w.plugin.startPlugin(context);
-			context.log(PluginHostContext.LOG_DEBUG,
-					String.format("Started plugin %2d : %s [%s]", startedPlugins.size() + 1, w.getName(), w.plugin.getClass()));
+			context.log(PluginHostContext.LOG_INFORMATION,
+					String.format("Started plugin %2d : %s [%s]", startedPlugins.size() + 1, w.getId(), w.plugin.getClass()));
 			w.status.status = STATUS_STARTED;
 			synchronized (lock) {
 				processedPlugins.add(w);
 				startedPlugins.add(w);
 				for (PluginWrapper<Plugin<T>> en : plugins) {
 					if (en != w) {
-						String pname = en.properties.getProperty(PLUGIN_NAME);
+						String pname = en.getId();
 						Set<PluginWrapper<Plugin<T>>> l = onLoad.get(pname);
 						if (l != null) {
 							for (PluginWrapper<Plugin<T>> p : new ArrayList<>(l)) {
@@ -1064,11 +1077,11 @@ public class PluginManager<T extends PluginHostContext> {
 				processedPlugins.add(w);
 				w.status.exception = pe;
 				w.status.status = STATUS_ERRORED;
-				context.log(PluginHostContext.LOG_ERROR, "Failed to start plugin " + w.properties.getProperty(PLUGIN_NAME), pe);
+				context.log(PluginHostContext.LOG_ERROR, "Failed to start plugin " + w.getId(), pe);
 				/* Anything that depends on this plugin cannot be started now */
 				for (PluginWrapper<Plugin<T>> en : plugins) {
 					if (en != w) {
-						String pname = en.properties.getProperty(PLUGIN_NAME);
+						String pname = en.getId();
 						Set<PluginWrapper<Plugin<T>>> l = onLoad.get(pname);
 						if (l != null) {
 							for (PluginWrapper<Plugin<T>> p : new ArrayList<>(l)) {

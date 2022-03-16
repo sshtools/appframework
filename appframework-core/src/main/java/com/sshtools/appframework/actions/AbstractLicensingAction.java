@@ -33,12 +33,12 @@ public abstract class AbstractLicensingAction extends AppAction {
 		putValue(NAME, Messages.getString("AbstractLicensingAction.Name"));
 		putValue(SHORT_DESCRIPTION, Messages.getString("AbstractLicensingAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION, Messages.getString("AbstractLicensingAction.LongDesc"));
-		putValue(MNEMONIC_KEY, new Integer('u'));
-		putValue(ON_MENUBAR, new Boolean(true));
+		putValue(MNEMONIC_KEY, Integer.valueOf('u'));
+		putValue(ON_MENUBAR, Boolean.valueOf(true));
 		putValue(MENU_NAME, "Help");
-		putValue(MENU_ITEM_GROUP, new Integer(100));
-		putValue(MENU_ITEM_WEIGHT, new Integer(90));
-		putValue(ON_TOOLBAR, new Boolean(false));
+		putValue(MENU_ITEM_GROUP, Integer.valueOf(100));
+		putValue(MENU_ITEM_WEIGHT, Integer.valueOf(90));
+		putValue(ON_TOOLBAR, Boolean.valueOf(false));
 	}
 
 }

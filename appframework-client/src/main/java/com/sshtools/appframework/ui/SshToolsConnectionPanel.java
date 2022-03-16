@@ -57,6 +57,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 
+import org.kordamp.ikonli.carbonicons.CarbonIcons;
+
 import com.sshtools.appframework.api.ui.AbstractSshToolsApplicationClientPanel;
 import com.sshtools.appframework.api.ui.SshToolsConnectionTab;
 import com.sshtools.appframework.ui.MessagePanel.Type;
@@ -264,7 +266,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 			for (Iterator<SchemeSettings> it = showSchemes.iterator(); it.hasNext();) {
 				final SchemeSettings settings = it.next();
 				ToolButton toolButton = new ToolButton(
-						new AbstractAction(settings.handler.getDescription(), settings.handler.getIcon()) {
+						new AbstractAction(settings.handler.getDescription(), settings.handler.getMediumIcon()) {
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
 								schemeSelected(settings);
@@ -334,7 +336,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 			int i1 = handler1.handler.getCategory() == null && handler2.handler.getCategory() != null ? -1
 					: (handler2.handler.getCategory() == null && handler1.handler.getCategory() != null ? 1
 							: handler1.handler.getCategory().compareTo(handler2.handler.getCategory()));
-			return i1 == 0 ? new Integer(handler1.handler.getWeight()).compareTo(new Integer(handler2.handler.getWeight())) : i1;
+			return i1 == 0 ? Integer.valueOf(handler1.handler.getWeight()).compareTo(Integer.valueOf(handler2.handler.getWeight())) : i1;
 		}
 	}
 
@@ -448,16 +450,8 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 		}
 		final UserAction userAction = new UserAction();
 		// Create the bottom button panel
-		final JButton cancel = new JButton(Messages.getString("Cancel"), IconStore.getInstance().getIcon("process-stop", 24));
-		cancel.setMnemonic('c');
-		cancel.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent evt) {
-				dialog.setVisible(false);
-			}
-		});
 		final JButton connect = new JButton(Messages.getString("Connect"),
-				IconStore.getInstance().getIcon("network-transmit-receive", 24));
+				IconStore.getInstance().icon(CarbonIcons.PLUG_FILLED, 24));
 		connect.setMnemonic('t');
 		connect.addActionListener(new ActionListener() {
 			@Override
@@ -474,7 +468,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 				}
 			}
 		});
-		final JButton save = new JButton(Messages.getString("Save"), IconStore.getInstance().getIcon("document-save", 24));
+		final JButton save = new JButton(Messages.getString("Save"), IconStore.getInstance().icon(CarbonIcons.SAVE, 24));
 		save.setMnemonic('s');
 		save.addActionListener(new ActionListener() {
 			@Override
@@ -538,7 +532,6 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 		JPanel buttonPanel = new JPanel(new MigLayout("", "[fill, grow][][][]", "[]"));
 		buttonPanel.add(advancedSelect, "growx");
 		buttonPanel.add(setDefault);
-		buttonPanel.add(cancel);
 		buttonPanel.add(save);
 		buttonPanel.add(connect);
 		//
@@ -551,7 +544,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 		dialog.getContentPane().add(mainPanel);
 		dialog.setSize(size);
 		dialog.setResizable(true);
-		UIUtil.positionComponent(SwingConstants.CENTER, dialog);
+		UIUtil.positionComponent(SwingConstants.CENTER, dialog, SwingUtilities.getWindowAncestor(parent));
 		dialog.setVisible(true);
 		if (!userAction.connect && !userAction.save) {
 			return null;

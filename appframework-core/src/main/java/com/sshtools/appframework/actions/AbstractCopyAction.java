@@ -24,6 +24,8 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import org.kordamp.ikonli.carbonicons.CarbonIcons;
+
 @SuppressWarnings("serial")
 public abstract class AbstractCopyAction extends AbstractAppAction {
 
@@ -33,15 +35,15 @@ public abstract class AbstractCopyAction extends AbstractAppAction {
 
 	public AbstractCopyAction(boolean onToolBar) {
 		putValue(NAME, Messages.getString("AbstractCopyAction.Name"));
-		putValue(SMALL_ICON, loadIcon("edit-copy", 16));
-		putValue(MEDIUM_ICON, loadIcon("edit-copy", 24));
+		putValue(SMALL_ICON, loadIcon(CarbonIcons.COPY, 16));
+		putValue(MEDIUM_ICON, loadIcon(CarbonIcons.COPY, 24));
 		putValue(ACCELERATOR_KEY,
-				KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
+				KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK));
 		putValue(SHORT_DESCRIPTION,
 				Messages.getString("AbstractCopyAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION,
 				Messages.getString("AbstractCopyAction.LongDesc"));
-		putValue(MNEMONIC_KEY, new Integer('c'));
+		putValue(MNEMONIC_KEY, Integer.valueOf('c'));
 		putValue(ON_MENUBAR, true);
 		putValue(MENU_NAME, "Edit");
 		putValue(MENU_ITEM_GROUP, 10);

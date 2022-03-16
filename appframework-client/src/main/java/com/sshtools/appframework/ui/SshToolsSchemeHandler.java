@@ -37,6 +37,7 @@ public abstract class SshToolsSchemeHandler<T extends ProfileTransport<?>> exten
 	private boolean internal;
 	private int weight;
 	private Icon largeIcon;
+	private Icon mediumIcon;
 	private boolean experimental;
 
 	/**
@@ -124,5 +125,13 @@ public abstract class SshToolsSchemeHandler<T extends ProfileTransport<?>> exten
 
 	protected void setInternal(boolean internal) {
 		this.internal = internal;
+	}
+
+	protected Icon getMediumIcon() {
+		return mediumIcon;
+	}
+
+	protected void setMediumIcon(Icon mediumIcon) {
+		this.mediumIcon = mediumIcon;
 	}
 }

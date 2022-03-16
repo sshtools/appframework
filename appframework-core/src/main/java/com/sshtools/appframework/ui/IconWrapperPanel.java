@@ -30,6 +30,7 @@ import javax.swing.JPanel;
  * 
  * @author $author$
  */
+@SuppressWarnings("serial")
 public class IconWrapperPanel extends JPanel {
     private JLabel iconLabel;
     private JPanel westPanel;

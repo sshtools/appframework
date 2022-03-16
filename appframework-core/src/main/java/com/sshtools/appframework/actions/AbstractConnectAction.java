@@ -23,6 +23,8 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import org.kordamp.ikonli.carbonicons.CarbonIcons;
+
 import com.sshtools.ui.swing.AppAction;
 
 /**
@@ -30,6 +32,7 @@ import com.sshtools.ui.swing.AppAction;
  * connection.
  * 
  */
+@SuppressWarnings("serial")
 public abstract class AbstractConnectAction extends AbstractAppAction {
 	public final static String VAL_NAME = Messages.getString("AbstractConnectAction.Name");
 
@@ -40,20 +43,20 @@ public abstract class AbstractConnectAction extends AbstractAppAction {
 	 */
 	public AbstractConnectAction(boolean onToolBar) {
 		putValue(NAME, VAL_NAME);
-		putValue(SMALL_ICON, loadIcon("network-wired", 16));
-		putValue(MEDIUM_ICON, loadIcon("network-wired", 24));
+		putValue(SMALL_ICON, loadIcon(CarbonIcons.PLUG_FILLED, 16));
+		putValue(MEDIUM_ICON, loadIcon(CarbonIcons.PLUG_FILLED, 24));
 		putValue(SHORT_DESCRIPTION, Messages.getString("AbstractConnectAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION, Messages.getString("AbstractConnectAction.LongDesc"));
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.ALT_MASK + InputEvent.SHIFT_MASK));
-		putValue(MNEMONIC_KEY, new Integer('c'));
-		putValue(ON_MENUBAR, new Boolean(true));
+		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.ALT_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
+		putValue(MNEMONIC_KEY, Integer.valueOf('c'));
+		putValue(ON_MENUBAR, Boolean.valueOf(true));
 		putValue(MENU_NAME, "File");
-		putValue(MENU_ITEM_GROUP, new Integer(0));
-		putValue(MENU_ITEM_WEIGHT, new Integer(1));
-		putValue(ON_TOOLBAR, new Boolean(onToolBar));
+		putValue(MENU_ITEM_GROUP, Integer.valueOf(0));
+		putValue(MENU_ITEM_WEIGHT, Integer.valueOf(1));
+		putValue(ON_TOOLBAR, Boolean.valueOf(onToolBar));
 		if (onToolBar) {
-			putValue(TOOLBAR_GROUP, new Integer(0));
-			putValue(TOOLBAR_WEIGHT, new Integer(0));
+			putValue(TOOLBAR_GROUP, Integer.valueOf(0));
+			putValue(TOOLBAR_WEIGHT, Integer.valueOf(0));
 			putValue(TEXT_ON_TOOLBAR, Boolean.TRUE);
 		}
 	}

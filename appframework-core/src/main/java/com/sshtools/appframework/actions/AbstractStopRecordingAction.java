@@ -24,6 +24,8 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import org.kordamp.ikonli.carbonicons.CarbonIcons;
+
 import com.sshtools.ui.swing.AppAction;
 
 /**
@@ -41,19 +43,19 @@ public abstract class AbstractStopRecordingAction extends AbstractAppAction {
 	 */
 	public AbstractStopRecordingAction() {
 		putValue(NAME, Messages.getString("AbstractStopRecordingAction.Name"));
-		putValue(SMALL_ICON, loadIcon("media-playback-stop", 16));
-		putValue(MEDIUM_ICON, loadIcon("media-playback-stop", 24));
+		putValue(SMALL_ICON, loadIcon(CarbonIcons.STOP_FILLED, 16));
+		putValue(MEDIUM_ICON, loadIcon(CarbonIcons.STOP_FILLED, 24));
 		putValue(SHORT_DESCRIPTION, Messages.getString("AbstractStopRecordingAction.ShortDesc"));
 		putValue(LONG_DESCRIPTION, Messages.getString("AbstractStopRecordingAction.LongDesc"));
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.ALT_MASK));
-		putValue(MNEMONIC_KEY, new Integer('t'));
-		putValue(ON_MENUBAR, new Boolean(true));
+		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.ALT_DOWN_MASK));
+		putValue(MNEMONIC_KEY, Integer.valueOf('t'));
+		putValue(ON_MENUBAR, Boolean.valueOf(true));
 		putValue(MENU_NAME, "Record");
-		putValue(MENU_ITEM_GROUP, new Integer(60));
-		putValue(MENU_ITEM_WEIGHT, new Integer(10));
-		putValue(ON_TOOLBAR, new Boolean(false));
-		putValue(TOOLBAR_GROUP, new Integer(60));
-		putValue(TOOLBAR_WEIGHT, new Integer(10));
+		putValue(MENU_ITEM_GROUP, Integer.valueOf(60));
+		putValue(MENU_ITEM_WEIGHT, Integer.valueOf(10));
+		putValue(ON_TOOLBAR, Boolean.valueOf(false));
+		putValue(TOOLBAR_GROUP, Integer.valueOf(60));
+		putValue(TOOLBAR_WEIGHT, Integer.valueOf(10));
 
 	}
 

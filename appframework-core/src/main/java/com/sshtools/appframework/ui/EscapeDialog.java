@@ -27,6 +27,7 @@ import java.awt.event.KeyListener;
 
 import javax.swing.JDialog;
 
+@SuppressWarnings("serial")
 public class EscapeDialog extends JDialog implements ContainerListener, KeyListener {
 	public EscapeDialog(Frame frame, String title, boolean modal) {
 		super(frame, title, modal);

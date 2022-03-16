@@ -26,6 +26,7 @@ import javax.swing.JPanel;
 
 import com.sshtools.ui.swing.ResourceIcon;
 
+@SuppressWarnings("serial")
 public class ImagePanel extends JPanel {
 
     private boolean alignBottomRight = false;

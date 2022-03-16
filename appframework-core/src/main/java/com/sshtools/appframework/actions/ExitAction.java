@@ -52,14 +52,14 @@ public class ExitAction extends AbstractAppAction {
 		this.container = container;
 		putValue(Action.NAME, Messages.getString("ExitAction.Name"));
 		putValue(Action.SHORT_DESCRIPTION, Messages.getString("ExitAction.ShortDesc"));
-		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.ALT_MASK));
+		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.ALT_DOWN_MASK));
 		putValue(Action.LONG_DESCRIPTION, Messages.getString("ExitAction.LongDesc"));
-		putValue(Action.MNEMONIC_KEY, new Integer('x'));
-		putValue(AppAction.ON_MENUBAR, new Boolean(true));
+		putValue(Action.MNEMONIC_KEY, Integer.valueOf('x'));
+		putValue(AppAction.ON_MENUBAR, Boolean.valueOf(true));
 		putValue(AppAction.MENU_NAME, "File");
-		putValue(AppAction.MENU_ITEM_GROUP, new Integer(90));
-		putValue(AppAction.MENU_ITEM_WEIGHT, new Integer(90));
-		putValue(AppAction.ON_TOOLBAR, new Boolean(false));
+		putValue(AppAction.MENU_ITEM_GROUP, Integer.valueOf(90));
+		putValue(AppAction.MENU_ITEM_WEIGHT, Integer.valueOf(90));
+		putValue(AppAction.ON_TOOLBAR, Boolean.valueOf(false));
 		setEmptyIcons();
 
 	}
