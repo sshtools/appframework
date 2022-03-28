@@ -38,7 +38,7 @@ import javax.swing.KeyStroke;
 /**
  * Bind key action to a {@link JComponent}. The Key actions dispatch the
  * following signals:
- * <table border="1" summary="Keys">
+ * <table>
  * <tr>
  * <td>Signal name</td>
  * 

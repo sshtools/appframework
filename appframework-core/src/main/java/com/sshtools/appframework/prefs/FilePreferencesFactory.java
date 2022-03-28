@@ -26,12 +26,12 @@ import java.util.prefs.PreferencesFactory;
  * <p>
  * PreferencesFactory implementation that stores the preferences in a
  * user-defined file. To use it, set the system property
- * <tt>java.util.prefs.PreferencesFactory</tt> to
- * <tt>net.infotrek.util.prefs.FilePreferencesFactory</tt>
+ * <code>java.util.prefs.PreferencesFactory</code> to
+ * <code>net.infotrek.util.prefs.FilePreferencesFactory</code>
  * </p>
  * <p>
  * The file defaults to [user.home]/.fileprefs, but may be overridden with the
- * system property <tt>net.infotrek.util.prefs.FilePreferencesFactory.file</tt>
+ * system property <code>net.infotrek.util.prefs.FilePreferencesFactory.file</code>
  * </p>
  * 
  * @author David Croft (<a href="http://www.davidc.net">www.davidc.net</a>)

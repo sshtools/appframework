@@ -94,7 +94,7 @@ import java.util.Scanner;
  * files commonly met on Windows, but there are some important differences:
  * </p>
  * <div class="itemizedlist">
- * <ul type="disc">
+ * <ul>
  * <li>
  * <p>
  * <code class="filename">.ini</code> files use the ';' character to begin

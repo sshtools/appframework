@@ -121,7 +121,7 @@ public class ToolButton extends JButton {
 	/**
 	 * Gets the text for the button
 	 *
-	 * @return the button text if not hidden otherwise <tt>null</tt>
+	 * @return the button text if not hidden otherwise <code>null</code>
 	 */
 	@Override
 	public String getText() {
@@ -131,7 +131,7 @@ public class ToolButton extends JButton {
 	/**
 	 * Determines if the button can retrieve focus
 	 *
-	 * @return always returns <tt>false</tt>
+	 * @return always returns <code>false</code>
 	 */
 	@Override
 	public boolean isFocusable() {
@@ -141,8 +141,8 @@ public class ToolButton extends JButton {
 	/**
 	 * Sets the hide text property of the buttin
 	 *
-	 * @param hideText <tt>true</tt> if the text is to be hidden otherwies
-	 *            <tt>false</tt>
+	 * @param hideText <code>true</code> if the text is to be hidden otherwies
+	 *            <code>false</code>
 	 */
 	public void setHideText(boolean hideText) {
 		if (this.hideText != hideText) {
