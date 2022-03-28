@@ -36,50 +36,7 @@ import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 
 /**
- * Bind key action to a {@link JComponent}. The Key actions dispatch the
- * following signals:
- * <table>
- * <tr>
- * <td>Signal name</td>
- * 
- * <td>Default key combinations</td>
- * </tr>
- * <tr>
- * <td>location-popup</td>
- * <td>
- * <b>Control+L</b> (empty path); <b>/</b> (path of "/") <b>~</b>; (path of "~")
- * </td>
- * 
- * </tr>
- * <tr>
- * <td>up-folder</td>
- * <td>
- * <b>Alt+Up</b>; <b>Backspace</b></td>
- * </tr>
- * <tr>
- * <td>down-folder</td>
- * <td>
- * <b>Alt+Down</b>
- * </td>
- * </tr>
- * <tr>
- * <td>home-folder</td>
- * <td>
- * 
- * <b>Alt+Home</b></td>
- * </tr>
- * <tr>
- * <td>desktop-folder</td>
- * <td>
- * <b>Alt+D</b></td>
- * </tr>
- * <tr>
- * 
- * <td>quick-bookmark</td>
- * <td>
- * <b>Alt+1</b> through <b>Alt+0</b></td>
- * </tr>
- * </table>
+ * Bind key action to a {@link JComponent}. 
  * 
  * @author c.cerbo
  * 
