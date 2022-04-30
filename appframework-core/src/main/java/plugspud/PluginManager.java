@@ -419,8 +419,8 @@ public class PluginManager<T extends PluginHostContext> {
 	 */
 	public void init(T context) throws PluginException {
 		this.context = context;
-		loadQueue = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() * 2);
-//		loadQueue = Executors.newScheduledThreadPool(1);
+//		loadQueue = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+		loadQueue = Executors.newScheduledThreadPool(1);
 		pluginMap = new HashMap<String, PluginWrapper<Plugin<T>>>();
 		plugins = new ArrayList<PluginWrapper<Plugin<T>>>();
 		startedPlugins = new HashSet<PluginWrapper<Plugin<T>>>();
@@ -484,7 +484,7 @@ public class PluginManager<T extends PluginHostContext> {
 			// Create a classloader for all of the plugin jars
 			Vector<URL> v = new Vector<URL>();
 			if (pluginDir != null) {
-				URL u = pluginDir.toURL();
+				URL u = pluginDir.toURI().toURL();
 				v.addElement(u);
 				context.log(PluginHostContext.LOG_INFORMATION, "Added Found plugin directory " + u.toExternalForm());
 				findJars(pluginDir, v);
@@ -777,7 +777,8 @@ public class PluginManager<T extends PluginHostContext> {
 			String deps = w.properties.getProperty(PLUGIN_DEPENDENCIES);
 			if (StringUtils.isBlank(deps)) {
 				started++;
-				boolean sync = "true".equals(w.properties.getProperty(PLUGIN_SYNC_LOAD));
+				//boolean sync = "true".equals(w.properties.getProperty(PLUGIN_SYNC_LOAD));
+				boolean sync = true;
 				context.log(PluginHostContext.LOG_DEBUG,
 						"Starting root plugin " + w.getName() + " [" + w.plugin.getClass() + ", sync=" + sync + "]");
 				if (sync) {

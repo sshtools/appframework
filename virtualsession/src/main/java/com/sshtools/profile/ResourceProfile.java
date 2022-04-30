@@ -77,6 +77,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	private Map<String, XMLElement> extensions = new HashMap<String, XMLElement>();
 	private boolean needSave;
 	private List<ResourceProfileListener> listeners = new ArrayList<ResourceProfileListener>();
+	private boolean persisted;
 
 	/**
 	 * Construct a new profile from an existing one.
@@ -116,6 +117,24 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 		} catch (CloneNotSupportedException e) {
 			throw new Error(e);
 		}
+	}
+
+	/**
+	 * Get whether this profile has been persisted.
+	 * 
+	 * @return persisted
+	 */
+	public boolean isPersisted() {
+		return persisted;
+	}
+
+	/**
+	 * Set whether this profile has been persisted.
+	 * 
+	 * @param persisted persisted
+	 */
+	public void setPersisted(boolean persisted) {
+		this.persisted = persisted;
 	}
 
 	/**
@@ -290,6 +309,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	 */
 	public void load(InputStream in) throws IOException {
 		loadImpl(in);
+		persisted = true;
 	}
 
 	/**
@@ -300,6 +320,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	 */
 	public void save(OutputStream out) throws IOException {
 		saveImpl(out);
+		persisted = true;
 	}
 
 	private void saveImpl(OutputStream out) {
@@ -559,6 +580,7 @@ public class ResourceProfile<T extends ProfileTransport<?>> {
 	public void setNeedSave(boolean needSave) {
 		if (this.needSave != needSave) {
 			this.needSave = needSave;
+			fireProfileChanged();
 		}
 	}
 
