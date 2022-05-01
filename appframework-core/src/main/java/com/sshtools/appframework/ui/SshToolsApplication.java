@@ -60,18 +60,14 @@ import java.util.UUID;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -92,7 +88,6 @@ import com.sshtools.appframework.actions.AboutAction;
 import com.sshtools.appframework.actions.AbstractOpenAction;
 import com.sshtools.appframework.actions.ExitAction;
 import com.sshtools.appframework.api.SshToolsApplicationException;
-import com.sshtools.appframework.api.ui.MenuBuilder;
 import com.sshtools.appframework.api.ui.MultilineLabel;
 import com.sshtools.appframework.api.ui.SshToolsApplicationContainer;
 import com.sshtools.appframework.api.ui.SshToolsApplicationPanel;
@@ -108,8 +103,6 @@ import com.sshtools.ui.swing.EmptyIcon;
 import com.sshtools.ui.swing.OptionDialog;
 import com.sshtools.ui.swing.UIUtil;
 
-import dorkbox.systemTray.Entry;
-import dorkbox.systemTray.SystemTray;
 import plugspud.PluginException;
 import plugspud.PluginHostContext;
 import plugspud.PluginManager;
@@ -151,12 +144,10 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	public final static String PREF_LAF = "apps.laf";
 	public final static String PREF_ICON_COLOR = "apps.iconColor";
 	public final static String PREF_SKIN = "apps.skin";
-	public final static String PREF_STAY_RUNNING = "apps.stayRunningOnLastWindowClose";
 	public final static String PREF_TOOLBAR_SHOW_SELECTIVE_TEXT = "apps.toolBar.showSelectiveText";
 	public final static String PREF_TOOLBAR_SMALL_ICONS = "apps.toolBar.smallIcons";
 	public static final String PREF_TOOLBAR_WRAP = "apps.toolBar.wrap";
 	public final static String PREF_USE_SYSTEM_ICON_THEME = "apps.toolBar.useSystemIconTheme";
-	public final static String PREF_TRAY_ICON = "apps.toolBar.trayIcon";
 	final static Logger log = LoggerFactory.getLogger(SshToolsApplication.class);
 	private static List<SshToolsApplicationContainer> containers = new ArrayList<SshToolsApplicationContainer>();
 	private static SshToolsApplication instance;
@@ -319,49 +310,15 @@ public abstract class SshToolsApplication implements PluginHostContext {
 	public abstract boolean canUpgrade();
 
 	public void closeContainer(SshToolsApplicationContainer container) {
-		closeContainer(container, false);
-	}
-
-	public void closeContainer(SshToolsApplicationContainer container, boolean exitIfLast) {
 		boolean canClose = container.canCloseContainer();
 		if (canClose) {
 			if (container.closeContainer()) {
 				containers.remove(container);
-				if ((exitIfLast || !PreferencesStore.getBoolean(PREF_STAY_RUNNING, false)) && containers.size() == 0) {
+				if (containers.size() == 0) {
 					exit();
 				}
 			}
 		}
-	}
-
-	public void showTrayIcon() {
-		SystemTray systemTray = SystemTray.get();
-		SystemTray.AUTO_SIZE = false;
-		SystemTray.AUTO_FIX_INCONSISTENCIES = false;
-		if (systemTray == null) {
-			throw new RuntimeException("Unable to load SystemTray!");
-		}
-		systemTray.setStatus(getApplicationName());
-		systemTray.setTooltip(getApplicationName() + " (" + getApplicationVersion() + ")");
-		systemTray.setImage(((ImageIcon) getApplicationSmallIcon()).getImage());
-		mruModel.addListDataListener(new ListDataListener() {
-			@Override
-			public void intervalRemoved(ListDataEvent e) {
-				addSystemTrayMenu(systemTray);
-			}
-
-			@Override
-			public void intervalAdded(ListDataEvent e) {
-				addSystemTrayMenu(systemTray);
-			}
-
-			@Override
-			public void contentsChanged(ListDataEvent e) {
-				addSystemTrayMenu(systemTray);
-			}
-		});
-		addSystemTrayMenu(systemTray);
-		systemTray.setEnabled(true);
 	}
 
 	public void open() {
@@ -396,24 +353,6 @@ public abstract class SshToolsApplication implements PluginHostContext {
 		actions.add(new AboutAction(null, this));
 		actions.add(createTrayFavouritesMRUMenu());
 		return actions;
-	}
-
-	private void addSystemTrayMenu(SystemTray systemTray) {
-		JMenu trayMenu = new JMenu("UniTTY");
-		MenuBuilder tb = new MenuBuilder(trayMenu);
-		tb.listActions().addAll(getTrayActions());
-		tb.setSmallIcons(true);
-		tb.rebuildActionComponents();
-		trayMenu.setIcon(getApplicationSmallIcon());
-		if (systemTray.getMenu() != null) {
-			while (true) {
-				Entry item = systemTray.getMenu().get(0);
-				if (item == null)
-					break;
-				systemTray.getMenu().remove(item);
-			}
-		}
-		systemTray.setMenu(trayMenu);
 	}
 
 	@SuppressWarnings("serial")
@@ -502,11 +441,6 @@ public abstract class SshToolsApplication implements PluginHostContext {
 
 	public String getApplicationVersion() {
 		return GeneralUtil.getArtifactVersion(getApplicationArtifactGroup(), getApplicationArtifactId());
-	}
-
-	public boolean isTraySupported() {
-		// TODO for now... dorkbox seem broken
-		return false;
 	}
 
 	/**
@@ -810,8 +744,6 @@ public abstract class SshToolsApplication implements PluginHostContext {
 			t.setDaemon(true);
 			t.start();
 		}
-		if (isTraySupported() && PreferencesStore.getBoolean(PREF_TRAY_ICON, true))
-			showTrayIcon();
 	}
 
 	protected void parsed(CommandLine commandLine) throws Exception {

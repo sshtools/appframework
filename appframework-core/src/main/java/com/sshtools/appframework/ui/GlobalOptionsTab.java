@@ -54,14 +54,12 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 	private JCheckBox toolBarShowSelectiveText = new JCheckBox(Messages.getString("GlobalOptionsTab.SelectiveText"));
 	private JCheckBox toolBarSmallIcons = new JCheckBox(Messages.getString("GlobalOptionsTab.SmallIcons"));
 	private JCheckBox useSystemIconTheme = new JCheckBox(Messages.getString("GlobalOptionsTab.UseSystemIconTheme"));
-	private JCheckBox stayRunning = new JCheckBox("Stay running on closing last window");
 	private JCheckBox wrapToolBar = new JCheckBox("Wrap tool bar icons");
-	private JCheckBox trayIcon = new JCheckBox("System tray icon");
 
 	public GlobalOptionsTab(SshToolsApplication application) {
 		super();
 		this.application = application;
-		setLayout(new MigLayout("wrap 2, fillx", "[][grow]", "[][][][][][][]"));
+		setLayout(new MigLayout("wrap 2, fillx", "[][grow]", "[][][][][][]"));
 		add(new JLabel(Messages.getString("GlobalOptionsTab.LAF")));
 		lafChooser = new JComboBox<UIManager.LookAndFeelInfo>(new LookAndFeelModel());
 		lafChooser.setRenderer(new ComboBoxRenderer<UIManager.LookAndFeelInfo>(lafChooser) {
@@ -82,12 +80,6 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 		add(toolBarShowSelectiveText, "span 2, gapleft 32");
 		wrapToolBar.setMnemonic('w');
 		add(wrapToolBar, "span 2, gapleft 32");
-		stayRunning.setMnemonic('r');
-		add(stayRunning, "span 2, gapleft 32");
-		if (application.isTraySupported()) {
-			trayIcon.setMnemonic('t');
-			add(trayIcon, "span 2, gapleft 32");
-		}
 		reset();
 	}
 
@@ -105,8 +97,6 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 		PreferencesStore.putBoolean(SshToolsApplication.PREF_TOOLBAR_SMALL_ICONS, toolBarSmallIcons.isSelected());
 		PreferencesStore.putBoolean(SshToolsApplication.PREF_USE_SYSTEM_ICON_THEME, useSystemIconTheme.isSelected());
 		PreferencesStore.putBoolean(SshToolsApplication.PREF_TOOLBAR_WRAP, wrapToolBar.isSelected());
-		PreferencesStore.putBoolean(SshToolsApplication.PREF_STAY_RUNNING, stayRunning.isSelected());
-		PreferencesStore.putBoolean(SshToolsApplication.PREF_TRAY_ICON, trayIcon.isSelected());
 		if (changed) {
 			application.setLookAndFeel(laf);
 		}
@@ -165,9 +155,6 @@ public class GlobalOptionsTab extends JPanel implements OptionsTab {
 		toolBarSmallIcons.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_TOOLBAR_SMALL_ICONS, false));
 		useSystemIconTheme.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_USE_SYSTEM_ICON_THEME, true));
 		wrapToolBar.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_TOOLBAR_WRAP, false));
-		stayRunning.setSelected(
-				PreferencesStore.getBoolean(SshToolsApplication.PREF_STAY_RUNNING, application.getStayRunningDefault()));
-		trayIcon.setSelected(PreferencesStore.getBoolean(SshToolsApplication.PREF_TRAY_ICON, true));
 	}
 
 	@Override

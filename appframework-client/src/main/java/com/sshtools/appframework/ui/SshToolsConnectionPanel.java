@@ -416,7 +416,8 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 		}
 	}
 
-	public static final Dimension DEFAULT_SIZE = new Dimension(620, 600);
+	//public static final Dimension DEFAULT_SIZE = new Dimension(620, 600);
+	public static final Dimension DEFAULT_SIZE = null;
 
 	public static ResourceProfile<?> showConnectionDialog(Component parent,
 			List<SshToolsConnectionTab<? extends ProfileTransport<?>>> optionalTabs) {
@@ -542,7 +543,8 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 		// Show the dialog
 		dialog.getContentPane().setLayout(new GridLayout(1, 1));
 		dialog.getContentPane().add(mainPanel);
-		dialog.setSize(size);
+		if(size != null)
+			dialog.setSize(size);
 		dialog.setResizable(true);
 		UIUtil.positionComponent(SwingConstants.CENTER, dialog, SwingUtilities.getWindowAncestor(parent));
 		dialog.setVisible(true);
