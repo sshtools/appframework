@@ -53,7 +53,7 @@ public class ActionJCheckboxMenuItem extends JCheckBoxMenuItem {
 		if(color instanceof ColorUIResource) {
 			ColorUIResource cui = (ColorUIResource)color;
 			if(cui.getTransparency() == 1) {
-				color = UIManager.getColor("black");
+				color = UIManager.getColor("Label.foreground");
 				if(color != null)
 					menuItem.setForeground(new Color(color.getRed(), color.getGreen(), color.getBlue()));
 			}

@@ -416,8 +416,7 @@ public class SshToolsConnectionPanel extends JPanel implements ActionListener {
 		}
 	}
 
-	//public static final Dimension DEFAULT_SIZE = new Dimension(620, 600);
-	public static final Dimension DEFAULT_SIZE = null;
+	public static final Dimension DEFAULT_SIZE = new Dimension(640, 740);
 
 	public static ResourceProfile<?> showConnectionDialog(Component parent,
 			List<SshToolsConnectionTab<? extends ProfileTransport<?>>> optionalTabs) {
