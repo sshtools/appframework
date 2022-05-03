@@ -160,10 +160,24 @@ public class ActionToggleButton extends JToggleButton {
 			setIcon((Icon) a.getValue(AppAction.MEDIUM_ICON));
 	}
 
+	@Override
+	public void updateUI() {
+		super.updateUI();
+		setUI();
+	}
+	
+	private void setUI() {
+		String name = UIManager.getLookAndFeel().getClass().getName();
+//		if(name.startsWith("com.github.weisj.")) {
+//			setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 8));
+//		}
+		enablePlasticWorkaround = name.startsWith("com.jgoodies.looks.plastic.");
+		setContentAreaFilled(enablePlasticWorkaround);
+	}
+	
 	private void init(AppAction a, boolean useToolIcon, boolean showText) {
 		this.useToolIcon = useToolIcon;
-		setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 8));
-		enablePlasticWorkaround = UIManager.getLookAndFeel().getClass().getName().startsWith("com.jgoodies.looks.plastic.");
+		setUI();
 		setAction(a);
 		addMouseListener(new MouseAdapter() {
 			@Override
