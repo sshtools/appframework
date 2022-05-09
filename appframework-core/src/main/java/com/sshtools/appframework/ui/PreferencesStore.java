@@ -32,6 +32,8 @@ import javax.swing.JTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sshtools.ui.swing.UIUtil;
+
 /**
  *
  *
@@ -181,7 +183,7 @@ public class PreferencesStore {
 	 * @throws IllegalArgumentException on error
 	 */
 	public static void restoreTableMetrics(JTable table, String pref, int[] defaultWidths) {
-		log.info("Restore table metrics " + pref);
+		log.info("Restore table metrics " + pref + " in " + table.getPreferredScrollableViewportSize());
 
 		// Check the table columns may be resized correctly
 		if (table.getAutoResizeMode() != JTable.AUTO_RESIZE_OFF) {
@@ -203,8 +205,9 @@ public class PreferencesStore {
 			} catch (NumberFormatException nfe) {
 			}
 		}
+		UIUtil.distributeColumns(table);
 	}
-
+	
 	public static void savePreferences() {
 		if (file == null) {
 			System.err.println("Preferences not saved as PreferencesStore has not been initialise.");
