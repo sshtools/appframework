@@ -25,7 +25,6 @@ import java.lang.reflect.Method;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 
-import com.sun.java.swing.plaf.gtk.GTKConstants.ArrowType;
 
 /**
  * @author Costantino Cerbo
