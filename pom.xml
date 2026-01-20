@@ -99,6 +99,16 @@
 	</dependencies>
 
 	<repositories>
+        
+        <repository>
+            <name>Central Portal Snapshots</name>
+            <id>central-portal-snapshots</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <releases>
+              <enabled>false</enabled>
+            </releases>
+            <snapshots/>
+        </repository>
 		<repository>
 			<id>opensource-snapshots</id>
 			<name>SSHTOOLS Opensource Snapshots</name>
